@@ -1,0 +1,28 @@
+---
+title: "Privacy"
+---
+
+::: {.callout-warning}
+**Draft for review.** Check this notice with the University of Zurich data protection office before launch.
+:::
+
+**Who is responsible.** The Response Diversity Network (RDN). Contact: Owen Petchey, University of Zurich, [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).
+
+**What we collect.** The answers you give in the membership form:
+
+- your name and email address;
+- your institution, city and country;
+- an optional website;
+- your research interests;
+- your research attributes, such as career stage and the systems you study;
+- your consent choices.
+
+**Why.** To run the network: to keep a member list, to show a public map of members (only if you agree), and to add you to the mailing list (only if you ask). The legal basis is your consent (Swiss revFADP; EU GDPR Art. 6(1)(a)).
+
+**What is public.** Only if you tick "show me on the public map", and only the details you choose. Your location is shown at city level, never as an address. The full record is never published.
+
+**Where your data is stored.** In a Google Form and Google Sheet in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. A small number of RDN organisers can access it. The mailing list is run separately by the list manager.
+
+**How long we keep it.** Until you leave. When you leave, we delete your entry and your stored form response.
+
+**Your rights.** You can see, correct or delete your data at any time with your personal update link, or by emailing us. You can withdraw consent at any time. You may also complain to the Swiss FDPIC or to your EU data protection authority.

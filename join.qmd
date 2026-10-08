@@ -1,0 +1,25 @@
+---
+title: "Join, update, leave"
+---
+
+## Join
+
+Fill in the [membership form](FORM_URL_TO_ADD). The form asks whether you want to appear on the public map, which details may be shown there, and whether you want to join the RDN mailing list.
+
+New entries appear on the map once a curator has checked them. This usually takes a few days.
+
+## Update your entry
+
+After you submit, we email you a personal link. Open it to change your answers at any time. Changes appear on the map within about 10 minutes.
+
+If you have lost the link, email [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).
+
+## Leave
+
+Open your personal link and choose **Leave the network** at the end of the form, then submit. We will:
+
+- remove you from the public map;
+- ask the mailing-list manager to unsubscribe you;
+- delete your entry from our records.
+
+You can also leave by emailing [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).

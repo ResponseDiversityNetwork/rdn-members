@@ -1,0 +1,27 @@
+project:
+  type: website
+  output-dir: _site
+  resources:
+    - data/demo-members.csv
+
+website:
+  title: "RDN Members"
+  site-url: https://responsediversitynetwork.github.io/rdn-members/
+  repo-url: https://github.com/ResponseDiversityNetwork/rdn-members
+  navbar:
+    left:
+      - href: index.qmd
+        text: Member map
+      - href: join.qmd
+        text: Join, update, leave
+      - href: privacy.qmd
+        text: Privacy
+    right:
+      - text: Project register
+        href: https://responsediversitynetwork.github.io/rdn-projectbase/
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: false

@@ -1,0 +1,221 @@
+---
+title: "Response Diversity Network: members"
+page-layout: full
+include-in-header:
+  text: |
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+---
+
+```{ojs}
+//| echo: false
+// ---- Configuration ---------------------------------------------------------
+// When the live public sheet exists, paste its "Publish to web" CSV URL here.
+// Leave it as null to use the made-up demo data in data/demo-members.csv.
+DATA_URL = null
+```
+
+```{ojs}
+//| echo: false
+DATA_URL ? html`` : html`<div class="rdn-demo-banner"><strong>Demo:</strong> every member shown here is fictional.</div>`
+```
+
+```{ojs}
+//| echo: false
+// ---- Load and tidy the public subset --------------------------------------
+MULTI = ["approach", "systems", "organisms", "levels", "stressors", "regions"]
+
+members = {
+  const text = DATA_URL
+    ? await fetch(DATA_URL, {cache: "no-store"}).then(r => {
+        if (!r.ok) throw new Error(`Could not load member data (${r.status})`);
+        return r.text();
+      })
+    : await FileAttachment("data/demo-members.csv").text();
+  return d3.csvParse(text)
+    .map(d => {
+      const out = {...d, lat: +d.lat, lon: +d.lon};
+      for (const k of MULTI) out[k] = d[k] ? d[k].split(";").map(s => s.trim()).filter(Boolean) : [];
+      out.display_name = d.name || "RDN member";
+      return out;
+    })
+    .filter(d => Number.isFinite(d.lat) && Number.isFinite(d.lon));
+}
+
+// Options for each filter come from the data, so new categories appear automatically.
+optionsFor = key => Array.from(new Set(members.flatMap(d => Array.isArray(d[key]) ? d[key] : (d[key] ? [d[key]] : [])))).sort()
+```
+
+::: {.grid}
+::: {.g-col-12 .g-col-lg-3 .rdn-sidebar}
+
+<div class="rdn-fhead">Search</div>
+
+```{ojs}
+//| echo: false
+viewof query = Inputs.search(members, {
+  placeholder: "Search names, institutions, places, interests…",
+  columns: ["name", "institution", "city", "country", "interests", "career_stage", ...MULTI],
+  width: "100%"
+})
+```
+
+<div class="rdn-filters">
+
+<div class="rdn-fhead">Career stage</div>
+
+```{ojs}
+//| echo: false
+viewof f_stage = Inputs.checkbox(optionsFor("career_stage"))
+```
+
+<div class="rdn-fhead">Research approach</div>
+
+```{ojs}
+//| echo: false
+viewof f_approach = Inputs.checkbox(optionsFor("approach"))
+```
+
+<div class="rdn-fhead">Systems</div>
+
+```{ojs}
+//| echo: false
+viewof f_systems = Inputs.checkbox(optionsFor("systems"))
+```
+
+<div class="rdn-fhead">Organisms</div>
+
+```{ojs}
+//| echo: false
+viewof f_organisms = Inputs.checkbox(optionsFor("organisms"))
+```
+
+<div class="rdn-fhead">Level of organisation</div>
+
+```{ojs}
+//| echo: false
+viewof f_levels = Inputs.checkbox(optionsFor("levels"))
+```
+
+<div class="rdn-fhead">Stressors studied</div>
+
+```{ojs}
+//| echo: false
+viewof f_stressors = Inputs.checkbox(optionsFor("stressors"))
+```
+
+<div class="rdn-fhead">Fieldwork regions</div>
+
+```{ojs}
+//| echo: false
+viewof f_regions = Inputs.checkbox(optionsFor("regions"))
+```
+
+</div>
+:::
+::: {.g-col-12 .g-col-lg-9}
+
+```{ojs}
+//| echo: false
+html`<div class="rdn-count">Showing <strong>${filtered.length}</strong> of ${members.length} members. Within a filter, members matching <em>any</em> ticked option are shown; across filters, all must match.</div>`
+```
+
+```{ojs}
+//| echo: false
+mapContainer = html`<div class="rdn-map"></div>`
+```
+
+:::
+:::
+
+```{ojs}
+//| echo: false
+// ---- Apply filters: OR within a filter, AND across filters ------------------
+filtered = {
+  const anyOf = (vals, chosen) => chosen.length === 0 || chosen.some(c => vals.includes(c));
+  return query.filter(d =>
+    anyOf([d.career_stage], f_stage) &&
+    anyOf(d.approach, f_approach) &&
+    anyOf(d.systems, f_systems) &&
+    anyOf(d.organisms, f_organisms) &&
+    anyOf(d.levels, f_levels) &&
+    anyOf(d.stressors, f_stressors) &&
+    anyOf(d.regions, f_regions)
+  );
+}
+```
+
+```{ojs}
+//| echo: false
+// ---- Map (created once; markers update when the filters change) ------------
+// Use the Leaflet loaded in the page header (window.L), which has the cluster
+// plugin attached. OJS's built-in `L` is a separate copy without it.
+Leaf = window.L
+
+leafletMap = {
+  const m = Leaf.map(mapContainer, {worldCopyJump: true, minZoom: 2}).setView([25, 10], 2);
+  Leaf.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: "abcd", maxZoom: 12
+  }).addTo(m);
+  setTimeout(() => m.invalidateSize(), 100);
+  invalidation.then(() => m.remove());
+  return m;
+}
+
+cluster = {
+  const c = Leaf.markerClusterGroup({showCoverageOnHover: false, maxClusterRadius: 40});
+  leafletMap.addLayer(c);
+  return c;
+}
+
+esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[ch]))
+
+safeUrl = u => /^https?:\/\//i.test(u || "") ? u : null
+
+popupHtml = d => {
+  const tags = [...d.approach, ...d.systems, ...d.organisms].map(t => `<span class="rdn-tag">${esc(t)}</span>`).join("");
+  const web = safeUrl(d.website);
+  return `<h4>${esc(d.display_name)}</h4>
+    ${d.institution ? `<div>${esc(d.institution)}</div>` : ""}
+    <div>${esc(d.city)}${d.city && d.country ? ", " : ""}${esc(d.country)}</div>
+    ${d.career_stage ? `<div><em>${esc(d.career_stage)}</em></div>` : ""}
+    ${d.interests ? `<div style="margin-top:0.35rem">${esc(d.interests)}</div>` : ""}
+    ${tags ? `<div class="rdn-tags">${tags}</div>` : ""}
+    <div style="margin-top:0.35rem">
+      ${d.email ? `<a href="mailto:${esc(d.email)}">${esc(d.email)}</a>` : ""}
+      ${d.email && web ? " · " : ""}
+      ${web ? `<a href="${esc(web)}" target="_blank" rel="noopener">Website</a>` : ""}
+    </div>`;
+}
+
+updateMarkers = {
+  cluster.clearLayers();
+  for (const d of filtered) {
+    Leaf.circleMarker([d.lat, d.lon], {radius: 7, color: "#0b5ed7", weight: 2, fillColor: "#3d8bfd", fillOpacity: 0.8})
+      .bindPopup(popupHtml(d))
+      .addTo(cluster);
+  }
+  if (filtered.length > 0 && filtered.length < members.length) {
+    leafletMap.fitBounds(cluster.getBounds(), {padding: [30, 30], maxZoom: 6});
+  } else if (filtered.length === members.length) {
+    leafletMap.setView([25, 10], 2);
+  }
+  return filtered.length;
+}
+```
+
+```{ojs}
+//| echo: false
+Inputs.table(filtered, {
+  columns: ["display_name", "institution", "city", "country", "career_stage", "interests"],
+  header: {display_name: "Name", institution: "Institution", city: "City", country: "Country", career_stage: "Career stage", interests: "Research interests"},
+  rows: 15,
+  layout: "auto"
+})
+```
+
+Locations are shown at city level only. Members choose whether they appear on this map and which details are shown; see [Privacy](privacy.qmd). To join, update your entry, or leave, see [Join, update, leave](join.qmd).
