@@ -157,9 +157,10 @@ Leaf = window.L
 
 leafletMap = {
   const m = Leaf.map(mapContainer, {worldCopyJump: true, minZoom: 2}).setView([25, 10], 2);
-  Leaf.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd", maxZoom: 12
+  // OpenStreetMap standard tiles: free, no API key; attribution required.
+  Leaf.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 12
   }).addTo(m);
   setTimeout(() => m.invalidateSize(), 100);
   invalidation.then(() => m.remove());
