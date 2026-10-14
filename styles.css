@@ -10,3 +10,12 @@
 .rdn-tags { margin-top: 0.35rem; }
 .rdn-tag { display: inline-block; background: #e7f1ff; color: #084298; border-radius: 3px; padding: 0 5px; margin: 1px 2px 1px 0; font-size: 0.75rem; }
 .grid { margin-bottom: 1.25rem; }
+.rdn-photo { float: right; width: 72px; height: 72px; object-fit: cover; border-radius: 50%; margin: 0 0 0.4rem 0.6rem; background: #e9ecef; }
+.leaflet-popup-content { min-width: 260px; }
+.rdn-tiles { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0 0 1rem; align-items: stretch; }
+.rdn-tile { border: 1px solid #dee2e6; border-radius: 6px; padding: 0.5rem 1rem; min-width: 120px; }
+.rdn-tile-label { font-size: 0.85rem; color: #52514e; }
+.rdn-tile-value { font-size: 1.9rem; font-weight: 600; line-height: 1.2; }
+.rdn-tile-note { border: none; font-size: 0.85rem; color: #52514e; align-self: center; max-width: 320px; padding: 0; }
+#rdn-summary { margin-top: 2rem; }
+#rdn-summary figure h2 { font-size: 1rem; font-weight: 600; border: none; margin: 0 0 0.25rem; padding: 0; }

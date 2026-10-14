@@ -4,7 +4,8 @@ The public member map for the Response Diversity Network.
 Site: https://responsediversitynetwork.github.io/rdn-members/
 
 - `index.qmd` is the map page, built with Quarto, Observable JS and Leaflet. The visitor's browser does all the work, so there is no server.
-- `join.qmd` and `privacy.qmd` are the "Join, update, leave" and privacy pages.
+- `join.qmd` explains how to join, update and leave, and holds the privacy notice.
+- `apps-script/` holds the Google Apps Script code (a copy for version control; it runs in the rdn.projectbase account).
 - `data/demo-members.csv` holds fictional members, used while `DATA_URL` in `index.qmd` is `null`.
 - `.github/workflows/publish.yml` renders the site and deploys it to GitHub Pages on every push to `main`.
 
@@ -28,6 +29,10 @@ That sheet is published to the web as CSV, and its URL is set as `DATA_URL` in `
 | lat, lon | rounded to 2 decimals |
 | career_stage | one value |
 | approach, systems, organisms, levels, stressors, regions | several values, separated by `; ` |
+| continent | from the geocoded country |
+| photo_url | https link to a small public copy of the member's photo (EXIF removed); blank if none or not consented |
+
+A second tab, `summary`, published as its own CSV (`SUMMARY_URL`), holds counts over **all** approved members, including those not on the map. Its columns are `metric, category, count`. The metrics are `members`, `countries` and `continents` (totals, with category left blank), plus `continent`, `career_stage` and `country`, one row per category. Countries with fewer than 3 members are left out of the `country` rows.
 
 Filter options are built from the data, so a new answer option in the form shows up as a filter automatically.
 

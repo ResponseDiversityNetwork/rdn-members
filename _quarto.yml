@@ -1,8 +1,13 @@
 project:
   type: website
   output-dir: _site
+  render:
+    - index.qmd
+    - join.qmd
   resources:
     - data/demo-members.csv
+    - data/demo-summary.csv
+    - data/demo-photos/*.jpg
 
 website:
   title: "RDN Members"
@@ -13,9 +18,7 @@ website:
       - href: index.qmd
         text: Member map
       - href: join.qmd
-        text: Join, update, leave
-      - href: privacy.qmd
-        text: Privacy
+        text: Join, update, leave & privacy
     right:
       - text: Project register
         href: https://responsediversitynetwork.github.io/rdn-projectbase/

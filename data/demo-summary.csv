@@ -1,0 +1,26 @@
+metric,category,count
+members,,65
+countries,,21
+continents,,6
+continent,South America,10
+continent,Europe,27
+continent,Oceania,6
+continent,North America,13
+continent,Africa,4
+continent,Asia,5
+career_stage,Practitioner/non-academic,10
+career_stage,Postdoc,12
+career_stage,Mid/senior researcher,17
+career_stage,PhD student,12
+career_stage,Early-career researcher/faculty,14
+country,Colombia,6
+country,Switzerland,4
+country,United States,8
+country,Germany,5
+country,Canada,5
+country,South Africa,3
+country,Brazil,3
+country,Australia,4
+country,United Kingdom,6
+country,France,3
+country,India,3

@@ -16,11 +16,37 @@ include-in-header:
 // When the live public sheet exists, paste its "Publish to web" CSV URL here.
 // Leave it as null to use the made-up demo data in data/demo-members.csv.
 DATA_URL = null
+
+// Paste the "Publish to web" CSV URL of the public sheet's "summary" tab here.
+// Leave it as null to use data/demo-summary.csv.
+SUMMARY_URL = null
 ```
 
 ```{ojs}
 //| echo: false
 DATA_URL ? html`` : html`<div class="rdn-demo-banner"><strong>Demo:</strong> every member shown here is fictional.</div>`
+```
+
+```{ojs}
+//| echo: false
+// ---- Membership summary ----------------------------------------------------
+// Counts cover ALL approved members, including those not shown on the map.
+// Apps Script writes them as rows of: metric, category, count.
+summary = {
+  const text = SUMMARY_URL
+    ? await fetch(SUMMARY_URL, {cache: "no-store"}).then(r => r.ok ? r.text() : "metric,category,count")
+    : await FileAttachment("data/demo-summary.csv").text();
+  return d3.csvParse(text, d => ({metric: d.metric, category: d.category, count: +d.count}));
+}
+summaryTotal = m => summary.find(d => d.metric === m)?.count ?? 0
+summaryRows = m => summary.filter(d => d.metric === m)
+
+html`<div class="rdn-tiles">
+  <div class="rdn-tile"><div class="rdn-tile-label">Members</div><div class="rdn-tile-value">${summaryTotal("members").toLocaleString("en")}</div></div>
+  <div class="rdn-tile"><div class="rdn-tile-label">Countries</div><div class="rdn-tile-value">${summaryTotal("countries")}</div></div>
+  <div class="rdn-tile"><div class="rdn-tile-label">Continents</div><div class="rdn-tile-value">${summaryTotal("continents")}</div></div>
+  <div class="rdn-tile rdn-tile-note">Counts include members who chose not to appear on the map. <a href="#rdn-summary">More about the membership ↓</a></div>
+</div>`
 ```
 
 ```{ojs}
@@ -177,10 +203,15 @@ esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&": "&amp;", "<": "&lt;"
 
 safeUrl = u => /^https?:\/\//i.test(u || "") ? u : null
 
+// Photos: https URLs from the live sheet, or relative paths for the demo photos.
+safePhoto = u => /^https:\/\//i.test(u || "") || /^data\/demo-photos\/[\w-]+\.jpg$/.test(u || "") ? u : null
+
 popupHtml = d => {
   const tags = [...d.approach, ...d.systems, ...d.organisms].map(t => `<span class="rdn-tag">${esc(t)}</span>`).join("");
   const web = safeUrl(d.website);
-  return `<h4>${esc(d.display_name)}</h4>
+  const photo = safePhoto(d.photo_url);
+  return `${photo ? `<img class="rdn-photo" src="${esc(photo)}" alt="Photo of ${esc(d.display_name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
+    <h4>${esc(d.display_name)}</h4>
     ${d.institution ? `<div>${esc(d.institution)}</div>` : ""}
     <div>${esc(d.city)}${d.city && d.country ? ", " : ""}${esc(d.country)}</div>
     ${d.career_stage ? `<div><em>${esc(d.career_stage)}</em></div>` : ""}
@@ -196,7 +227,7 @@ popupHtml = d => {
 updateMarkers = {
   cluster.clearLayers();
   for (const d of filtered) {
-    Leaf.circleMarker([d.lat, d.lon], {radius: 7, color: "#0b5ed7", weight: 2, fillColor: "#3d8bfd", fillOpacity: 0.8})
+    Leaf.circleMarker([d.lat, d.lon], {radius: 7, color: "#ffffff", weight: 2, fillColor: "#2a78d6", fillOpacity: 0.9})
       .bindPopup(popupHtml(d))
       .addTo(cluster);
   }
@@ -219,4 +250,60 @@ Inputs.table(filtered, {
 })
 ```
 
-Locations are shown at city level only. Members choose whether they appear on this map and which details are shown; see [Privacy](privacy.qmd). To join, update your entry, or leave, see [Join, update, leave](join.qmd).
+Locations are shown at city level only. Members choose whether they appear on this map and which details are shown; see [Privacy](join.qmd#privacy). To join, update your entry, or leave, see [Join, update, leave](join.qmd).
+
+## Who's in the network {#rdn-summary}
+
+All approved members, including those who chose not to appear on the map. Countries with fewer than three members are counted in the totals but not listed.
+
+::: {.grid}
+::: {.g-col-12 .g-col-lg-4}
+
+```{ojs}
+//| echo: false
+CAREER_ORDER = ["PhD student", "Postdoc", "Early-career researcher/faculty", "Mid/senior researcher", "Practitioner/non-academic", "Other"]
+
+barChart = (rows, {title, order} = {}) => {
+  const data = order
+    ? rows.slice().sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category))
+    : rows.slice().sort((a, b) => d3.descending(a.count, b.count));
+  const max = d3.max(data, d => d.count) || 1;
+  return Plot.plot({
+    title,
+    width: 380,
+    height: 30 + data.length * 30,
+    marginLeft: 190,
+    marginRight: 36,
+    x: {axis: null, domain: [0, max]},
+    y: {label: null, domain: data.map(d => d.category), tickSize: 0},
+    style: {fontSize: "12px", color: "#212529"},
+    marks: [
+      Plot.barX(data, {y: "category", x: "count", fill: "#2a78d6", insetTop: 6, insetBottom: 6, rx: 4,
+                       title: d => `${d.category}: ${d.count} member${d.count === 1 ? "" : "s"}`}),
+      Plot.text(data, {y: "category", x: "count", text: d => d.count, dx: 5, textAnchor: "start", fill: "#52514e"}),
+      Plot.ruleX([0], {stroke: "#ced4da"})
+    ]
+  });
+}
+
+barChart(summaryRows("career_stage"), {title: "Career stage", order: CAREER_ORDER})
+```
+
+:::
+::: {.g-col-12 .g-col-lg-4}
+
+```{ojs}
+//| echo: false
+barChart(summaryRows("continent"), {title: "Continent"})
+```
+
+:::
+::: {.g-col-12 .g-col-lg-4}
+
+```{ojs}
+//| echo: false
+barChart(summaryRows("country").sort((a, b) => d3.descending(a.count, b.count)).slice(0, 10), {title: "Top countries"})
+```
+
+:::
+:::

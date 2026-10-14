@@ -1,10 +1,17 @@
 ---
 title: "Join, update, leave"
+subtitle: "How membership works, and what we do with your information"
+toc: true
 ---
 
 ## Join
 
-Fill in the [membership form](FORM_URL_TO_ADD). The form asks whether you want to appear on the public map, which details may be shown there, and whether you want to join the RDN mailing list.
+There are two versions of the membership form. They ask the same questions; the only difference is the photo:
+
+- **[Membership form](FORM_A_URL)**: no photo, no sign-in needed.
+- **[Membership form with photo](FORM_B_URL)**: lets you upload a photo for the map. Google requires you to sign in with a Google account to upload files.
+
+Both ask whether you want to appear on the public map, which details may be shown there, and whether you want to join the RDN mailing list.
 
 New entries appear on the map once a curator has checked them. This usually takes a few days.
 
@@ -12,14 +19,51 @@ New entries appear on the map once a curator has checked them. This usually take
 
 After you submit, we email you a personal link. Open it to change your answers at any time. Changes appear on the map within about 10 minutes.
 
-If you have lost the link, email [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).
+**Adding or removing a photo.** Every email we send also includes a link to switch to the other version of the form, with your answers already filled in:
+
+- to **add a photo**, use the "add a photo" link, upload a photo and submit;
+- to **remove your photo** and stop needing to sign in, use the "switch to the form without a photo" link and submit.
+
+Your entry moves across and your previous version is deleted. We then email you a new personal link. To keep your photo but hide it from the map, untick "Photo" under the details you agree to show.
+
+If you have lost your link, email [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).
 
 ## Leave
 
-Open your personal link and choose **Leave the network** at the end of the form, then submit. We will:
+Open your personal link, tick **Leave the network** at the end of the form, and submit. We will:
 
 - remove you from the public map;
 - ask the mailing-list manager to unsubscribe you;
-- delete your entry from our records.
+- delete your entry, your stored form response and any photo.
 
 You can also leave by emailing [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).
+
+## Privacy {#privacy}
+
+::: {.callout-warning}
+**Draft for review.** Check this notice with the University of Zurich data protection office before launch.
+:::
+
+**Who is responsible.** The Response Diversity Network (RDN). Contact: Owen Petchey, University of Zurich, [owen.petchey@uzh.ch](mailto:owen.petchey@uzh.ch).
+
+**What we collect.** The answers you give in the membership form:
+
+- your name and email address;
+- your institution, city and country;
+- an optional website;
+- your research interests;
+- your research attributes, such as career stage and the systems you study;
+- an optional photo (photo version of the form only);
+- your consent choices.
+
+**Why.** To run the network: to keep a member list, to show a public map of members (only if you agree), and to add you to the mailing list (only if you ask). The legal basis is your consent (Swiss revFADP; EU GDPR Art. 6(1)(a)).
+
+**What is public.** Only if you tick "show me on the public map", and only the details you choose. Your location is shown at city level, never as an address. The full record is never published. The map page also shows overall counts, such as the number of members per country, continent and career stage. These counts include all members but never name anyone, and countries with fewer than three members are not listed.
+
+**Photos.** If you upload a photo and agree to show it, we publish a small copy (about 400 pixels wide). Google re-creates the copy from your upload, which removes hidden data stored in photo files, such as where the photo was taken. The copy is publicly viewable by anyone who has its link. Your original upload stays private.
+
+**Where your data is stored.** In Google Forms, Google Sheets and Google Drive in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. If you use the photo version of the form, Google also knows which Google account submitted it. A small number of RDN organisers can access the data. The mailing list is run separately by the list manager.
+
+**How long we keep it.** Until you leave. When you leave, we delete your entry, your stored form response and your photos.
+
+**Your rights.** You can see, correct or delete your data at any time with your personal update link, or by emailing us. You can withdraw consent at any time. You may also complain to the Swiss FDPIC or to your EU data protection authority.
