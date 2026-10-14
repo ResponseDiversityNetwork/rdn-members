@@ -70,7 +70,9 @@ const OPTIONS = {
               'Harvesting', 'Multiple stressors'],
   REGIONS: ['Europe', 'North America', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
-  SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website', 'Research interests', 'Research attributes'],
+  SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
+  SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
+                    'Your city and country are always shown if you appear on the map.',
   SHOW_FIELDS_PHOTO: 'Photo',       // extra option, photo form only
   YES: 'Yes',
   NO: 'No',
@@ -355,8 +357,7 @@ function buildForm_(form, withPhoto) {
   form.addMultipleChoiceItem().setTitle(Q.SHOW_ON_MAP).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO]);
   const fields = withPhoto ? OPTIONS.SHOW_FIELDS.concat([OPTIONS.SHOW_FIELDS_PHOTO]) : OPTIONS.SHOW_FIELDS;
-  form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(fields)
-      .setHelpText('Your city and country are always shown if you appear on the map. Untick anything you want to keep private.');
+  form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(fields).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
   form.addMultipleChoiceItem().setTitle(Q.MAILING_LIST).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO])
       .setHelpText('If you choose Yes, we ask the mailing-list manager to add you.');
@@ -443,8 +444,8 @@ function consentHelp_() {
 }
 
 /**
- * Rewrites the form descriptions and the consent section's privacy note in both
- * existing forms from the current CONFIG (e.g. after changing INFO_URL or PRIVACY_URL).
+ * Rewrites the form descriptions, the consent section's privacy note, and the options and note of
+ * "Details I agree to show on the map" in both existing forms from the current Config.
  * Questions and responses are not touched.
  */
 function updateFormTexts() {
@@ -455,6 +456,12 @@ function updateFormTexts() {
     form.setDescription(formDescription_(key, urlA, urlB));
     const consent = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === CONSENT_SECTION_TITLE);
     if (consent) consent.asPageBreakItem().setHelpText(consentHelp_());
+    const fieldsItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SHOW_FIELDS);
+    if (fieldsItem) {
+      const opts = key === 'B' ? OPTIONS.SHOW_FIELDS.concat([OPTIONS.SHOW_FIELDS_PHOTO]) : OPTIONS.SHOW_FIELDS;
+      fieldsItem.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
+      Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
+    }
     Logger.log('Form ' + key + ': description ' + (consent ? 'and privacy note ' : '') + 'updated' +
                (consent ? '.' : ' (no "' + CONSENT_SECTION_TITLE + '" section found).'));
   });
@@ -1254,7 +1261,7 @@ function publicRow_(r) {
     lat: round(r['Lat']),
     lon: round(r['Lon']),
     email: show('Email', r['Email']),
-    website: show('Website', web),
+    website: shown.has('Website or ORCID link') || shown.has('Website') ? web : '',   // 'Website' = label before 2026-10-14
     interests: show('Research interests', r['Research interests']),
     career_stage: attrs ? r['Career stage'] : '',
     approach: attrs ? r['Research approach'] : '',

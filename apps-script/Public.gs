@@ -27,7 +27,7 @@ function publicRow_(r) {
     lat: round(r['Lat']),
     lon: round(r['Lon']),
     email: show('Email', r['Email']),
-    website: show('Website', web),
+    website: shown.has('Website or ORCID link') || shown.has('Website') ? web : '',   // 'Website' = label before 2026-10-14
     interests: show('Research interests', r['Research interests']),
     career_stage: attrs ? r['Career stage'] : '',
     approach: attrs ? r['Research approach'] : '',

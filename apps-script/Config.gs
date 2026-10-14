@@ -67,7 +67,9 @@ const OPTIONS = {
               'Harvesting', 'Multiple stressors'],
   REGIONS: ['Europe', 'North America', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
-  SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website', 'Research interests', 'Research attributes'],
+  SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
+  SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
+                    'Your city and country are always shown if you appear on the map.',
   SHOW_FIELDS_PHOTO: 'Photo',       // extra option, photo form only
   YES: 'Yes',
   NO: 'No',

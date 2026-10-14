@@ -56,7 +56,7 @@ check(s.find(r => r.metric === 'members').count === 1 && s.find(r => r.metric ==
 check(!s.some(r => r.metric === 'country'), 'country with <3 members not listed in summary');
 
 console.log('3. Alice edits: new email, leaves mailing list, shows website');
-fA.edit(a, {[Q.EMAIL]: 'alice@new.org', [Q.MAILING_LIST]: O.NO, [Q.SHOW_FIELDS]: ['Name', 'Website', 'Research attributes']});
+fA.edit(a, {[Q.EMAIL]: 'alice@new.org', [Q.MAILING_LIST]: O.NO, [Q.SHOW_FIELDS]: ['Name', 'Website or ORCID link', 'Research attributes']});
 go('A', a);
 m = members(); ms = newMails();
 check(m.length === 1 && m[0].Email === 'alice@new.org' && m[0].Approved === true, 'same row updated, still approved');
