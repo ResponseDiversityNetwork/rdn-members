@@ -5,7 +5,9 @@ Do all of this signed in as **rdn.projectbase@gmail.com**.
 ## 1. Create the script project
 
 1. Go to https://script.google.com → **New project**. Rename it "RDN membership".
-2. Create one script file for each `.gs` file in this folder, with the same name: `Config`, `Setup`, `Photos`, `Switching`, `Invite`, `Geo`, `Members`, `Automation`, `Emails`, `Public`, `Admin`. Use **+ → Script** for each, then paste in its contents. Delete the empty `Code.gs`. When you get updated files from me later, replace the contents of every file.
+2. Open `apps-script/dist/RDN-membership.gs` in a text editor, select all, and copy. In the Apps Script editor, open `Code.gs`, select all, and paste over it. Click **Save** (the disk icon).
+   - This one file bundles all the separate `.gs` files. It's regenerated with `apps-script/build.sh` whenever they change.
+   - To update later, paste the new bundle over the whole of `Code.gs` again.
 3. **Services (+)** → **Drive API** → **Add**. Keep the identifier `Drive`.
 
 ## 2. Run the setup
