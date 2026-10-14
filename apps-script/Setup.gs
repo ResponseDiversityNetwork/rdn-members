@@ -38,16 +38,8 @@ function setupMembership() {
 
   const urlA = formA.shortenFormUrl(formA.getPublishedUrl());
   const urlB = formB.shortenFormUrl(formB.getPublishedUrl());
-  formA.setDescription(
-    'Join the ' + CONFIG.ORG_NAME + ', or update your entry.\n\n' +
-    'Would you like a photo on the member map? Use the photo version of this form instead: ' + urlB +
-    ' (Google requires you to sign in to upload a photo.)\n\n' +
-    'How membership works, and our privacy notice: ' + CONFIG.INFO_URL);
-  formB.setDescription(
-    'Join the ' + CONFIG.ORG_NAME + ', or update your entry. This version lets you upload a photo for the map. ' +
-    'Google requires you to sign in to a Google account to upload files.\n\n' +
-    'Prefer not to sign in? Use the version without a photo: ' + urlA + '\n\n' +
-    'How membership works, and our privacy notice: ' + CONFIG.INFO_URL);
+  formA.setDescription(formDescription_('A', urlA, urlB));
+  formB.setDescription(formDescription_('B', urlA, urlB));
 
   props.setProperties({
     FORM_A_ID: formA.getId(), FORM_B_ID: formB.getId(),
@@ -116,12 +108,7 @@ function buildForm_(form, withPhoto) {
     .forEach(([title, opts]) => form.addCheckboxItem().setTitle(title).setChoiceValues(opts));
 
   // Section 3: consent
-  form.addPageBreakItem().setTitle('Consent and privacy').setHelpText(
-    'We store your answers in RDN\'s Google account (Google Forms, Sheets and Drive), which may be ' +
-    'outside Switzerland or the EU. Only a few RDN organisers can see them. ' +
-    'If you agree, we show the details you choose below on a public map, with your location at city level only. ' +
-    'You can change your answers or leave at any time with the personal link we email you. ' +
-    'Full privacy notice: ' + CONFIG.PRIVACY_URL);
+  form.addPageBreakItem().setTitle(CONSENT_SECTION_TITLE).setHelpText(consentHelp_());
   form.addMultipleChoiceItem().setTitle(Q.SHOW_ON_MAP).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO]);
   const fields = withPhoto ? OPTIONS.SHOW_FIELDS.concat([OPTIONS.SHOW_FIELDS_PHOTO]) : OPTIONS.SHOW_FIELDS;
@@ -185,4 +172,48 @@ function showSetup() {
     Logger.log(label + ': ' + (missing.length ? 'MISSING questions: ' + missing.join(', ') : 'all questions present') +
                '; ' + form.getResponses().length + ' responses so far.');
   });
+}
+
+
+const CONSENT_SECTION_TITLE = 'Consent and privacy';
+
+/** The text at the top of each form. */
+function formDescription_(key, urlA, urlB) {
+  return key === 'A'
+    ? 'Join the ' + CONFIG.ORG_NAME + ', or update your entry.\n\n' +
+      'Would you like a photo on the member map? Use the photo version of this form instead: ' + urlB +
+      ' (Google requires you to sign in to upload a photo.)\n\n' +
+      'How membership works, and our privacy notice: ' + CONFIG.INFO_URL
+    : 'Join the ' + CONFIG.ORG_NAME + ', or update your entry. This version lets you upload a photo for the map. ' +
+      'Google requires you to sign in to a Google account to upload files.\n\n' +
+      'Prefer not to sign in? Use the version without a photo: ' + urlA + '\n\n' +
+      'How membership works, and our privacy notice: ' + CONFIG.INFO_URL;
+}
+
+/** The short privacy note at the top of the consent section. */
+function consentHelp_() {
+  return 'We store your answers in RDN\'s Google account (Google Forms, Sheets and Drive), which may be ' +
+    'outside Switzerland or the EU. Only a few RDN organisers can see them. ' +
+    'If you agree, we show the details you choose below on a public map, with your location at city level only. ' +
+    'You can change your answers or leave at any time with the personal link we email you. ' +
+    'Full privacy notice: ' + CONFIG.PRIVACY_URL;
+}
+
+/**
+ * Rewrites the form descriptions and the consent section's privacy note in both
+ * existing forms from the current CONFIG (e.g. after changing INFO_URL or PRIVACY_URL).
+ * Questions and responses are not touched.
+ */
+function updateFormTexts() {
+  const p = PropertiesService.getScriptProperties();
+  const urlA = p.getProperty('FORM_A_URL'), urlB = p.getProperty('FORM_B_URL');
+  [['A', prop_('FORM_A_ID')], ['B', prop_('FORM_B_ID')]].forEach(([key, id]) => {
+    const form = FormApp.openById(id);
+    form.setDescription(formDescription_(key, urlA, urlB));
+    const consent = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === CONSENT_SECTION_TITLE);
+    if (consent) consent.asPageBreakItem().setHelpText(consentHelp_());
+    Logger.log('Form ' + key + ': description ' + (consent ? 'and privacy note ' : '') + 'updated' +
+               (consent ? '.' : ' (no "' + CONSENT_SECTION_TITLE + '" section found).'));
+  });
+  Logger.log('Privacy notice link now: ' + CONFIG.PRIVACY_URL);
 }
