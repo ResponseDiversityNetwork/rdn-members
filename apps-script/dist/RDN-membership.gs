@@ -405,6 +405,31 @@ function checkPhotoForm() {
   Logger.log('OK: the photo form has a File upload question titled "' + Q.PHOTO + '".');
 }
 
+/**
+ * Logs the links to everything setupMembership() created, and checks both forms
+ * have the questions the automation needs. Safe to run at any time.
+ */
+function showSetup() {
+  const p = PropertiesService.getScriptProperties();
+  const formA = FormApp.openById(prop_('FORM_A_ID'));
+  const formB = FormApp.openById(prop_('FORM_B_ID'));
+  Logger.log('Form A (no photo), public link:  ' + p.getProperty('FORM_A_URL'));
+  Logger.log('Form A, edit:                    ' + formA.getEditUrl());
+  Logger.log('Form B (photo), public link:     ' + p.getProperty('FORM_B_URL'));
+  Logger.log('Form B, edit:                    ' + formB.getEditUrl());
+  Logger.log('Private spreadsheet:             ' + SpreadsheetApp.openById(prop_('PRIVATE_SS_ID')).getUrl());
+  Logger.log('Public spreadsheet:              ' + SpreadsheetApp.openById(prop_('PUBLIC_SS_ID')).getUrl());
+  Logger.log('Photo folder:                    ' + DriveApp.getFolderById(prop_('PHOTO_FOLDER_ID')).getUrl());
+
+  const needed = Object.keys(Q).filter(k => k !== 'PHOTO').map(k => Q[k]);
+  [['Form A', formA, needed], ['Form B', formB, needed.concat([Q.PHOTO])]].forEach(([label, form, titles]) => {
+    const have = new Set(form.getItems().map(i => i.getTitle()));
+    const missing = titles.filter(t => !have.has(t));
+    Logger.log(label + ': ' + (missing.length ? 'MISSING questions: ' + missing.join(', ') : 'all questions present') +
+               '; ' + form.getResponses().length + ' responses so far.');
+  });
+}
+
 // ===== Photos.gs =====
 /**
  * Photos. Members upload through Form B. Google stores the original privately
