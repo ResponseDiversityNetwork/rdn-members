@@ -22,6 +22,8 @@ DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTD6lUGJig7DfQbnXF5m
 SUMMARY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTD6lUGJig7DfQbnXF5m3Wbrkh8tJs_LmCtzHiZjTz9cPzVRCtqHDWuDsBDeyLYBanUjy3JdJRU6Slf/pub?gid=1695318466&single=true&output=csv"
 ```
 
+{{< include _test-banner.qmd >}}
+
 ```{ojs}
 //| echo: false
 DATA_URL ? html`` : html`<div class="rdn-demo-banner"><strong>Demo:</strong> every member shown here is fictional.</div>`

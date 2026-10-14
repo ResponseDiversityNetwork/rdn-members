@@ -77,6 +77,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 
 ## 7. Clear test entries and launch
 
+0. End the test phase: set `TEST_PHASE: false` in `Config.gs` (emails stop saying "[Test]"), rebuild and paste the script, and empty `_test-banner.qmd` (or delete its two `include` lines in `index.qmd` and `join.qmd`), then push.
 1. In `Admin.gs`, change `ALLOW_CLEAR = false` to `true` and save. Run `clearTestData`, then change it back to `false` and save. This deletes **all** responses, photos and member rows.
 2. Invite the existing members (next section).
 3. When the mailing list exists:

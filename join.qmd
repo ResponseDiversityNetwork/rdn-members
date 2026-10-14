@@ -4,6 +4,9 @@ subtitle: "How membership works, and what we do with your information"
 toc: true
 ---
 
+{{< include _test-banner.qmd >}}
+
+
 ## Join
 
 There are two versions of the membership form. They ask the same questions; the only difference is the photo:

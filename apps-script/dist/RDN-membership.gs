@@ -17,6 +17,10 @@ const CONFIG = {
   PRIVACY_URL: 'https://responsediversitynetwork.github.io/rdn-members/join.html#privacy',
   PHOTO_SIZE_PX: 400,
 
+  // While colleagues test the system: emails get "[Test]" in the subject and a note saying
+  // entries will be deleted before launch. Set to false at launch.
+  TEST_PHASE: true,
+
   // Mailing list. Until the list exists, requests are only recorded in the
   // Members tab; run emailMailingListRequests() once the list is ready, then set this to true
   // so each later request emails the manager straight away.
@@ -1111,6 +1115,11 @@ function dailyRebuild() {
  */
 
 function mail_(to, subject, paragraphs) {
+  if (CONFIG.TEST_PHASE) {
+    subject = '[Test] ' + subject;
+    paragraphs = ['<i>This is a test of the new RDN membership system. Test entries will be deleted before launch. ' +
+                  'Thank you for helping!</i>'].concat(paragraphs);
+  }
   const html = paragraphs.map(p => '<p>' + p + '</p>').join('\n');
   const text = paragraphs
     .map(p => p.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, '$2: $1').replace(/<br>/g, '\n').replace(/<[^>]+>/g, ''))

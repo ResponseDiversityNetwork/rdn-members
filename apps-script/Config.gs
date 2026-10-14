@@ -14,6 +14,10 @@ const CONFIG = {
   PRIVACY_URL: 'https://responsediversitynetwork.github.io/rdn-members/join.html#privacy',
   PHOTO_SIZE_PX: 400,
 
+  // While colleagues test the system: emails get "[Test]" in the subject and a note saying
+  // entries will be deleted before launch. Set to false at launch.
+  TEST_PHASE: true,
+
   // Mailing list. Until the list exists, requests are only recorded in the
   // Members tab; run emailMailingListRequests() once the list is ready, then set this to true
   // so each later request emails the manager straight away.

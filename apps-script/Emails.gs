@@ -4,6 +4,11 @@
  */
 
 function mail_(to, subject, paragraphs) {
+  if (CONFIG.TEST_PHASE) {
+    subject = '[Test] ' + subject;
+    paragraphs = ['<i>This is a test of the new RDN membership system. Test entries will be deleted before launch. ' +
+                  'Thank you for helping!</i>'].concat(paragraphs);
+  }
   const html = paragraphs.map(p => '<p>' + p + '</p>').join('\n');
   const text = paragraphs
     .map(p => p.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, '$2: $1').replace(/<br>/g, '\n').replace(/<[^>]+>/g, ''))
