@@ -11,11 +11,10 @@ const CONFIG = {
   REPLY_TO: 'owen.petchey@uzh.ch',
   LISTSERV_MANAGER: 'owen.petchey@uzh.ch',
   CURATOR: 'owen.petchey@uzh.ch',
-  // Links in member emails point to the main RDN website (members.qmd and join.qmd there).
-  // These pages only exist once the new-image branch is live: don't send invitations before that.
-  MAP_URL: 'https://responsediversitynetwork.github.io/RDN-website/members.html',
-  INFO_URL: 'https://responsediversitynetwork.github.io/RDN-website/join.html',
-  PRIVACY_URL: 'https://responsediversitynetwork.github.io/RDN-website/join.html#privacy',
+  // Links in member emails point to this repo's GitHub Pages site (rdn-members).
+  MAP_URL: 'https://responsediversitynetwork.github.io/rdn-members/',
+  INFO_URL: 'https://responsediversitynetwork.github.io/rdn-members/join.html',
+  PRIVACY_URL: 'https://responsediversitynetwork.github.io/rdn-members/join.html#privacy',
   PHOTO_SIZE_PX: 400,
 
   // Mailing list. Until the list exists, requests are only recorded in the

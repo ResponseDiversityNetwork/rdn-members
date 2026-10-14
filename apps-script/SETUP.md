@@ -55,10 +55,8 @@ Apps Script can't create file-upload questions, so this step is manual.
    1. Under **Link**, choose the `public` tab and **Comma-separated values (.csv)**, then click **Publish**. Copy the URL.
    2. Choose the `summary` tab, CSV again, then **Publish**. Copy that URL too.
    3. Under **Published content & settings**, check that **Automatically republish when changes are made** is ticked.
-4. Put the links into **both** sites. The main RDN website is the real one (member emails link to it); the rdn-members site is the test bed until the website's `new-image` branch goes live.
-   - **RDN-website** (`new-image` branch): in `data/sources.json`, set `data_url` to the first URL and `summary_url` to the second. In `_variables.yml`, replace `FORM_A_URL` and `FORM_B_URL` with the two public form links from the setup log.
-   - **rdn-members**: in `index.qmd`, set `DATA_URL` and `SUMMARY_URL` (each in quotes). In `join.qmd`, replace `FORM_A_URL` and `FORM_B_URL`.
-5. Commit and push both. The maps are now live but empty until the first member is approved, and the "Demo" banner disappears.
+4. In `index.qmd`, set `DATA_URL` to the first URL and `SUMMARY_URL` to the second, each in quotes. In `join.qmd`, replace `FORM_A_URL` and `FORM_B_URL` with the two public form links from the setup log.
+5. Commit and push. The map at https://responsediversitynetwork.github.io/rdn-members/ is now live but empty until the first member is approved, and the "Demo" banner disappears.
 
 ## 6. Test everything
 
@@ -95,7 +93,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 
 ## Inviting the existing members
 
-Do this after section 7, step 1, and only once the RDN website's `new-image` branch is live: the invitation emails link to its `members.html` and `join.html` pages.
+Do this after section 7, step 1. The invitation emails link to the rdn-members site's map and join pages.
 
 1. In the **private** spreadsheet, choose **File → Import → Upload**, pick the old member list, and select **Insert new sheet(s)**. Rename the new tab to `Invites`. The headings must stay as they are: Name, Organisation, Country, City, State/Province, Email, Status, Comments, Date joined.
 2. Run `prepareInvites`. It adds tracking columns and marks each row `ready` or `not invitable`. The reason for each `not invitable` row is in **Invite note**, for example a missing or duplicate email. The Status and Comments columns are ignored. Fix those rows if you can, then run it again.
