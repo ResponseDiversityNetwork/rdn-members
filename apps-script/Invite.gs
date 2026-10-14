@@ -220,3 +220,10 @@ function inviteProgress() {
   readInvites_().rows.forEach(r => { const s = r['Invite state'] || '(blank)'; counts[s] = (counts[s] || 0) + 1; });
   Logger.log(JSON.stringify(counts, null, 2));
 }
+
+/** Switches off the daily invitation timer (invitations and reminders stop; nothing is deleted). */
+function stopInvites() {
+  const ts = ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'inviteTick');
+  ts.forEach(t => ScriptApp.deleteTrigger(t));
+  Logger.log(ts.length ? 'Invitation timer switched off.' : 'No invitation timer was running.');
+}

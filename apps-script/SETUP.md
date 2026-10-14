@@ -102,3 +102,24 @@ Do this after section 7, step 1. The invitation emails link to the rdn-members s
 5. Check progress at any time in the `Invites` tab, or run `inviteProgress`.
 
 If someone replies asking to be removed, set their **Invite state** to `removed`.
+
+### Testing the invitations first
+
+Do this before importing the real list, with test rows only, so no real member can get an email.
+
+1. In the private spreadsheet, add a tab called `Invites`. Paste these headings into A1: Name, Organisation, Country, City, State/Province, Email, Status, Comments, Date joined. Below them add three test rows:
+   - you, with a real address you can read;
+   - you again, with a second address you can read, a city and state (e.g. Cambridge, Massachusetts, USA), and a date such as 2021-05-01;
+   - a row with no email, to check that it gets flagged.
+2. Run `prepareInvites`. Two rows should be `ready` and one `not invitable` ("no email").
+3. Run `sendTestInvite`. One invitation arrives at the reply-to address. Open both links: name, email, organisation, city, state and country should be filled in, with a member reference on the last page.
+4. Run `startInvites`. Both test addresses get an invitation, and a daily `inviteTick` timer appears under **Triggers**.
+5. Reply to the first invitation through its no-photo link. Fill in the rest and submit. Check that:
+   - you get a "Your Response Diversity Network membership is updated" email, and no curator email;
+   - the person is in `Members`, already **Approved**, with **Joined** taken from the Invites row;
+   - the Invites row shows `responded`;
+   - the person appears on the map within about 10 minutes.
+6. Test the reminder without waiting 14 days: in the second row, change **Invited at** to a date more than 14 days ago, then run `inviteTick`. A "Reminder: ..." email should arrive.
+7. Reply to the reminder through its photo link, uploading a photo.
+8. Run `stopInvites`, delete the `Invites` tab, and clear the test data (section 7, step 1). Then follow the steps above with the real list.
+

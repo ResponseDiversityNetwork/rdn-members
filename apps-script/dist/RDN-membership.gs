@@ -834,6 +834,13 @@ function inviteProgress() {
   Logger.log(JSON.stringify(counts, null, 2));
 }
 
+/** Switches off the daily invitation timer (invitations and reminders stop; nothing is deleted). */
+function stopInvites() {
+  const ts = ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'inviteTick');
+  ts.forEach(t => ScriptApp.deleteTrigger(t));
+  Logger.log(ts.length ? 'Invitation timer switched off.' : 'No invitation timer was running.');
+}
+
 // ===== Automation.gs =====
 /**
  * What happens when someone submits or edits either form.
