@@ -15,11 +15,11 @@ include-in-header:
 // ---- Configuration ---------------------------------------------------------
 // When the live public sheet exists, paste its "Publish to web" CSV URL here.
 // Leave it as null to use the made-up demo data in data/demo-members.csv.
-DATA_URL = null
+DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTD6lUGJig7DfQbnXF5m3Wbrkh8tJs_LmCtzHiZjTz9cPzVRCtqHDWuDsBDeyLYBanUjy3JdJRU6Slf/pub?gid=0&single=true&output=csv"
 
 // Paste the "Publish to web" CSV URL of the public sheet's "summary" tab here.
 // Leave it as null to use data/demo-summary.csv.
-SUMMARY_URL = null
+SUMMARY_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTD6lUGJig7DfQbnXF5m3Wbrkh8tJs_LmCtzHiZjTz9cPzVRCtqHDWuDsBDeyLYBanUjy3JdJRU6Slf/pub?gid=1695318466&single=true&output=csv"
 ```
 
 ```{ojs}
