@@ -8,8 +8,8 @@ toc: true
 
 There are two versions of the membership form. They ask the same questions; the only difference is the photo:
 
-- **[Membership form](FORM_A_URL)**: no photo, no sign-in needed.
-- **[Membership form with photo](FORM_B_URL)**: lets you upload a photo for the map. Google requires you to sign in with a Google account to upload files.
+- **[Membership form](https://forms.gle/yhXSwWUDRqEu8BFNA)**: no photo, no sign-in needed.
+- **[Membership form with photo](https://forms.gle/kTBMN7riaRvJ3QNA7)**: lets you upload a photo for the map. Google requires you to sign in with a Google account to upload files.
 
 Both ask whether you want to appear on the public map, which details may be shown there, and whether you want to join the RDN mailing list.
 
