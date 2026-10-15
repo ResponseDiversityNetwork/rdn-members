@@ -190,6 +190,8 @@ function updateFormTexts() {
   if (consent) { consent.asPageBreakItem().setHelpText(consentHelp_()); log('privacy note'); }
   const fieldsItem = byTitle(FormApp.ItemType.CHECKBOX, Q.SHOW_FIELDS);
   if (fieldsItem) { fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP); log('"' + Q.SHOW_FIELDS + '"'); }
+  const career = byTitle(FormApp.ItemType.MULTIPLE_CHOICE, Q.CAREER);
+  if (career) { career.asMultipleChoiceItem().setChoiceValues(OPTIONS.CAREER); log('"' + Q.CAREER + '" options'); }
   [[Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS]].forEach(([title, opts]) => {
     const it = byTitle(FormApp.ItemType.CHECKBOX, title);
     if (it) { it.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.OTHER_HELP); log('"' + title + '" options'); }

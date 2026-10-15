@@ -73,8 +73,11 @@ const LQ = {
 const LEAVE_CONFIRM_OPTION = 'I want to leave the Response Diversity Network and have my entry deleted';
 
 const OPTIONS = {
-  CAREER: ['PhD student', 'Postdoc', 'Early-career researcher/faculty', 'Mid/senior researcher',
-           'Practitioner/non-academic', 'Other'],
+  CAREER: ['Student (Bachelor\u2019s or Master\u2019s)', 'PhD student', 'Postdoctoral researcher',
+           'Early-career independent researcher (e.g. assistant professor, junior group leader, lecturer)',
+           'Established researcher (e.g. associate or full professor, senior scientist)',
+           'Working outside academia (e.g. government agency, NGO, consultancy, industry)',
+           'Retired or emeritus', 'Other'],
   APPROACH: ['Field observation', 'Experiments (lab/mesocosm)', 'Theory/modelling',
              'Data synthesis/meta-analysis', 'Applied/management'],
   // Ecosystems, from the RDN response diversity survey (Oikos appendix S1, question 8e). "Multiple" is left out:

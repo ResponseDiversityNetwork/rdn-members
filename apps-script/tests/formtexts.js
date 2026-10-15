@@ -12,7 +12,7 @@ function mkItem(form, type, title) {
     setChoiceValues(c) { it.choices = c; return it; }, setRequired(r) { it.required = r; return it; },
     clearValidation() { it.validation = null; return it; },
   });
-  it.asSectionHeaderItem = it.asPageBreakItem = it.asCheckboxItem = it.asParagraphTextItem = it.asTextItem = () => it;
+  it.asSectionHeaderItem = it.asPageBreakItem = it.asCheckboxItem = it.asParagraphTextItem = it.asTextItem = it.asMultipleChoiceItem = () => it;
   return it;
 }
 function typed(it) { return {getId: it.getId, setTitle(t) { it.setTitle(t); return this; }, setHelpText(h) { it.setHelpText(h); return this; },
@@ -43,6 +43,7 @@ const oldLayout = withPhoto => add => {
   add(T.TEXT, 'Full name'); add(T.TEXT, 'Email address'); add(T.PARAGRAPH_TEXT, 'Research interests');
   if (withPhoto) add(T.FILE_UPLOAD, 'Photo');
   add(T.PAGE_BREAK, 'Your research');
+  add(T.MULTIPLE_CHOICE, 'Career stage').setChoiceValues(['PhD student', 'Postdoc', 'Mid/senior researcher']);
   add(T.CHECKBOX, 'Systems').setChoiceValues(['Terrestrial', 'Urban']);
   add(T.CHECKBOX, 'Organisms').setChoiceValues(['Plants', 'Vertebrates']);
   add(T.PAGE_BREAK, 'Consent and privacy');
@@ -91,6 +92,8 @@ for (const run of [1, 2]) {
   assert(find(A, 'Details I agree to show on the map').choices.includes('Website or ORCID link') && !find(A, 'Details I agree to show on the map').choices.includes('Photo'), 'display options');
   assert(find(A, 'Organisms').choices.includes('Amphibians') && find(A, 'Systems').choices.includes('Subterranean (e.g. soil)'), 'survey lists');
   assert(/Research interests/.test(find(A, 'Systems').help) && /Research interests/.test(find(A, 'Organisms').help), '"Other" notes');
+  const cs = find(A, 'Career stage').choices;
+  assert(cs.length === 8 && cs.includes('Retired or emeritus') && !cs.includes('Mid/senior researcher'), 'career stage options');
   const ri = find(A, 'Research interests');
   assert(/short phrase or a few keywords/.test(ri.help) && ri.validation === null, 'interests');
 }

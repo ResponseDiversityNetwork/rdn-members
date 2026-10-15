@@ -97,7 +97,8 @@ viewof query = Inputs.search(members, {
 
 ```{ojs}
 //| echo: false
-viewof f_stage = Inputs.checkbox(optionsFor("career_stage"))
+careerRank = c => { const i = CAREER_ORDER.indexOf(shortLabel(c)); return i < 0 ? 99 : i; }
+viewof f_stage = Inputs.checkbox(optionsFor("career_stage").sort((a, b) => careerRank(a) - careerRank(b)), {format: shortLabel})
 ```
 
 <div class="rdn-fhead">Research approach</div>
@@ -263,7 +264,11 @@ All approved members, including those who chose not to appear on the map. Countr
 
 ```{ojs}
 //| echo: false
-CAREER_ORDER = ["PhD student", "Postdoc", "Early-career researcher/faculty", "Mid/senior researcher", "Practitioner/non-academic", "Other"]
+// Chart labels drop the "(e.g. ...)" examples from the form's career-stage options.
+shortLabel = c => c.replace(/\s*\(e\.g\..*\)\s*$/, "")
+CAREER_ORDER = ["Student (Bachelor’s or Master’s)", "PhD student", "Postdoctoral researcher",
+  "Early-career independent researcher", "Established researcher", "Working outside academia",
+  "Retired or emeritus", "Other"]
 
 barChart = (rows, {title, order} = {}) => {
   const data = order
@@ -274,7 +279,7 @@ barChart = (rows, {title, order} = {}) => {
     title,
     width: 380,
     height: 30 + data.length * 30,
-    marginLeft: 190,
+    marginLeft: 230,
     marginRight: 36,
     x: {axis: null, domain: [0, max]},
     y: {label: null, domain: data.map(d => d.category), tickSize: 0},
@@ -288,7 +293,7 @@ barChart = (rows, {title, order} = {}) => {
   });
 }
 
-barChart(summaryRows("career_stage"), {title: "Career stage", order: CAREER_ORDER})
+barChart(summaryRows("career_stage").map(d => ({...d, category: shortLabel(d.category)})), {title: "Career stage", order: CAREER_ORDER})
 ```
 
 :::
