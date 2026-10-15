@@ -60,7 +60,8 @@ function makeEnv() {
     asCheckboxItem() { return Object.assign(this.mk(), {getChoices: () => this.getChoices()}); }
   }
   class Response {
-    constructor(form, answers) { this.id = id('resp'); this.form = form; this.answers = answers; }
+    constructor(form, answers) { this.id = id('resp'); this.form = form; this.answers = answers; this.ts = new Date(); }
+    getTimestamp() { return this.ts; }
     getId() { return this.id; }
     getItemResponses() { return Object.entries(this.answers).filter(([, v]) => v !== '' && v !== undefined && !(Array.isArray(v) && !v.length))
       .map(([t, v]) => ({getItem: () => this.form.items.find(i => i.title === t) || new Item(t, 'TEXT'), getResponse: () => v})); }
@@ -90,7 +91,7 @@ function makeEnv() {
     createResponse() { const parts = []; return {withItemResponse(x) { parts.push(x); return this; }, toPrefilledUrl: () => 'https://forms/' + this.id + '/prefill?' + parts.map(p => encodeURIComponent(p.item.title) + '=' + encodeURIComponent([].concat(p.v).join('|'))).join('&')}; }
     // test helpers
     submit(answers) { const r = new Response(this, answers); this.responses.push(r); this.toTab(r); return r; }
-    edit(r, changes) { Object.assign(r.answers, changes); this.toTab(r, true); return r; }
+    edit(r, changes) { Object.assign(r.answers, changes); r.ts = new Date(Date.now() + 5000); this.toTab(r, true); return r; }
     toTab(r, isEdit) {
       if (!this.tab) return;
       const titles = ['Timestamp'].concat(this.items.map(i => i.title));

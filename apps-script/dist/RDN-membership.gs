@@ -1777,6 +1777,29 @@ function clearTestData() {
 }
 
 
+/**
+ * Handles membership-form submissions that the automation missed (e.g. while its trigger
+ * wasn't installed): responses not yet in Members, and edits made after a row was last updated.
+ * Safe to run again; nothing is done twice.
+ */
+function processMissedResponses() {
+  const m = readMembers_();
+  const updated = {};
+  m.rows.forEach(r => { if (r['Response ID']) updated[r['Response ID']] = new Date(r['Updated'] || 0).getTime(); });
+  let n = 0;
+  formFor_('A').getResponses().forEach(resp => {
+    const seen = updated[resp.getId()];
+    if (seen === undefined || resp.getTimestamp().getTime() > seen + 1000) {
+      handleSubmit_('A', resp);
+      n++;
+    }
+  });
+  Logger.log(n ? 'Handled ' + n + ' missed submission(s).' : 'No missed submissions.');
+  if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'onSubmitA')) {
+    Logger.log('Warning: the onSubmitA trigger is not installed, so new submissions are not handled. Run installTriggers.');
+  }
+}
+
 /** Fills in "Photo link" for any member rows that lack it (e.g. rows made before the column existed). */
 function fillPhotoLinks() {
   const m = readMembers_();

@@ -105,6 +105,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 - **Fixing a location:** edit City, State/Province or Country in `Members`, and the row is placed again.
 - **Your own notes:** use the `Curator notes` column. The script overwrites the other columns when a member edits their entry.
 - **Map looks out of date:** run `rebuildPublicNow`.
+- **A submission got no email and isn't in `Members`:** check that `onSubmitA` is listed under **Triggers** (run `installTriggers` if not), then run `processMissedResponses`.
 - **Leave requests:** the curator gets an email and ticks **Confirmed** in the `Leave requests` tab.
 - **Turning everything off:** run `removeTriggers`.
 

@@ -267,4 +267,17 @@ const rowsBefore = fA.tab.getLastRow();
 run(`deleteResponse_('A', '${g.id}', ['gina@example.org'])`);
 check(rowsBefore > 1 && fA.tab.getLastRow() === rowsBefore - 1, 'deleting a response still removes its row from the renamed tab');
 
+console.log('13. Submissions the automation missed');
+newMails();
+let h = fA.submit(base({[Q.NAME]: 'Hugo Hale', [Q.EMAIL]: 'hugo@example.org'}));   // no trigger ran
+run('processMissedResponses()');
+ms = newMails();
+check(members().some(r => r.Email === 'hugo@example.org') && ms.some(x => x.to === 'hugo@example.org'), 'missed new submission handled and emailed');
+const nMembers = members().length;
+run('processMissedResponses()');
+check(members().length === nMembers && newMails().length === 0, 'running it again does nothing');
+fA.edit(h, {[Q.INSTITUTION]: 'ETH'});   // a missed edit
+run('processMissedResponses()');
+check(members().find(r => r.Email === 'hugo@example.org').Institution === 'ETH', 'missed edit handled');
+
 console.log(`\nAll ${ok} checks passed.`);
