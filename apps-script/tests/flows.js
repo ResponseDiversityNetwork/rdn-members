@@ -138,6 +138,7 @@ check(!publicRows().some(r => r.name === 'Bob Brenner'), 'removed from map');
 let x = fA.submit(base({[Q.EMAIL]: 'x@example.org', [Q.LEAVE]: [O.LEAVE]}));
 go('A', x);
 check(!fA.getResponses().some(r => r.id === x.id) && !members().some(r => r.Email === 'x@example.org'), 'leave on a new submission stores nothing');
+check(newMails().length === 0, '...and, for an unknown email, sends no email at all');
 newMails();
 
 console.log('9. Photo not ready at submit → retried');
@@ -222,6 +223,15 @@ leaveSh.set(4, 1, true);
 E.ctx.onSheetEdit({range: leaveSh.getRange(4, 1)});
 check(inv.rowsAsObjects().find(r => r.Name === 'Finn Faro')['Invite state'] === 'removed' && /old member list/.test(leaveSh.rowsAsObjects()[2].Status), 'old-list-only person removed from invitations');
 newMails();
+// A fresh form with "Leave" ticked and a member's email: becomes a request, nothing deleted.
+const erinNow = members().find(r => r.Email === 'erin@example.org');
+let fresh = fA.submit(base({[Q.NAME]: 'Someone Else', [Q.EMAIL]: 'erin@example.org', [Q.LEAVE]: [O.LEAVE]}));
+go('A', fresh);
+const lastReq = leaveSh.rowsAsObjects().slice(-1)[0];
+ms = newMails();
+check(members().some(r => r['Member ID'] === erinNow['Member ID']) && !fA.getResponses().some(r => r.id === fresh.id), 'fresh-form leave: member kept, submission discarded');
+check(lastReq.Email === 'erin@example.org' && lastReq['Member ID'] === erinNow['Member ID'] && /new form/.test(lastReq.Message), 'fresh-form leave queued as a leave request');
+check(ms.some(x => x.to === 'erin@example.org' && /request to leave received/.test(x.subject)) && !ms.some(x => /you have left/.test(x.subject)), 'member asked to object; no "you have left" email');
 
 console.log('11. Clearing test data');
 assert.throws(() => run('clearTestData()'), /Safety catch/); ok++; console.log('  ✓ safety catch blocks clearTestData');

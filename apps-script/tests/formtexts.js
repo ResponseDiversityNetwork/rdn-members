@@ -21,7 +21,7 @@ function mkForm(id, withPhoto) {
   add(T.PAGE_BREAK, 'Your research'); add(T.PAGE_BREAK, 'Consent and privacy');
   add(T.CHECKBOX, 'Organisms').setChoiceValues(['Plants', 'Vertebrates']);
   add(T.CHECKBOX, 'Details I agree to show on the map').setChoiceValues(['Name', 'Website']);
-  add(T.PAGE_BREAK, 'For existing members');
+  add(T.PAGE_BREAK, 'For existing members'); add(T.CHECKBOX, 'Leave the network');
   Object.assign(f, {
     getItems: t => f.items.filter(i => !t || i.type === t),
     // add*() return typed items: no as*() methods, like Apps Script's SectionHeaderItem / PageBreakItem
@@ -62,6 +62,11 @@ for (const run of [1, 2]) {   // running twice must not add a second cover page
   }
 }
 assert(forms.B.items.some(i => i.title === 'Photo'), 'photo question kept');
+for (const k of ['A', 'B']) {
+  assert(/personal link/.test(forms[k].items.find(i => i.title === 'For existing members').help) &&
+         /join.html#leave|forms/.test(forms[k].items.find(i => i.title === 'For existing members').help), k + ' last page explains personal link + leave form');
+  assert(/Only works when you opened this form with your personal link/.test(forms[k].items.find(i => i.title === 'Leave the network').help), k + ' leave tick explained');
+}
 for (const k of ['A', 'B']) {
   const ch = forms[k].items.find(i => i.title === 'Organisms').choices;
   assert(ch.includes('Terrestrial mammals') && ch.includes('Amphibians') && !ch.includes('Vertebrates'), k + ' taxa list updated');

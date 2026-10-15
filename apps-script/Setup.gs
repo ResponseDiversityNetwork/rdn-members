@@ -114,12 +114,10 @@ function buildForm_(form, withPhoto) {
   form.addCheckboxItem().setTitle(Q.PRIVACY_OK).setRequired(true).setChoiceValues([OPTIONS.PRIVACY_OK]);
 
   // Section 4: existing members only
-  form.addPageBreakItem().setTitle('For existing members')
-      .setHelpText('If you are joining for the first time, leave this page blank and submit.');
+  form.addPageBreakItem().setTitle(EXISTING_SECTION_TITLE).setHelpText(existingMembersHelp_());
   form.addTextItem().setTitle(Q.MEMBER_REF)
       .setHelpText('Filled in automatically when you use a link from one of our emails. Please don\'t change it.');
-  form.addCheckboxItem().setTitle(Q.LEAVE).setChoiceValues([OPTIONS.LEAVE])
-      .setHelpText('Removes you from the map and the mailing list, and deletes your entry and any photo.');
+  form.addCheckboxItem().setTitle(Q.LEAVE).setChoiceValues([OPTIONS.LEAVE]).setHelpText(LEAVE_HELP);
 }
 
 /** Sends a form's responses to the spreadsheet and returns the name of the new tab. */
@@ -214,6 +212,11 @@ function updateFormTexts() {
       fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
       Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
     }
+    const existing = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === EXISTING_SECTION_TITLE);
+    if (existing) existing.asPageBreakItem().setHelpText(existingMembersHelp_());
+    const leaveItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.LEAVE);
+    if (leaveItem) leaveItem.asCheckboxItem().setHelpText(LEAVE_HELP);
+    Logger.log('Form ' + key + ': "' + EXISTING_SECTION_TITLE + '" page text updated.');
     const organisms = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.ORGANISMS);
     if (organisms) {
       organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS);
@@ -277,4 +280,17 @@ function ensureCoverPage_(form) {
   let page = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === 'About you');
   if (!page) page = form.getItemById(form.addPageBreakItem().setTitle('About you').getId());
   if (page.getIndex() !== 1) form.moveItem(page.getIndex(), 1);
+}
+
+
+const EXISTING_SECTION_TITLE = 'For existing members';
+const LEAVE_HELP = 'Only works when you opened this form with your personal link. Removes you from the map and the ' +
+                   'mailing list, and deletes your entry and any photo.';
+
+/** Text of the last page: only for people using their personal link; how to leave otherwise. */
+function existingMembersHelp_() {
+  const leaveUrl = PropertiesService.getScriptProperties().getProperty('LEAVE_FORM_URL') || (CONFIG.INFO_URL + '#leave');
+  return 'Only use this page if you opened this form with your personal link (the \u201cEdit your response\u201d link, ' +
+    'or a link in one of our emails). If you are joining for the first time, leave this page blank and submit.\n\n' +
+    'To leave the network without your personal link, use the leave form instead: ' + leaveUrl;
 }

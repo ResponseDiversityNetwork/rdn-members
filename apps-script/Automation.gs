@@ -51,7 +51,16 @@ function handleSubmit_(formKey, response) {
     }
 
     if (leaving) {
-      doLeave_(m.sh, row, formKey, response, ans);
+      if (row) {
+        doLeave_(m.sh, row, formKey, response, ans);   // via a personal link: takes effect at once
+      } else {
+        // A fresh form (no personal link) with "Leave" ticked: discard it, and if the email belongs to a
+        // member, queue a leave request for the curator to confirm.
+        deleteResponse_(formKey, response.getId(), [String(ans[Q.EMAIL] || '').trim().toLowerCase()]);
+        deleteUploads_([].concat(ans[Q.PHOTO] || []));
+        queueLeaveRequest_(ans[Q.EMAIL], ans[Q.NAME],
+          'Ticked "Leave the network" on a new form, not via their personal link.', true);
+      }
       rebuildPublic_();
       return;
     }

@@ -41,7 +41,7 @@ If you have lost your link, email [rdn.projectbase@gmail.com](mailto:rdn.project
 
 **Existing members:** if your invitation to the new system doesn't arrive, simply join using the form above with the email address we know you by. We will recognise you and keep your original joining date.
 
-## Leave
+## Leave {#leave}
 
 There are two ways to leave:
 

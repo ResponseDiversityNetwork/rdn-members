@@ -55,25 +55,37 @@ function onLeaveRequest(e) {
   lock.waitLock(60000);
   try {
     const ans = answersOf_(e.response);
-    const email = String(ans[LQ.EMAIL] || '').trim().toLowerCase();
-    const nameGiven = String(ans[LQ.NAME] || '').trim();
-    const message = String(ans[LQ.MESSAGE] || '').trim();
-    const member = readMembers_().rows.find(r => r['Email'] === email);
-    const listed = member ? null : inviteForEmail_(email);
-    const found = member ? 'Member: ' + member['Name'] + ' (' + member['Member ID'] + ')'
-                : listed ? 'Only on the old member list: ' + listed['Name']
-                : 'No member with this email address';
-    const sh = leaveSheet_();
-    sh.appendRow([false, new Date(), email, safeText_(nameGiven), safeText_(message), found,
-                  member ? member['Member ID'] : '', 'Waiting for curator', '']);
-    sh.getRange(sh.getLastRow(), 1).setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    queueLeaveRequest_(ans[LQ.EMAIL], ans[LQ.NAME], ans[LQ.MESSAGE], false);
     // The request is now in the tab; don't keep a second copy in the form.
     try { FormApp.openById(prop_('LEAVE_FORM_ID')).deleteResponse(e.response.getId()); } catch (err) { /* ignore */ }
-    if (member || listed) emailLeaveReceived_(email, member ? member['Name'] : listed['Name']);
-    emailCuratorLeave_(email, found, message);
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Adds a request to the Leave requests tab, emails the curator, and acknowledges it to the
+ * member. With onlyIfKnown, nothing happens unless the email belongs to a member or the old list.
+ * Returns true if a request was queued. (Callers hold the script lock.)
+ */
+function queueLeaveRequest_(emailIn, nameIn, messageIn, onlyIfKnown) {
+  const email = String(emailIn || '').trim().toLowerCase();
+  const nameGiven = String(nameIn || '').trim();
+  const message = String(messageIn || '').trim();
+  if (!email) return false;
+  const member = readMembers_().rows.find(r => r['Email'] === email);
+  const listed = member ? null : inviteForEmail_(email);
+  if (onlyIfKnown && !member && !listed) return false;
+  const found = member ? 'Member: ' + member['Name'] + ' (' + member['Member ID'] + ')'
+              : listed ? 'Only on the old member list: ' + listed['Name']
+              : 'No member with this email address';
+  const sh = leaveSheet_();
+  sh.appendRow([false, new Date(), email, safeText_(nameGiven), safeText_(message), found,
+                member ? member['Member ID'] : '', 'Waiting for curator', '']);
+  sh.getRange(sh.getLastRow(), 1).setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+  if (member || listed) emailLeaveReceived_(email, member ? member['Name'] : listed['Name']);
+  emailCuratorLeave_(email, found, message);
+  return true;
 }
 
 /** Called from onSheetEdit when the curator edits the Leave requests tab. */
