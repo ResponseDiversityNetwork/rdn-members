@@ -28,7 +28,7 @@ Every email we send you has a link to the **photo form**, where you can add, cha
 ## Leave {#leave}
 
 - **With your personal link:** open it, tick **Leave the network** on the last page, and submit. This takes effect straight away.
-- **No link?** Use the **[leave form](LEAVE_FORM_URL)**. A curator confirms the request, usually within a few days.
+- **No link?** Use the **[leave form](https://forms.gle/eqev4qakdbtdK6T77)**. A curator confirms the request, usually within a few days.
 
 We then remove you from the map and the mailing list, delete your entry and any photo, and email you to confirm.
 
