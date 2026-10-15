@@ -94,6 +94,8 @@ const OPTIONS = {
   REGIONS: ['Europe', 'North America', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
+  OTHER_HELP: 'If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d ' +
+              '(a short phrase or a few keywords) on the \u201cAbout you\u201d page.',
   INTERESTS_HELP: 'A short phrase or a few keywords, e.g. \u2018Response diversity of plankton communities to heatwaves\u2019. ' +
                   'Shown on the map and searchable.',
   SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
@@ -373,7 +375,10 @@ function buildForm_(form, withPhoto) {
   form.addMultipleChoiceItem().setTitle(Q.CAREER).setRequired(true).setChoiceValues(OPTIONS.CAREER);
   [[Q.APPROACH, OPTIONS.APPROACH], [Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS],
    [Q.LEVELS, OPTIONS.LEVELS], [Q.STRESSORS, OPTIONS.STRESSORS], [Q.REGIONS, OPTIONS.REGIONS]]
-    .forEach(([title, opts]) => form.addCheckboxItem().setTitle(title).setChoiceValues(opts));
+    .forEach(([title, opts]) => {
+      const item = form.addCheckboxItem().setTitle(title).setChoiceValues(opts);
+      if (opts.indexOf('Other') >= 0) item.setHelpText(OPTIONS.OTHER_HELP);
+    });
 
   // Section 3: consent
   form.addPageBreakItem().setTitle(CONSENT_SECTION_TITLE).setHelpText(consentHelp_());
@@ -492,12 +497,12 @@ function updateFormTexts() {
     Logger.log('Form ' + key + ': "' + EXISTING_SECTION_TITLE + '" page text updated.');
     const systems = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SYSTEMS);
     if (systems) {
-      systems.asCheckboxItem().setChoiceValues(OPTIONS.SYSTEMS);
+      systems.asCheckboxItem().setChoiceValues(OPTIONS.SYSTEMS).setHelpText(OPTIONS.OTHER_HELP);
       Logger.log('Form ' + key + ': "' + Q.SYSTEMS + '" options updated.');
     }
     const organisms = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.ORGANISMS);
     if (organisms) {
-      organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS);
+      organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS).setHelpText(OPTIONS.OTHER_HELP);
       Logger.log('Form ' + key + ': "' + Q.ORGANISMS + '" options updated.');
     }
     const interests = form.getItems(FormApp.ItemType.PARAGRAPH_TEXT).find(i => i.getTitle() === Q.INTERESTS);

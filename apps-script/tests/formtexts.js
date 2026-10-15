@@ -72,6 +72,7 @@ for (const k of ['A', 'B']) {
   const ch = forms[k].items.find(i => i.title === 'Organisms').choices;
   assert(ch.includes('Terrestrial mammals') && ch.includes('Amphibians') && !ch.includes('Vertebrates'), k + ' taxa list updated');
   const sy = forms[k].items.find(i => i.title === 'Systems').choices;
+  for (const t of ['Systems', 'Organisms']) assert(/Research interests/.test(forms[k].items.find(i => i.title === t).help), k + ' ' + t + ': "Other" note');
   assert(sy.includes('Terrestrial (arctic and boreal)') && sy.includes('Subterranean (e.g. soil)') && !sy.includes('Urban'), k + ' ecosystem list updated');
 }
 for (const k of ['A', 'B']) {
