@@ -1,27 +1,29 @@
 /**
- * What happens when someone submits or edits either form.
+ * What happens when someone submits a form.
  *
  * Triggers (created by installTriggers() in Admin.gs):
- *   onSubmitA / onSubmitB: form submit, for Form A / Form B (a new response or an edit);
- *   onSheetEdit: a curator edits the Members tab (ticking "Approved", fixing a city);
+ *   onSubmitA:       the membership form (a new response, or an edit through a personal link);
+ *   onPhotoSubmit:   the photo form;
+ *   onLeaveRequest:  the leave form (Leave.gs);
+ *   onSheetEdit:     a curator edits the Members or Leave requests tab;
  *   maintenanceTick: every 15 minutes, retries photos that weren't ready;
- *   dailyRebuild: rebuilds the public sheet once a day as a safety net.
+ *   dailyRebuild:    rebuilds the public sheet once a day as a safety net.
  *
- * Cases handled by handleSubmit_:
- *   new:     a first submission → new Members row. Pending until approved, unless the
- *            response carries the member reference of an invited existing member.
- *   edit:    a submission through someone's personal link (same response) → row updated.
- *   switch:  a response in the other form carrying a member's reference → the row moves
- *            to the new response; the old response is deleted (and photos too, if the
- *            member moves to the no-photo form).
- *   leave:   "Leave the network" ticked → everything about the member is deleted.
+ * Cases handled by handleSubmit_ (membership form):
+ *   new:    a first submission → new Members row. Pending until approved, unless the response
+ *           carries the member reference of an invited existing member.
+ *   edit:   a submission through someone's personal link (same response) → row updated.
+ *   moved:  a new response carrying a known member reference (e.g. an invitation reply after
+ *           joining through the join page) → the row moves to the new response; the old one is deleted.
+ *   leave:  "Leave the network" ticked → via a personal link, everything is deleted at once;
+ *           on a fresh form, a leave request is queued for the curator instead.
  */
 
 function onSubmitA(e) { handleSubmit_('A', e.response); }
-function onSubmitB(e) { handleSubmit_('B', e.response); }
+function onPhotoSubmit(e) { handlePhotoSubmit_(e.response); }
+function onSubmitB(e) { handlePhotoSubmit_(e.response); }   // old trigger name, until installTriggers is re-run
 
 function formFor_(key) { return FormApp.openById(prop_(key === 'A' ? 'FORM_A_ID' : 'FORM_B_ID')); }
-function otherKey_(key) { return key === 'A' ? 'B' : 'A'; }
 
 /** A response's answers as {question title: value}. Checkbox and upload answers are arrays. */
 function answersOf_(response) {
@@ -47,7 +49,7 @@ function handleSubmit_(formKey, response) {
     let kind = row ? 'edit' : null;
     if (!row && ref) {
       row = m.rows.find(r => r['Member ref'] === ref);
-      if (row) kind = 'switch';
+      if (row) kind = 'moved';
     }
 
     if (leaving) {
@@ -113,33 +115,11 @@ function handleSubmit_(formKey, response) {
                  '" on the map. Correct City/Country in the Members tab.');
     }
 
-    // Photos
-    const oldUploads = old ? listOf_(old['Photo uploads']) : [];
-    if (formKey === 'A') {
-      if (oldUploads.length || (old && old['Photo URL'])) {
-        deleteUploads_(oldUploads);
-        deletePublicPhoto_(rec['Member ID']);
-      }
-      rec['Photo uploads'] = ''; rec['Photo URL'] = ''; rec['Photo pending'] = false;
-    } else {
-      const uploads = [].concat(ans[Q.PHOTO] || []);
-      if (uploads.join('; ') !== oldUploads.join('; ') || (uploads.length && !rec['Photo URL'])) {
-        deleteUploads_(oldUploads.filter(id => uploads.indexOf(id) < 0));
-        if (uploads.length) {
-          const url = publishPhoto_(uploads[0], rec['Member ID']);
-          rec['Photo URL'] = url || '';
-          rec['Photo pending'] = !url;
-        } else {
-          deletePublicPhoto_(rec['Member ID']);
-          rec['Photo URL'] = ''; rec['Photo pending'] = false;
-        }
-      }
-      rec['Photo uploads'] = uploads.join('; ');
-    }
+    // Photos are handled by the photo form; a membership-form submission leaves them alone.
 
-    // Switching forms: remove the old response.
-    if (kind === 'switch' && old['Response ID'] && old['Response ID'] !== rec['Response ID']) {
-      deleteResponse_(old['Form'], old['Response ID'], [old['Email']]);
+    // The member's entry moved to a new response: remove the old one.
+    if (kind === 'moved' && old['Response ID'] && old['Response ID'] !== rec['Response ID']) {
+      deleteResponse_(old['Form'] || 'A', old['Response ID'], [old['Email']]);
     }
 
     rec['Notes'] = notes.join(' ');
@@ -154,13 +134,13 @@ function handleSubmit_(formKey, response) {
         emailMember_(rec, response, 'received');
         emailCurator_(rec, notes);
       }
-    } else if (kind === 'switch') {
-      emailMember_(rec, response, formKey === 'B' ? 'switchedToPhoto' : 'switchedToNoPhoto');
+    } else if (kind === 'moved') {
+      emailMember_(rec, response, 'linkChanged');
     }
     if (old) {
       const emailChanged = old['Email'] !== rec['Email'];
       if (emailChanged) {
-        if (kind !== 'switch') emailMember_(rec, response, 'emailChanged');
+        if (kind !== 'moved') emailMember_(rec, response, 'emailChanged');
         emailOldAddress_(old['Email'], rec['Email']);
       }
       if (rec['Approved']) {
@@ -172,6 +152,50 @@ function handleSubmit_(formKey, response) {
       if (notes.length && !old['Notes']) emailCurator_(rec, notes, true);
     }
 
+    rebuildPublic_();
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * The photo form: identifies the member by the reference in the link from their email, then
+ * publishes the new photo (replacing any old one) or removes it. The form response itself is not kept.
+ */
+function handlePhotoSubmit_(response) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(60000);
+  try {
+    const ans = answersOf_(response);
+    const ref = String(ans[Q.MEMBER_REF] || '').trim();
+    const uploads = [].concat(ans[Q.PHOTO] || []);
+    const remove = [].concat(ans[Q.REMOVE_PHOTO] || []).length > 0;
+    try { formFor_('B').deleteResponse(response.getId()); } catch (e) { /* ignore */ }
+    const m = readMembers_();
+    const rec = ref ? m.rows.find(r => r['Member ref'] === ref) : null;
+    if (!rec) {
+      deleteUploads_(uploads);
+      mail_(CONFIG.CURATOR, '[RDN] Photo discarded: unknown member reference', [
+        'Someone used the photo form without a valid member reference (' + esc_(ref || 'empty') + '), so the photo was discarded. ' +
+        'If they write to you, send them the photo link from their own membership emails.']);
+      return;
+    }
+    const oldUploads = listOf_(rec['Photo uploads']);
+    if (remove) {
+      deleteUploads_(oldUploads.concat(uploads));
+      deletePublicPhoto_(rec['Member ID']);
+      rec['Photo uploads'] = ''; rec['Photo URL'] = ''; rec['Photo pending'] = false;
+    } else if (uploads.length) {
+      deleteUploads_(oldUploads.filter(id => uploads.indexOf(id) < 0));
+      const url = publishPhoto_(uploads[0], rec['Member ID']);
+      rec['Photo uploads'] = uploads.join('; ');
+      rec['Photo URL'] = url || '';
+      rec['Photo pending'] = !url;
+    } else {
+      return;   // nothing to do
+    }
+    rec['Updated'] = new Date();
+    writeMember_(m.sh, rec);
     rebuildPublic_();
   } finally {
     lock.releaseLock();

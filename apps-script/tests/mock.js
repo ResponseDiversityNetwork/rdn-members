@@ -70,6 +70,10 @@ function makeEnv() {
     constructor(withPhoto, Q, O) {
       this.id = id('form'); this.responses = [];
       const t = (title, type, ch) => new Item(title, type, ch);
+      if (withPhoto === 'photo') {   // the small photo form
+        this.items = [t(Q.PHOTO, 'FILE_UPLOAD'), t(Q.REMOVE_PHOTO, 'CHECKBOX', [O.REMOVE_PHOTO]), t(Q.MEMBER_REF, 'TEXT')];
+        this.tab = null; this.Q = Q; return;
+      }
       this.items = [t(Q.NAME, 'TEXT'), t(Q.EMAIL, 'TEXT'), t(Q.INSTITUTION, 'TEXT'), t(Q.CITY, 'TEXT'), t(Q.STATE, 'TEXT'), t(Q.COUNTRY, 'TEXT'),
         t(Q.WEBSITE, 'TEXT'), t(Q.INTERESTS, 'PARAGRAPH_TEXT'), ...(withPhoto ? [t(Q.PHOTO, 'FILE_UPLOAD')] : []),
         t(Q.CAREER, 'MULTIPLE_CHOICE', O.CAREER), t(Q.APPROACH, 'CHECKBOX', O.APPROACH), t(Q.SYSTEMS, 'CHECKBOX', O.SYSTEMS),
@@ -155,13 +159,12 @@ function makeEnv() {
   const Q = run('Q'), O = run('OPTIONS');
   const priv = ctx.SpreadsheetApp.create('priv'); priv.sheets[0].setName('Members');
   const pub = ctx.SpreadsheetApp.create('pub');
-  const fA = new Form(false, Q, O), fB = new Form(true, Q, O);
+  const fA = new Form(false, Q, O), fB = new Form('photo', Q, O);
   formsById[fA.id] = fA; formsById[fB.id] = fB;
   const fL = new Form(false, Q, O); fL.items = []; formsById[fL.id] = fL;   // the leave form (answers matched by title)
   fA.tab = priv.insertSheet('Responses A (no photo)'); fA.tab.setFrozenRows(1);
-  fB.tab = priv.insertSheet('Responses B (photo)'); fB.tab.setFrozenRows(1);
   Object.assign(props, {FORM_A_ID: fA.id, FORM_B_ID: fB.id, PRIVATE_SS_ID: priv.id, PUBLIC_SS_ID: pub.id,
-    RESPONSES_A_TAB: 'Responses A (no photo)', RESPONSES_B_TAB: 'Responses B (photo)', PHOTO_FOLDER_ID: 'photos', LEAVE_FORM_ID: fL.id});
+    RESPONSES_A_TAB: 'Responses A (no photo)', RESPONSES_B_TAB: '', PHOTO_FOLDER_ID: 'photos', LEAVE_FORM_ID: fL.id});
   const upload = (ready = true) => { const f = {id: id('upl'), name: 'me.jpg', folder: 'uploads', trashed: false, thumbReady: ready}; files[f.id] = f; return f.id; };
 
   return {ctx, run, mails, log, priv, pub, fA, fB, fL, files, triggers: () => triggers, upload, O, Q};

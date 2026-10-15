@@ -36,22 +36,15 @@ function link_(url, label) { return '<a href="' + esc_(url) + '">' + esc_(label)
 
 function firstName_(name) { return String(name || '').trim().split(/\s+/)[0] || 'colleague'; }
 
-/** The paragraphs every member email ends with: personal link, switch link, more information. */
-function memberLinks_(rec, response) {
-  const resp = response || formFor_(rec['Form']).getResponse(rec['Response ID']);
-  const other = formFor_(otherKey_(rec['Form']));
-  const sw = switchLink_(resp, other, rec['Member ref']);
-  const swText = rec['Form'] === 'A'
-    ? 'To add a photo, use the ' + link_(sw, 'photo version of the form') +
-      ' (Google Forms; your answers are already filled in; it needs a Google sign-in).'
-    : 'To remove your photo, use the ' + link_(sw, 'version of the form without a photo') +
-      ' (Google Forms; your answers are already filled in).';
+/** The paragraphs every member email ends with: personal link, photo link, footer. */
+function memberLinks_(rec) {
+  const hasPhoto = !!(rec['Photo URL'] || rec['Photo pending']);
   return [
-    'Your personal link for changing your answers, or for leaving the network, is: ' +
-      link_(rec['Edit URL'], 'my membership entry') + ' (Google Forms). Please keep this email: the link is personal to you.',
-    swText,
-    'More about membership and privacy: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
-    'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
+    'Your personal link, for changing your answers or leaving the network: ' + link_(rec['Edit URL'], 'my membership entry') +
+      '. Please keep this email.',
+    (hasPhoto ? 'To change or remove your photo: ' : 'To add a photo to your map entry: ') +
+      link_(photoLink_(rec['Member ref']), 'photo form') + ' (Google asks you to sign in to upload a photo).',
+    'Best wishes,<br>' + esc_(CONFIG.ORG_NAME) + '<br><small>Membership and privacy: ' + esc_(CONFIG.INFO_URL) + '</small>',
   ];
 }
 
@@ -61,8 +54,7 @@ function emailMember_(rec, response, kind) {
   const subjects = {
     received: 'Response Diversity Network: membership received',
     welcome: 'Response Diversity Network: membership details saved',
-    switchedToPhoto: 'Response Diversity Network: your entry now has a photo',
-    switchedToNoPhoto: 'Response Diversity Network: photo removed',
+    linkChanged: 'Response Diversity Network: membership details saved',
     emailChanged: 'Response Diversity Network: email address changed',
   };
   const bodies = {
@@ -70,12 +62,10 @@ function emailMember_(rec, response, kind) {
       (onMap ? 'After that you will appear on the member map.' : 'You chose not to appear on the public member map.'),
     welcome: 'Thank you for updating your Response Diversity Network membership. ' +
       (onMap ? 'You will appear on the member map within about 10 minutes.' : 'You chose not to appear on the public member map.'),
-    switchedToPhoto: 'Your entry now uses the form with a photo. Your previous personal link no longer works; please use the new one below.',
-    switchedToNoPhoto: 'Your entry now uses the form without a photo, and we have deleted your photo. ' +
-      'Your previous personal link no longer works; please use the new one below.',
+    linkChanged: 'Thank you, your membership details are saved. Your personal link has changed: please use the one below.',
     emailChanged: 'The email address on your membership is now this one. We have also let your previous address know.',
   };
-  mail_(rec['Email'], subjects[kind], [hi, bodies[kind]].concat(memberLinks_(rec, response)));
+  mail_(rec['Email'], subjects[kind], [hi, bodies[kind]].concat(memberLinks_(rec)));
 }
 
 function emailApproved_(rec) {

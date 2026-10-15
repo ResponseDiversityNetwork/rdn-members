@@ -2,7 +2,7 @@
  * Admin functions, run by hand from the Apps Script editor.
  */
 
-const AUTOMATION_HANDLERS = ['onSubmitA', 'onSubmitB', 'onSheetEdit', 'maintenanceTick', 'dailyRebuild', 'onLeaveRequest'];
+const AUTOMATION_HANDLERS = ['onSubmitA', 'onSubmitB', 'onPhotoSubmit', 'onSheetEdit', 'maintenanceTick', 'dailyRebuild', 'onLeaveRequest'];
 
 /** Turns the automation on (safe to run again; it replaces its own triggers). */
 function installTriggers() {
@@ -10,7 +10,7 @@ function installTriggers() {
     .filter(t => AUTOMATION_HANDLERS.indexOf(t.getHandlerFunction()) >= 0)
     .forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('onSubmitA').forForm(prop_('FORM_A_ID')).onFormSubmit().create();
-  ScriptApp.newTrigger('onSubmitB').forForm(prop_('FORM_B_ID')).onFormSubmit().create();
+  ScriptApp.newTrigger('onPhotoSubmit').forForm(prop_('FORM_B_ID')).onFormSubmit().create();
   ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(prop_('PRIVATE_SS_ID')).onEdit().create();
   ScriptApp.newTrigger('maintenanceTick').timeBased().everyMinutes(15).create();
   ScriptApp.newTrigger('dailyRebuild').timeBased().everyDays(1).atHour(3).create();
@@ -65,6 +65,7 @@ function clearTestData() {
     formB.getResponses().forEach(resp => resp.getItemResponses().forEach(ir => {
       if (ir.getItem().getTitle() === Q.PHOTO) [].concat(ir.getResponse() || []).forEach(id => uploads.push(id));
     }));
+    readMembers_().rows.forEach(r => listOf_(r['Photo uploads']).forEach(id => uploads.push(id)));
     deleteUploads_(uploads);
     const folder = DriveApp.getFolderById(prop_('PHOTO_FOLDER_ID'));
     const files = folder.getFiles();

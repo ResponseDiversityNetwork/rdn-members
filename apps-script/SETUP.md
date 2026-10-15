@@ -2,6 +2,13 @@
 
 Do all of this signed in as **rdn.projectbase@gmail.com**.
 
+> **Updating an installation made before 16 October 2026** (one membership form plus a small photo form, instead of two full forms):
+> 1. Paste the new bundle over `Code.gs` and save.
+> 2. Clear the test data (section 7, step 1). This is needed because test members on the old photo form can't be moved across.
+> 3. Run `convertPhotoForm`. It turns Form B into the small photo form, keeping its upload question.
+> 4. Run `installTriggers`, then `updateFormTexts`.
+> 5. Optionally delete the `Responses B (photo)` tab in the private spreadsheet.
+
 ## 1. Create the script project
 
 1. Go to https://script.google.com → **New project**. Rename it "RDN membership".
@@ -16,15 +23,15 @@ Do all of this signed in as **rdn.projectbase@gmail.com**.
 2. Approve the permissions. Google warns that the app is unverified: click **Advanced → Go to RDN membership**.
 3. Open **Execution log** and copy the seven links somewhere safe.
 
-If you already ran the setup before 9 October, add a short-answer question titled `State/Province` (not required) under **City** in both forms by hand.
+If you already ran the setup before 9 October, add a short-answer question titled `State/Province` (not required) under **City** in the membership form by hand.
 
-The setup creates two forms, a private spreadsheet (with tabs `Members`, `Responses A (no photo)` and `Responses B (photo)`), a public spreadsheet, and a photo folder.
+The setup creates the membership form (Form A), the small photo form (Form B), a private spreadsheet (with tabs `Members` and `Responses A`), a public spreadsheet, and a photo folder.
 
-## 3. Add the photo question to Form B (by hand)
+## 3. Add the upload question to the photo form (by hand)
 
 Apps Script can't create file-upload questions, so this step is manual.
 
-1. Open the **Form B edit** link from the log.
+1. Open the **photo form edit** link from the log.
 2. Click the **Research interests** question, then **+ Add question**. The new question appears just below it.
 3. Set the question type to **File upload**. If Google warns that respondents must sign in, click **Continue**.
 4. Set it up as follows:
@@ -38,12 +45,9 @@ Apps Script can't create file-upload questions, so this step is manual.
 
 ## 4. Check the forms
 
-1. Open both public form links in a **private browser window**.
-   - Form A should open without asking you to sign in.
-   - Form B should ask you to sign in.
-2. Submit Form A once with test answers. Then run `testSwitchLink` and open the link it logs. Your answers should be filled in on Form B, with `TEST-REF-123` on the last page.
-3. Submit Form B once with a photo. Then run `testPublishPhoto` and open the logged link in a private window. You should see a small copy of the photo. If it says "not ready", wait a minute and run it again.
-4. Send me the results.
+1. Open the membership form's public link in a **private browser window**. It should open without asking you to sign in.
+2. Run `testPhotoLink` and open the link it logs. The photo form should ask you to sign in, and show `TEST-REF-123` in "Member reference". Don't submit.
+3. Send me the results.
 
 ## 5. Turn on the automation
 
@@ -76,9 +80,9 @@ Use your own addresses, plus a second address you can read.
 | Submit Form A as a new member (show on map: Yes, mailing list: Yes) | You get a "Thank you for joining" email. The curator gets "New member to approve". A new row appears in `Members`. |
 | Tick **Approved** in that row | You get "Welcome". The member appears on the map within about 5–10 minutes. The counts update. |
 | Open the personal link from the email, change your email address, submit | The new and the old address each get an email. |
-| Click "Switch to the form with a photo" in that email and upload a photo | A "now with a photo" email arrives. The photo appears in the map popup. The old Form A response is gone. |
+| Click the photo-form link in that email and upload a photo | The photo appears in the map popup within about 15 minutes. Your personal link stays the same. |
 | Take a phone photo that has a location, upload it, then download the public copy (the `Photo URL` in `Members`) and check it has no location data | On a Mac: open it in Preview → **Tools → Show Inspector**. There should be no GPS tab. |
-| Click "switch to the form without a photo" and submit | The photo is deleted, both the Drive copy and the public copy. |
+| Use the photo-form link again, tick **Remove my photo**, and submit | The photo is deleted, both the Drive copy and the public copy. |
 | Submit with the city "Atlantis" | The curator gets a "could not find" note. Correct the city in `Members` and the row is placed again. |
 | Open the personal link, tick **Leave the network**, submit | A "You have left" email arrives. The row, the response and any photo are deleted, and the member disappears from the map. |
 
@@ -95,6 +99,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 
 ## Day to day
 
+- **Photos:** members add, change or remove them with the photo-form link in any of our emails. A photo submitted without a valid member reference is discarded, and you get an email.
 - **New members:** the curator gets an email and ticks **Approved** in the `Members` tab.
 - **Fixing a location:** edit City, State/Province or Country in `Members`, and the row is placed again.
 - **Your own notes:** use the `Curator notes` column. The script overwrites the other columns when a member edits their entry.
@@ -110,7 +115,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 2. **Invitations from the system**, as below. Each one has the member's details pre-filled.
 3. **Fallbacks**, needing no extra work:
    - a member who joins through the join page with an email address on the old list is recognised: the curator email says so, and they keep their original joining date and get no reminder;
-   - after about two weeks, `exportInviteLinks` writes an `Invite links` tab of everyone who hasn't responded, with their personal pre-filled links. Download it as CSV and send those few emails as one mail merge from your own account (for example Word → Mailings → Start Mail Merge → Email Messages, using Outlook), using the fields FirstName, LinkNoPhoto and LinkWithPhoto.
+   - after about two weeks, `exportInviteLinks` writes an `Invite links` tab of everyone who hasn't responded, with their personal pre-filled links. Download it as CSV and send those few emails as one mail merge from your own account (for example Word → Mailings → Start Mail Merge → Email Messages, using Outlook), using the fields FirstName and Link.
 
 
 Do this after section 7, step 1. The invitation emails link to the rdn-members site's map and join pages.
@@ -134,12 +139,12 @@ Do this before importing the real list, with test rows only, so no real member c
 2. Run `prepareInvites`. Two rows should be `ready` and one `not invitable` ("no email").
 3. Run `sendTestInvite`. One invitation arrives at the reply-to address. Open both links: name, email, organisation, city, state and country should be filled in, with a member reference on the last page.
 4. Run `startInvites`. Both test addresses get an invitation, and a daily `inviteTick` timer appears under **Triggers**.
-5. Reply to the first invitation through its no-photo link. Fill in the rest and submit. Check that:
+5. Reply to the first invitation through its link. Fill in the rest and submit. Check that:
    - you get a "Your Response Diversity Network membership is updated" email, and no curator email;
    - the person is in `Members`, already **Approved**, with **Joined** taken from the Invites row;
    - the Invites row shows `responded`;
    - the person appears on the map within about 10 minutes.
 6. Test the reminder without waiting 14 days: in the second row, change **Invited at** to a date more than 14 days ago, then run `inviteTick`. A "Reminder: ..." email should arrive.
-7. Reply to the reminder through its photo link, uploading a photo.
+7. Reply to the reminder through its link. Then use the photo-form link in the email you get back to add a photo.
 8. Run `stopInvites`, delete the `Invites` tab, and clear the test data (section 7, step 1). Then follow the steps above with the real list.
 

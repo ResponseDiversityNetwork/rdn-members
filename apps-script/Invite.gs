@@ -92,7 +92,6 @@ function inviteEmail_(r, isReminder) {
   const first = firstName_(r['Name']);
   const answers = inviteAnswers_(r);
   const linkA = prefillUrl_(formsCache_().a, answers);
-  const linkB = prefillUrl_(formsCache_().b, answers);
   const subject = isReminder ? 'Reminder: your Response Diversity Network membership'
                              : 'Response Diversity Network: your membership in our new system';
   const intro = isReminder
@@ -103,9 +102,8 @@ function inviteEmail_(r, isReminder) {
   const paragraphs = [
     'Dear ' + esc_(first) + ',',
     esc_(intro),
-    '<b>' + link_(linkA, 'Open my membership form') + '</b> (Google Forms, no sign-in needed).',
-    'If you would like a photo on the map, use the ' + link_(linkB, 'photo version of the form') +
-      ' instead (Google Forms; it needs a Google sign-in).',
+    '<b>' + link_(linkA, 'Open my membership form') + '</b> (Google Forms, no sign-in needed). ' +
+      'You can add a photo afterwards, with a link in the email we send you.',
     'Nothing about you is shown publicly unless you agree to it in the form. You can change your answers or leave at any time. ' +
       'More about membership and privacy: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
     'So that our emails reach you, please add ' + esc_(CONFIG.CONTACT_EMAIL) + ' to your contacts. ' +
@@ -117,7 +115,7 @@ function inviteEmail_(r, isReminder) {
 
 let FORMS_CACHE_ = null;
 function formsCache_() {
-  if (!FORMS_CACHE_) FORMS_CACHE_ = {a: FormApp.openById(prop_('FORM_A_ID')), b: FormApp.openById(prop_('FORM_B_ID'))};
+  if (!FORMS_CACHE_) FORMS_CACHE_ = {a: FormApp.openById(prop_('FORM_A_ID'))};
   return FORMS_CACHE_;
 }
 
@@ -248,9 +246,9 @@ function exportInviteLinks() {
   const out = rows.map(r => {
     const a = inviteAnswers_(r);
     return [String(r['Name'] || '').trim(), firstName_(r['Name']), String(r['Email'] || '').trim(),
-            prefillUrl_(formsCache_().a, a), prefillUrl_(formsCache_().b, a), r['Invite state']];
+            prefillUrl_(formsCache_().a, a), r['Invite state']];
   });
   writeTab_(SpreadsheetApp.openById(prop_('PRIVATE_SS_ID')), 'Invite links',
-            ['Name', 'FirstName', 'Email', 'LinkNoPhoto', 'LinkWithPhoto', 'InviteState'], out);
+            ['Name', 'FirstName', 'Email', 'Link', 'InviteState'], out);
   Logger.log('Wrote ' + out.length + ' rows to the "Invite links" tab (members who have not responded yet).');
 }

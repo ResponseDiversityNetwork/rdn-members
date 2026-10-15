@@ -1,36 +1,28 @@
 /**
  * One-off setup. Run setupMembership() once from the Apps Script editor.
  * It creates, in the rdn.projectbase account's Drive:
- *   - Form A "RDN membership" (no photo, no sign-in);
- *   - Form B "RDN membership (with photo)" (you add the upload question by hand, see SETUP.md);
- *   - the PRIVATE spreadsheet that both forms write to, plus a "Members" tab;
+ *   - the membership form (no sign-in), "Form A" in the code;
+ *   - the small photo form, "Form B" in the code (you add its upload question by hand, see SETUP.md);
+ *   - the PRIVATE spreadsheet the membership form writes to, plus a "Members" tab;
  *   - the PUBLIC spreadsheet that will hold the map subset;
  *   - a Drive folder for the public photo copies.
  * It stores all their IDs as script properties and logs the links.
+ * (Installations made before 16 October 2026 had a second full form as Form B: convert it with convertPhotoForm().)
  */
 function setupMembership() {
   const props = PropertiesService.getScriptProperties();
   if (props.getProperty('FORM_A_ID')) {
     throw new Error('Already set up (FORM_A_ID exists). To start again, delete the script properties first.');
   }
-
-  // Spreadsheets and folder
   const priv = SpreadsheetApp.create('RDN members (PRIVATE, do not share)');
   const pub = SpreadsheetApp.create('RDN members (PUBLIC map subset)');
   pub.getSheets()[0].setName('public');
   const photoFolder = DriveApp.createFolder('RDN member photos (PUBLIC copies)');
 
-  // Forms
   const formA = FormApp.create('Response Diversity Network: membership');
-  const formB = FormApp.create('Response Diversity Network: membership (with photo)');
-  buildForm_(formA, false);
-  buildForm_(formB, true);
-
-  // Both forms write to the private spreadsheet, each to its own tab.
-  const tabA = linkToSheet_(formA, priv, 'Responses A (no photo)');
-  const tabB = linkToSheet_(formB, priv, 'Responses B (photo)');
-
-  // Members tab: one row per member; filled by the automation (next step).
+  const formB = FormApp.create(PHOTO_FORM_TITLE);
+  buildForm_(formA);
+  const tabA = linkToSheet_(formA, priv, 'Responses A');
   const members = priv.getSheets().find(s => s.getName() === 'Sheet1') || priv.insertSheet();
   members.setName('Members');
   priv.setActiveSheet(members);
@@ -38,30 +30,28 @@ function setupMembership() {
 
   const urlA = formA.shortenFormUrl(formA.getPublishedUrl());
   const urlB = formB.shortenFormUrl(formB.getPublishedUrl());
-  formA.setDescription(formDescription_('A', urlA, urlB));
-  formB.setDescription(formDescription_('B', urlA, urlB));
-
+  formA.setDescription(formDescription_());
   props.setProperties({
     FORM_A_ID: formA.getId(), FORM_B_ID: formB.getId(),
     FORM_A_URL: urlA, FORM_B_URL: urlB,
     PRIVATE_SS_ID: priv.getId(), PUBLIC_SS_ID: pub.getId(),
-    RESPONSES_A_TAB: tabA, RESPONSES_B_TAB: tabB,
+    RESPONSES_A_TAB: tabA, RESPONSES_B_TAB: '',
     PHOTO_FOLDER_ID: photoFolder.getId(),
   });
+  buildPhotoForm_(formB);
 
-  Logger.log('Form A (no photo), public link:  ' + urlA);
-  Logger.log('Form A, edit:                    ' + formA.getEditUrl());
-  Logger.log('Form B (photo), public link:     ' + urlB);
-  Logger.log('Form B, edit (add upload here!): ' + formB.getEditUrl());
-  Logger.log('Private spreadsheet:             ' + priv.getUrl());
-  Logger.log('Public spreadsheet:              ' + pub.getUrl());
-  Logger.log('Photo folder:                    ' + photoFolder.getUrl());
+  Logger.log('Membership form, public link: ' + urlA);
+  Logger.log('Membership form, edit:        ' + formA.getEditUrl());
+  Logger.log('Photo form, edit (add the upload question here!): ' + formB.getEditUrl());
+  Logger.log('Private spreadsheet:          ' + priv.getUrl());
+  Logger.log('Public spreadsheet:           ' + pub.getUrl());
+  Logger.log('Photo folder:                 ' + photoFolder.getUrl());
 }
 
-/** Adds all questions to a form. withPhoto adds the "Photo" display option. */
-function buildForm_(form, withPhoto) {
+/** Adds all questions to the membership form. */
+function buildForm_(form) {
   form.setAllowResponseEdits(true)
-      .setCollectEmail(false)          // email is a normal question, so Form A needs no sign-in
+      .setCollectEmail(false)          // email is a normal question, so the form needs no sign-in
       .setShowLinkToRespondAgain(false)
       .setProgressBar(true)
       .setConfirmationMessage(confirmationMessage_());
@@ -76,7 +66,7 @@ function buildForm_(form, withPhoto) {
   form.addTextItem().setTitle(Q.NAME).setRequired(true)
       .setValidation(minLen(2, 'Please enter your name.'));
   form.addTextItem().setTitle(Q.EMAIL).setRequired(true)
-      .setHelpText('We send your personal update link here. Shown on the map only if you tick "Email" below.')
+      .setHelpText('We send your personal link here. Shown on the map only if you tick "Email" below.')
       .setValidation(FormApp.createTextValidation().requireTextIsEmail()
         .setHelpText('Please enter a valid email address.').build());
   form.addTextItem().setTitle(Q.INSTITUTION);
@@ -92,7 +82,6 @@ function buildForm_(form, withPhoto) {
       .setValidation(FormApp.createTextValidation().requireTextIsUrl()
         .setHelpText('Please enter a full link starting with https://').build());
   form.addParagraphTextItem().setTitle(Q.INTERESTS).setRequired(true).setHelpText(OPTIONS.INTERESTS_HELP);
-  // Form B: the "Photo" File upload question goes here, added by hand (SETUP.md, step 3).
 
   // Section 2: research
   form.addPageBreakItem().setTitle('Your research')
@@ -109,18 +98,16 @@ function buildForm_(form, withPhoto) {
   form.addPageBreakItem().setTitle(CONSENT_SECTION_TITLE).setHelpText(consentHelp_());
   form.addMultipleChoiceItem().setTitle(Q.SHOW_ON_MAP).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO]);
-  const fields = OPTIONS.SHOW_FIELDS;
-  form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(fields).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
+  form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
   form.addMultipleChoiceItem().setTitle(Q.MAILING_LIST).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO])
       .setHelpText('If you choose Yes, we ask the mailing-list manager to add you.');
   form.addCheckboxItem().setTitle(Q.PRIVACY_OK).setRequired(true).setChoiceValues([OPTIONS.PRIVACY_OK]);
 
-  // Section 4: existing members only
+  // Section 4: only used through a personal link
   form.addPageBreakItem().setTitle(EXISTING_SECTION_TITLE).setHelpText(existingMembersHelp_());
-  form.addTextItem().setTitle(Q.MEMBER_REF)
-      .setHelpText('Filled in automatically when you use a link from one of our emails. Please don\'t change it.');
-  form.addCheckboxItem().setTitle(Q.LEAVE).setChoiceValues([OPTIONS.LEAVE]).setHelpText(LEAVE_HELP);
+  form.addTextItem().setTitle(Q.MEMBER_REF).setHelpText(MEMBER_REF_HELP);
+  form.addCheckboxItem().setTitle(Q.LEAVE).setChoiceValues([OPTIONS.LEAVE]).setHelpText(leaveHelp_());
 }
 
 /** Sends a form's responses to the spreadsheet and returns the name of the new tab. */
@@ -152,16 +139,16 @@ function showSetup() {
   const p = PropertiesService.getScriptProperties();
   const formA = FormApp.openById(prop_('FORM_A_ID'));
   const formB = FormApp.openById(prop_('FORM_B_ID'));
-  Logger.log('Form A (no photo), public link:  ' + p.getProperty('FORM_A_URL'));
-  Logger.log('Form A, edit:                    ' + formA.getEditUrl());
-  Logger.log('Form B (photo), public link:     ' + p.getProperty('FORM_B_URL'));
-  Logger.log('Form B, edit:                    ' + formB.getEditUrl());
-  Logger.log('Private spreadsheet:             ' + SpreadsheetApp.openById(prop_('PRIVATE_SS_ID')).getUrl());
-  Logger.log('Public spreadsheet:              ' + SpreadsheetApp.openById(prop_('PUBLIC_SS_ID')).getUrl());
-  Logger.log('Photo folder:                    ' + DriveApp.getFolderById(prop_('PHOTO_FOLDER_ID')).getUrl());
-
-  const needed = Object.keys(Q).filter(k => k !== 'PHOTO').map(k => Q[k]);
-  [['Form A', formA, needed], ['Form B', formB, needed.concat([Q.PHOTO])]].forEach(([label, form, titles]) => {
+  Logger.log('Membership form, public link: ' + p.getProperty('FORM_A_URL'));
+  Logger.log('Membership form, edit:        ' + formA.getEditUrl());
+  Logger.log('Photo form, edit:             ' + formB.getEditUrl());
+  Logger.log('Leave form, public link:      ' + (p.getProperty('LEAVE_FORM_URL') || '(not set up yet: run setupLeaveForm)'));
+  Logger.log('Private spreadsheet:          ' + SpreadsheetApp.openById(prop_('PRIVATE_SS_ID')).getUrl());
+  Logger.log('Public spreadsheet:           ' + SpreadsheetApp.openById(prop_('PUBLIC_SS_ID')).getUrl());
+  Logger.log('Photo folder:                 ' + DriveApp.getFolderById(prop_('PHOTO_FOLDER_ID')).getUrl());
+  const neededA = Object.keys(Q).filter(k => k !== 'PHOTO' && k !== 'REMOVE_PHOTO').map(k => Q[k]);
+  const neededB = [Q.PHOTO, Q.REMOVE_PHOTO, Q.MEMBER_REF];
+  [['Membership form', formA, neededA], ['Photo form', formB, neededB]].forEach(([label, form, titles]) => {
     const have = new Set(form.getItems().map(i => i.getTitle()));
     const missing = titles.filter(t => !have.has(t));
     Logger.log(label + ': ' + (missing.length ? 'MISSING questions: ' + missing.join(', ') : 'all questions present') +
@@ -172,17 +159,10 @@ function showSetup() {
 
 const CONSENT_SECTION_TITLE = 'Consent and privacy';
 
-/** The text at the top of each form. */
-function formDescription_(key, urlA, urlB) {
-  return key === 'A'
-    ? 'Join the ' + CONFIG.ORG_NAME + ', or update your entry.\n\n' +
-      'Would you like a photo on the member map? Use the photo version of this form instead: ' + urlB +
-      ' (Google requires you to sign in to upload a photo.)\n\n' +
-      'How membership works, and our privacy notice: ' + CONFIG.INFO_URL
-    : 'Join the ' + CONFIG.ORG_NAME + ', or update your entry. This version lets you upload a photo for the map. ' +
-      'Google requires you to sign in to a Google account to upload files.\n\n' +
-      'Prefer not to sign in? Use the version without a photo: ' + urlA + '\n\n' +
-      'How membership works, and our privacy notice: ' + CONFIG.INFO_URL;
+/** The text at the top of the membership form. */
+function formDescription_() {
+  return 'Join the ' + CONFIG.ORG_NAME + ', or update your entry. It takes about five minutes.\n\n' +
+    'About membership and privacy: ' + CONFIG.INFO_URL;
 }
 
 /** The short privacy note at the top of the consent section. */
@@ -190,85 +170,58 @@ function consentHelp_() {
   return 'We store your answers in RDN\'s Google account (Google Forms, Sheets and Drive), which may be ' +
     'outside Switzerland or the EU. Only a few RDN organisers can see them. ' +
     'If you agree, we show the details you choose below on a public map, with your location at city level only. ' +
-    'You can change your answers or leave at any time with the personal link we email you. ' +
+    'You can change your answers or leave at any time with your personal link. ' +
     'Full privacy notice: ' + CONFIG.PRIVACY_URL;
 }
 
 /**
- * Rewrites the form descriptions, the consent section's privacy note, and the options and note of
- * "Details I agree to show on the map" in both existing forms from the current Config.
- * Questions and responses are not touched.
+ * Rewrites all explanatory texts and option lists in the existing forms from the current Config:
+ * the membership form (description, cover page, consent note, confirmation message, option lists,
+ * last page) and the photo form. Questions' answers and responses are not touched.
  */
 function updateFormTexts() {
-  const p = PropertiesService.getScriptProperties();
-  const urlA = p.getProperty('FORM_A_URL'), urlB = p.getProperty('FORM_B_URL');
-  [['A', prop_('FORM_A_ID')], ['B', prop_('FORM_B_ID')]].forEach(([key, id]) => {
-    const form = FormApp.openById(id);
-    form.setDescription(formDescription_(key, urlA, urlB));
-    const consent = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === CONSENT_SECTION_TITLE);
-    if (consent) consent.asPageBreakItem().setHelpText(consentHelp_());
-    form.setConfirmationMessage(confirmationMessage_());
-    ensureCoverPage_(form);
-    Logger.log('Form ' + key + ': confirmation message and cover page updated.');
-    const fieldsItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SHOW_FIELDS);
-    if (fieldsItem) {
-      fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
-      Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
-    }
-    const existing = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === EXISTING_SECTION_TITLE);
-    if (existing) existing.asPageBreakItem().setHelpText(existingMembersHelp_());
-    const leaveItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.LEAVE);
-    if (leaveItem) leaveItem.asCheckboxItem().setHelpText(LEAVE_HELP);
-    Logger.log('Form ' + key + ': "' + EXISTING_SECTION_TITLE + '" page text updated.');
-    const systems = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SYSTEMS);
-    if (systems) {
-      systems.asCheckboxItem().setChoiceValues(OPTIONS.SYSTEMS).setHelpText(OPTIONS.OTHER_HELP);
-      Logger.log('Form ' + key + ': "' + Q.SYSTEMS + '" options updated.');
-    }
-    const organisms = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.ORGANISMS);
-    if (organisms) {
-      organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS).setHelpText(OPTIONS.OTHER_HELP);
-      Logger.log('Form ' + key + ': "' + Q.ORGANISMS + '" options updated.');
-    }
-    const interests = form.getItems(FormApp.ItemType.PARAGRAPH_TEXT).find(i => i.getTitle() === Q.INTERESTS);
-    if (interests) {
-      interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation();
-      Logger.log('Form ' + key + ': research interests help text updated, length limit removed.');
-    }
-    const photo = form.getItems().find(i => i.getTitle() === Q.PHOTO);
-    if (photo) { photo.setHelpText(OPTIONS.PHOTO_HELP); Logger.log('Form ' + key + ': photo question description updated.'); }
-    Logger.log('Form ' + key + ': description ' + (consent ? 'and privacy note ' : '') + 'updated' +
-               (consent ? '.' : ' (no "' + CONSENT_SECTION_TITLE + '" section found).'));
+  const form = FormApp.openById(prop_('FORM_A_ID'));
+  const log = what => Logger.log('Membership form: ' + what + ' updated.');
+  const byTitle = (type, title) => form.getItems(type).find(i => i.getTitle() === title);
+  form.setDescription(formDescription_()); log('description');
+  form.setConfirmationMessage(confirmationMessage_()); log('confirmation message');
+  ensureCoverPage_(form); log('cover page');
+  const consent = byTitle(FormApp.ItemType.PAGE_BREAK, CONSENT_SECTION_TITLE);
+  if (consent) { consent.asPageBreakItem().setHelpText(consentHelp_()); log('privacy note'); }
+  const fieldsItem = byTitle(FormApp.ItemType.CHECKBOX, Q.SHOW_FIELDS);
+  if (fieldsItem) { fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP); log('"' + Q.SHOW_FIELDS + '"'); }
+  [[Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS]].forEach(([title, opts]) => {
+    const it = byTitle(FormApp.ItemType.CHECKBOX, title);
+    if (it) { it.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.OTHER_HELP); log('"' + title + '" options'); }
   });
-  Logger.log('Privacy notice link now: ' + CONFIG.PRIVACY_URL);
+  const interests = byTitle(FormApp.ItemType.PARAGRAPH_TEXT, Q.INTERESTS);
+  if (interests) { interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation(); log('research interests'); }
+  const existing = byTitle(FormApp.ItemType.PAGE_BREAK, EXISTING_SECTION_TITLE);
+  if (existing) existing.asPageBreakItem().setHelpText(existingMembersHelp_());
+  const ref = byTitle(FormApp.ItemType.TEXT, Q.MEMBER_REF);
+  if (ref) ref.asTextItem().setHelpText(MEMBER_REF_HELP);
+  const leaveItem = byTitle(FormApp.ItemType.CHECKBOX, Q.LEAVE);
+  if (leaveItem) leaveItem.asCheckboxItem().setHelpText(leaveHelp_());
+  log('last page');
+  photoFormTexts_(FormApp.openById(prop_('FORM_B_ID')));
+  Logger.log('Photo form: texts updated.');
 }
 
 
 const COVER_TITLE = 'Before you start: about our emails';
 
-/** The cover page: why we email, the non-email option, and how to help our emails arrive. Plain text (Forms shows no formatting). */
+/** The cover page, kept short; the details are on the join page (#emails). Plain text (Forms shows no formatting). */
 function coverText_() {
   const c = CONFIG.CONTACT_EMAIL;
-  return 'WHY WE EMAIL YOU. When you submit this form, we email you a personal link. You can use it at any time to update your entry, ' +
-    'add or remove a photo, or leave the network. We also use email to confirm when a curator has approved a new membership.\n\n' +
-    'YOU DON\u2019T NEED THE EMAIL. When you submit this form, the confirmation page shows an \u201cEdit your response\u201d link. ' +
-    'This is the same personal link we email you. Bookmark it, or copy it somewhere safe, before you close the page. ' +
-    'Opening it later lets you change any of your answers, or leave the network by ticking \u201cLeave the network\u201d on the last page. ' +
-    'If you lose the link and our email never arrived, write to ' + c + ' and we\u2019ll help.\n\n' +
-    'WHY YOU MIGHT NOT GET OUR EMAILS (AND WHAT YOU CAN DO TO TRY TO GET THEM). These emails are sent automatically by the system that ' +
-    'runs RDN membership, so they come from the network\u2019s own account (sender name \u201c' + CONFIG.SENDER_NAME + '\u201d) ' +
-    'rather than from a person. Some organisations\u2019 email systems treat automated messages like this with suspicion and may move ' +
-    'them to junk or hold them in quarantine. To help them reach you, add ' + c + ' to your contacts or safe senders before you submit. ' +
-    'If nothing arrives within an hour, check your junk folder and your organisation\u2019s quarantine. ' +
-    'In Microsoft 365, that\u2019s the quarantine notification email or security.microsoft.com/quarantine.';
+  return '\u2022 After you submit, we email you a personal link for changing your entry or leaving later. ' +
+    'It comes from ' + c + ': please add that address to your contacts.\n' +
+    '\u2022 The same link is shown on the page after you submit (\u201cEdit your response\u201d). Please bookmark it.\n' +
+    '\u2022 No email and no link? Write to ' + c + '. If our emails don\u2019t arrive: ' + CONFIG.INFO_URL + '#emails';
 }
 
 function confirmationMessage_() {
-  return 'Thank you, your answers are saved.\n\n' +
-    'The "Edit your response" link below is your personal link for changing your entry or leaving the network later. ' +
-    'Please bookmark it or save it now, in case our email does not reach you. ' +
-    'We are also emailing it to you from ' + CONFIG.CONTACT_EMAIL + '.\n\n' +
-    'New members appear on the map after a curator has checked their entry.';
+  return 'Saved, thank you. The \u201cEdit your response\u201d link below is your personal link for changing your entry ' +
+    'or leaving the network. Please bookmark it.';
 }
 
 /**
@@ -292,13 +245,75 @@ function ensureCoverPage_(form) {
 
 
 const EXISTING_SECTION_TITLE = 'For existing members';
-const LEAVE_HELP = 'Only works when you opened this form with your personal link. Removes you from the map and the ' +
-                   'mailing list, and deletes your entry and any photo.';
+const MEMBER_REF_HELP = 'Filled in automatically. Please don\u2019t change it.';
 
-/** Text of the last page: only for people using their personal link; how to leave otherwise. */
+/** Text of the last page. */
 function existingMembersHelp_() {
+  return 'If you are joining, leave this page blank and submit.';
+}
+
+/** Help text of the "Leave the network" tick. */
+function leaveHelp_() {
   const leaveUrl = PropertiesService.getScriptProperties().getProperty('LEAVE_FORM_URL') || (CONFIG.INFO_URL + '#leave');
-  return 'Only use this page if you opened this form with your personal link (the \u201cEdit your response\u201d link, ' +
-    'or a link in one of our emails). If you are joining for the first time, leave this page blank and submit.\n\n' +
-    'To leave the network without your personal link, use the leave form instead: ' + leaveUrl;
+  return 'Only works if you opened this form with your personal link. No link? Use the leave form: ' + leaveUrl;
+}
+
+
+// ---------- The photo form ("Form B") ----------
+
+const PHOTO_FORM_TITLE = 'Response Diversity Network: your photo';
+
+/** Sets up a new, empty photo form (the upload question is added by hand afterwards). */
+function buildPhotoForm_(form) {
+  form.setCollectEmail(false).setAllowResponseEdits(false).setShowLinkToRespondAgain(false);
+  if (typeof form.setPublished === 'function') form.setPublished(true);
+  form.addCheckboxItem().setTitle(Q.REMOVE_PHOTO).setChoiceValues([OPTIONS.REMOVE_PHOTO]);
+  form.addTextItem().setTitle(Q.MEMBER_REF).setRequired(true).setHelpText(MEMBER_REF_HELP);
+  photoFormTexts_(form);
+}
+
+function photoFormTexts_(form) {
+  form.setTitle(PHOTO_FORM_TITLE)
+      .setDescription('Add, change or remove the photo shown with your entry on the ' + CONFIG.ORG_NAME + ' member map. ' +
+        'Please open this form with the link in one of our emails, so that the photo goes to your entry. ' +
+        'Google asks you to sign in to upload a photo.\n\nAbout membership and privacy: ' + CONFIG.INFO_URL)
+      .setConfirmationMessage('Thank you. Your photo will be updated on the map within about 15 minutes.');
+  const photo = form.getItems().find(i => i.getTitle() === Q.PHOTO);
+  if (photo) photo.setHelpText(OPTIONS.PHOTO_HELP);
+  const ref = form.getItems(FormApp.ItemType.TEXT).find(i => i.getTitle() === Q.MEMBER_REF);
+  if (ref) ref.asTextItem().setHelpText(MEMBER_REF_HELP);
+}
+
+/**
+ * One-off, for installations made before 16 October 2026: turns the old second membership
+ * form ("with photo") into the small photo form. Keeps its upload question; deletes all other
+ * questions and all its responses; adds "Remove my photo"; stops it writing to the spreadsheet.
+ * Run clearTestData() first (it refuses to run while members still use the old form).
+ */
+function convertPhotoForm() {
+  if (readMembers_().rows.some(r => r['Form'] === 'B')) {
+    throw new Error('Some members still use the old photo form. Run clearTestData() first (it is all test data).');
+  }
+  const form = FormApp.openById(prop_('FORM_B_ID'));
+  form.deleteAllResponses();
+  try { form.removeDestination(); } catch (e) { /* not linked */ }
+  form.getItems().forEach(item => {
+    const t = item.getTitle();
+    if (t !== Q.PHOTO && t !== Q.MEMBER_REF && t !== Q.REMOVE_PHOTO) form.deleteItem(item);
+  });
+  if (!form.getItems().some(i => i.getTitle() === Q.REMOVE_PHOTO)) {
+    form.addCheckboxItem().setTitle(Q.REMOVE_PHOTO).setChoiceValues([OPTIONS.REMOVE_PHOTO]);
+  }
+  let ref = form.getItems(FormApp.ItemType.TEXT).find(i => i.getTitle() === Q.MEMBER_REF);
+  if (!ref) ref = form.getItemById(form.addTextItem().setTitle(Q.MEMBER_REF).getId());
+  ref.asTextItem().setRequired(true);
+  // Order: Photo, Remove my photo, Member reference
+  const idx = title => form.getItems().findIndex(i => i.getTitle() === title);
+  if (idx(Q.PHOTO) > 0) form.moveItem(idx(Q.PHOTO), 0);
+  if (idx(Q.REMOVE_PHOTO) !== 1) form.moveItem(idx(Q.REMOVE_PHOTO), 1);
+  form.setAllowResponseEdits(false).setShowLinkToRespondAgain(false).setProgressBar(false);
+  photoFormTexts_(form);
+  PropertiesService.getScriptProperties().setProperty('RESPONSES_B_TAB', '');
+  Logger.log('Photo form ready: ' + form.getItems().map(i => i.getTitle()).join(' | '));
+  Logger.log('Now run installTriggers. You can delete the old "Responses B (photo)" tab in the private spreadsheet.');
 }

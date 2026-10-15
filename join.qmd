@@ -1,6 +1,6 @@
 ---
 title: "Join, update, leave"
-subtitle: "How membership works, and what we do with your information"
+subtitle: "How membership works, and our privacy notice"
 toc: true
 ---
 
@@ -9,53 +9,36 @@ toc: true
 
 ## Join
 
-There are two versions of the membership form. They ask the same questions; the only difference is the photo:
+**[Open the membership form](https://forms.gle/yhXSwWUDRqEu8BFNA)**. It takes about five minutes and needs no sign-in. You choose whether you appear on the public map, which details are shown, and whether you join the mailing list.
 
-- **[Membership form](https://forms.gle/yhXSwWUDRqEu8BFNA)**: no photo, no sign-in needed.
-- **[Membership form with photo](https://forms.gle/kTBMN7riaRvJ3QNA7)**: lets you upload a photo for the map. Google requires you to sign in with a Google account to upload files.
+New entries appear on the map once a curator has checked them, usually within a few days.
 
-Both ask whether you want to appear on the public map, which details may be shown there, and whether you want to join the RDN mailing list.
+## Your personal link
 
-New entries appear on the map once a curator has checked them. This usually takes a few days.
+After you submit, the confirmation page shows an **"Edit your response"** link. This is your personal link: bookmark it. We also email it to you.
 
-## Update your entry
+Open it at any time to change your answers. Changes appear on the map within about 10 minutes.
 
-After you submit, the confirmation page shows an **Edit your response** link, and we also email it to you. This is your personal link: open it to change your answers at any time. Changes appear on the map within about 10 minutes.
+Lost it, and our email never arrived? Write to [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com) and we'll help.
 
-**Adding or removing a photo.** Every email we send also includes a link to switch to the other version of the form, with your answers already filled in:
+## Photo
 
-- to **add a photo**, use the link to the photo version of the form, upload a photo and submit;
-- to **remove your photo** and stop needing to sign in, use the link to the version without a photo and submit.
-
-Your entry moves across and your previous version is deleted. We then email you a new personal link. If you add a photo, it is shown in your entry on the map; to stop showing it, switch to the version without a photo, which deletes it.
-
-If you have lost your link, email [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com).
-
-## About our emails {#emails}
-
-**Why we email you.** When you submit this form, we email you a personal link. You can use it at any time to update your entry, add or remove a photo, or leave the network. We also use email to confirm when a curator has approved a new membership.
-
-**You don't need the email.** When you submit this form, the confirmation page shows an "Edit your response" link. This is the same personal link we email you. Bookmark it, or copy it somewhere safe, before you close the page. Opening it later lets you change any of your answers, or leave the network by ticking "Leave the network" on the last page. If you lose the link and our email never arrived, write to [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com) and we'll help.
-
-**Why you might not get our emails (and what you can do to try to get them).** These emails are sent automatically by the system that runs RDN membership, so they come from the network's own account (sender name "Response Diversity Network (membership)") rather than from a person. Some organisations' email systems treat automated messages like this with suspicion and may move them to junk or hold them in quarantine. To help them reach you, add [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com) to your contacts or safe senders before you submit. If nothing arrives within an hour, check your junk folder and your organisation's quarantine. In Microsoft 365, that's the quarantine notification email or [security.microsoft.com/quarantine](https://security.microsoft.com/quarantine).
-
-**Existing members:** if your invitation to the new system doesn't arrive, simply join using the form above with the email address we know you by. We will recognise you and keep your original joining date.
+Every email we send you has a link to the **photo form**, where you can add, change or remove a photo. Google asks you to sign in to upload one. Uploading a photo means it's shown with your entry on the map.
 
 ## Leave {#leave}
 
-There are two ways to leave:
+- **With your personal link:** open it, tick **Leave the network** on the last page, and submit. This takes effect straight away.
+- **No link?** Use the **[leave form](LEAVE_FORM_URL)**. A curator confirms the request, usually within a few days.
 
-- **With your personal link** (the "Edit your response" link, or the link in our emails): open it, tick **Leave the network** on the last page, and submit. This takes effect straight away.
-- **With the [leave form](LEAVE_FORM_URL)**, if you don't have your personal link: enter the email address you joined with. A curator confirms the request, usually within a few days.
+We then remove you from the map and the mailing list, delete your entry and any photo, and email you to confirm.
 
-Either way, we:
+## If our emails don't arrive {#emails}
 
-- remove you from the public map;
-- ask the mailing-list manager to unsubscribe you;
-- delete your entry, your stored form response and any photo;
-- email you to confirm.
+Our emails are sent automatically by the system that runs RDN membership, so they come from the network's own account, **rdn.projectbase@gmail.com** (sender name "Response Diversity Network (membership)"), rather than from a person. Some organisations' email systems treat automated messages like this with suspicion and may move them to junk or hold them in quarantine.
 
-You can also leave by emailing [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com).
+To help them reach you, add rdn.projectbase@gmail.com to your contacts or safe senders before you submit. If nothing arrives within an hour, check your junk folder and your organisation's quarantine. In Microsoft 365, that's the quarantine notification email or [security.microsoft.com/quarantine](https://security.microsoft.com/quarantine).
+
+You don't need the email to manage your entry: the "Edit your response" link on the confirmation page is the same personal link.
 
 ## Privacy {#privacy}
 
@@ -72,7 +55,7 @@ You can also leave by emailing [rdn.projectbase@gmail.com](mailto:rdn.projectbas
 - an optional website;
 - your research interests;
 - your research attributes, such as career stage and the systems you study;
-- an optional photo (photo version of the form only);
+- an optional photo (added with the photo form);
 - your consent choices.
 
 **Why.** To run the network: to keep a member list, to show a public map of members (only if you agree), and to add you to the mailing list (only if you ask). The legal basis is your consent (Swiss revFADP; EU GDPR Art. 6(1)(a)).
@@ -81,7 +64,7 @@ You can also leave by emailing [rdn.projectbase@gmail.com](mailto:rdn.projectbas
 
 **Photos.** If you upload a photo (and appear on the map), we publish a small copy (about 400 pixels wide). Google re-creates the copy from your upload, which removes hidden data stored in photo files, such as where the photo was taken. The copy is publicly viewable by anyone who has its link. Your original upload stays private.
 
-**Where your data is stored.** In Google Forms, Google Sheets and Google Drive in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. If you use the photo version of the form, Google also knows which Google account submitted it. A small number of RDN organisers can access the data. The mailing list is run separately by the list manager.
+**Where your data is stored.** In Google Forms, Google Sheets and Google Drive in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. If you use the photo form, Google also knows which Google account submitted it. A small number of RDN organisers can access the data. The mailing list is run separately by the list manager.
 
 **How long we keep it.** Until you leave. When you leave, we delete your entry, your stored form response and your photos.
 

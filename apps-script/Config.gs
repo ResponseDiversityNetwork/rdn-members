@@ -46,7 +46,8 @@ const Q = {
   COUNTRY: 'Country',
   WEBSITE: 'Website or ORCID link',
   INTERESTS: 'Research interests',
-  PHOTO: 'Photo',                 // File upload question, added by hand to the photo form only
+  PHOTO: 'Photo',                 // File upload question in the photo form (added by hand)
+  REMOVE_PHOTO: 'Remove my photo',   // photo form only
   CAREER: 'Career stage',
   APPROACH: 'Research approach',
   SYSTEMS: 'Systems',
@@ -98,9 +99,9 @@ const OPTIONS = {
   SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
                     'Your city and country are always shown if you appear on the map.',
   // Uploading a photo is the consent to show it (no separate "Photo" tick since 2026-10-15).
-  PHOTO_HELP: 'Optional. A head-and-shoulders photo works best. If you add a photo, it is shown in your entry on the ' +
-              'public member map (only if you chose to appear on the map). To stop showing it, remove it: use the link ' +
-              'to the version of the form without a photo, in any of our emails.',
+  PHOTO_HELP: 'A head-and-shoulders photo works best. It is shown with your entry on the public member map ' +
+              '(if you chose to appear on the map). A new photo replaces the old one.',
+  REMOVE_PHOTO: 'Please remove my photo from the map and delete it',
   YES: 'Yes',
   NO: 'No',
   PRIVACY_OK: 'I have read the privacy note',
