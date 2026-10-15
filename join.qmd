@@ -43,11 +43,17 @@ If you have lost your link, email [rdn.projectbase@gmail.com](mailto:rdn.project
 
 ## Leave
 
-Open your personal link, tick **Leave the network** at the end of the form, and submit. We will:
+There are two ways to leave:
+
+- **With your personal link** (the "Edit your response" link, or the link in our emails): open it, tick **Leave the network** on the last page, and submit. This takes effect straight away.
+- **With the [leave form](LEAVE_FORM_URL)**, if you don't have your personal link: enter the email address you joined with. A curator confirms the request, usually within a few days.
+
+Either way, we:
 
 - remove you from the public map;
 - ask the mailing-list manager to unsubscribe you;
-- delete your entry, your stored form response and any photo.
+- delete your entry, your stored form response and any photo;
+- email you to confirm.
 
 You can also leave by emailing [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com).
 

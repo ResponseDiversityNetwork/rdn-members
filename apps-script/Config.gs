@@ -62,6 +62,15 @@ const Q = {
   LEAVE: 'Leave the network',
 };
 
+/** Question titles in the separate "leave the network" form (Leave.gs). */
+const LQ = {
+  EMAIL: 'Email address',
+  NAME: 'Full name (optional)',
+  MESSAGE: 'Anything you would like to tell us? (optional)',
+  CONFIRM: 'Confirm',
+};
+const LEAVE_CONFIRM_OPTION = 'I want to leave the Response Diversity Network and have my entry deleted';
+
 const OPTIONS = {
   CAREER: ['PhD student', 'Postdoc', 'Early-career researcher/faculty', 'Mid/senior researcher',
            'Practitioner/non-academic', 'Other'],

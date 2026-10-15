@@ -137,3 +137,26 @@ function listservNotify_(action, rec, oldEmail) {
   }[action];
   mail_(CONFIG.LISTSERV_MANAGER, subject, [body, 'Sent automatically by the RDN membership system.']);
 }
+
+
+function emailLeaveReceived_(email, name) {
+  mail_(email, 'Response Diversity Network: request to leave received', [
+    'Dear ' + esc_(firstName_(name)) + ',',
+    'We have received a request to remove this email address from the Response Diversity Network. ' +
+      'A curator will confirm it, usually within a few days, and we will email you when it is done.',
+    'If you did not make this request, please reply to this email.',
+    'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
+  ]);
+}
+
+function emailCuratorLeave_(email, matched, message) {
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  mail_(CONFIG.CURATOR, '[RDN] Request to leave: ' + email, [
+    'Someone has asked to leave the network using the leave form.',
+    '<b>Email:</b> ' + esc_(email) + '<br><b>Found:</b> ' + esc_(matched) +
+      (message ? '<br><b>Message:</b> ' + esc_(message) : ''),
+    'To carry it out, tick <b>Confirmed</b> in its row of the "' + LEAVE_TAB + '" tab. ' +
+      'Their entry, photos and form response are then deleted, and they get a confirmation email.',
+    link_(ss.getUrl(), 'Open the private spreadsheet'),
+  ]);
+}

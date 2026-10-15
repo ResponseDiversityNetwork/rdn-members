@@ -65,6 +65,15 @@ const Q = {
   LEAVE: 'Leave the network',
 };
 
+/** Question titles in the separate "leave the network" form (Leave.gs). */
+const LQ = {
+  EMAIL: 'Email address',
+  NAME: 'Full name (optional)',
+  MESSAGE: 'Anything you would like to tell us? (optional)',
+  CONFIRM: 'Confirm',
+};
+const LEAVE_CONFIRM_OPTION = 'I want to leave the Response Diversity Network and have my entry deleted';
+
 const OPTIONS = {
   CAREER: ['PhD student', 'Postdoc', 'Early-career researcher/faculty', 'Mid/senior researcher',
            'Practitioner/non-academic', 'Other'],
@@ -1104,15 +1113,22 @@ function doLeave_(sh, row, formKey, response, ans) {
   // The response that was just submitted
   deleteResponse_(formKey, response.getId(), emails);
   deleteUploads_([].concat(ans[Q.PHOTO] || []));
-  if (row) {
-    if (row['Response ID'] !== response.getId()) deleteResponse_(row['Form'], row['Response ID'], emails);
-    deleteUploads_(listOf_(row['Photo uploads']));
-    deletePublicPhoto_(row['Member ID']);
-    markInviteState_(row['Member ref'], 'left');
-    if (row['Approved'] === true && isYes_(row['Mailing list'])) listservNotify_('remove', row);
-    deleteMemberRow_(sh, row);
-  }
+  if (row) removeMember_(sh, row, emails, response.getId());
   if (email) emailLeft_(email, ans[Q.NAME]);
+}
+
+/**
+ * Deletes everything about a member: their form response and its sheet row, photos,
+ * Members row; marks their invitation "left"; asks the listserv manager to unsubscribe them.
+ */
+function removeMember_(sh, row, emails, skipResponseId) {
+  emails = (emails || []).concat([row['Email']]);
+  if (row['Response ID'] && row['Response ID'] !== skipResponseId) deleteResponse_(row['Form'], row['Response ID'], emails);
+  deleteUploads_(listOf_(row['Photo uploads']));
+  deletePublicPhoto_(row['Member ID']);
+  markInviteState_(row['Member ref'], 'left');
+  if (row['Approved'] === true && isYes_(row['Mailing list'])) listservNotify_('remove', row);
+  deleteMemberRow_(sh, row);
 }
 
 /** Deletes a response from its form and its row in the form's responses tab. */
@@ -1136,6 +1152,7 @@ function deleteResponse_(formKey, responseId, emails) {
  */
 function onSheetEdit(e) {
   const sh = e.range.getSheet();
+  if (sh.getName() === LEAVE_TAB && e.range.getRow() >= 2) return onLeaveSheetEdit_(e);
   if (sh.getName() !== 'Members' || e.range.getRow() < 2) return;
   const lock = LockService.getScriptLock();
   lock.waitLock(60000);
@@ -1340,6 +1357,29 @@ function listservNotify_(action, rec, oldEmail) {
   mail_(CONFIG.LISTSERV_MANAGER, subject, [body, 'Sent automatically by the RDN membership system.']);
 }
 
+
+function emailLeaveReceived_(email, name) {
+  mail_(email, 'Response Diversity Network: request to leave received', [
+    'Dear ' + esc_(firstName_(name)) + ',',
+    'We have received a request to remove this email address from the Response Diversity Network. ' +
+      'A curator will confirm it, usually within a few days, and we will email you when it is done.',
+    'If you did not make this request, please reply to this email.',
+    'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
+  ]);
+}
+
+function emailCuratorLeave_(email, matched, message) {
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  mail_(CONFIG.CURATOR, '[RDN] Request to leave: ' + email, [
+    'Someone has asked to leave the network using the leave form.',
+    '<b>Email:</b> ' + esc_(email) + '<br><b>Found:</b> ' + esc_(matched) +
+      (message ? '<br><b>Message:</b> ' + esc_(message) : ''),
+    'To carry it out, tick <b>Confirmed</b> in its row of the "' + LEAVE_TAB + '" tab. ' +
+      'Their entry, photos and form response are then deleted, and they get a confirmation email.',
+    link_(ss.getUrl(), 'Open the private spreadsheet'),
+  ]);
+}
+
 // ===== Public.gs =====
 /**
  * Builds the PUBLIC spreadsheet that the map reads. It has two tabs, each published to the web as CSV:
@@ -1429,12 +1469,130 @@ function rebuildPublicNow() {
   Logger.log('Public sheet rebuilt.');
 }
 
+// ===== Leave.gs =====
+/**
+ * A short, separate "leave the network" form for people who don't have (or don't want to use)
+ * their personal link. Requests are queued in the "Leave requests" tab of the private spreadsheet
+ * and only carried out when a curator ticks "Confirmed".
+ * (Leaving through the personal link, by ticking "Leave the network", still takes effect at once.)
+ *
+ * Setup: run setupLeaveForm() once. It creates the form and its trigger and logs its link.
+ */
+
+const LEAVE_TAB = 'Leave requests';
+const LEAVE_COLS = ['Confirmed', 'Requested', 'Email', 'Name given', 'Message', 'Found', 'Member ID', 'Status', 'Done at'];
+
+function setupLeaveForm() {
+  const p = PropertiesService.getScriptProperties();
+  if (p.getProperty('LEAVE_FORM_ID')) throw new Error('The leave form already exists: ' + p.getProperty('LEAVE_FORM_URL'));
+  const f = FormApp.create('Response Diversity Network: leave the network');
+  f.setDescription('Use this form to ask to leave the ' + CONFIG.ORG_NAME + '. A curator will confirm your request, ' +
+      'usually within a few days. We then remove you from the member map and the mailing list, delete your entry, ' +
+      'and email you to confirm.\n\nIf you have your personal link (the "Edit your response" link, or the link in our emails), ' +
+      'you can also leave straight away: open it, tick "Leave the network" on the last page, and submit.')
+   .setCollectEmail(false)
+   .setAllowResponseEdits(false)
+   .setShowLinkToRespondAgain(false)
+   .setConfirmationMessage('Thank you. A curator will confirm your request, usually within a few days, ' +
+      'and we will email you when it is done.');
+  if (typeof f.setPublished === 'function') f.setPublished(true);
+  f.addTextItem().setTitle(LQ.EMAIL).setRequired(true)
+   .setHelpText('The email address you used for your RDN membership.')
+   .setValidation(FormApp.createTextValidation().requireTextIsEmail().setHelpText('Please enter a valid email address.').build());
+  f.addTextItem().setTitle(LQ.NAME);
+  f.addParagraphTextItem().setTitle(LQ.MESSAGE);
+  f.addCheckboxItem().setTitle(LQ.CONFIRM).setRequired(true).setChoiceValues([LEAVE_CONFIRM_OPTION]);
+  const url = f.shortenFormUrl(f.getPublishedUrl());
+  p.setProperties({LEAVE_FORM_ID: f.getId(), LEAVE_FORM_URL: url});
+  ScriptApp.newTrigger('onLeaveRequest').forForm(f).onFormSubmit().create();
+  leaveSheet_();
+  Logger.log('Leave form, public link: ' + url);
+  Logger.log('Leave form, edit:        ' + f.getEditUrl());
+}
+
+function leaveSheet_() {
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  let sh = ss.getSheetByName(LEAVE_TAB);
+  if (!sh) {
+    sh = ss.insertSheet(LEAVE_TAB);
+    sh.getRange(1, 1, 1, LEAVE_COLS.length).setValues([LEAVE_COLS]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+/** Trigger: a leave request was submitted. Queues it, tells the curator, and acknowledges it. */
+function onLeaveRequest(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(60000);
+  try {
+    const ans = answersOf_(e.response);
+    const email = String(ans[LQ.EMAIL] || '').trim().toLowerCase();
+    const nameGiven = String(ans[LQ.NAME] || '').trim();
+    const message = String(ans[LQ.MESSAGE] || '').trim();
+    const member = readMembers_().rows.find(r => r['Email'] === email);
+    const listed = member ? null : inviteForEmail_(email);
+    const found = member ? 'Member: ' + member['Name'] + ' (' + member['Member ID'] + ')'
+                : listed ? 'Only on the old member list: ' + listed['Name']
+                : 'No member with this email address';
+    const sh = leaveSheet_();
+    sh.appendRow([false, new Date(), email, safeText_(nameGiven), safeText_(message), found,
+                  member ? member['Member ID'] : '', 'Waiting for curator', '']);
+    sh.getRange(sh.getLastRow(), 1).setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    // The request is now in the tab; don't keep a second copy in the form.
+    try { FormApp.openById(prop_('LEAVE_FORM_ID')).deleteResponse(e.response.getId()); } catch (err) { /* ignore */ }
+    if (member || listed) emailLeaveReceived_(email, member ? member['Name'] : listed['Name']);
+    emailCuratorLeave_(email, found, message);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** Called from onSheetEdit when the curator edits the Leave requests tab. */
+function onLeaveSheetEdit_(e) {
+  const confirmedCol = LEAVE_COLS.indexOf('Confirmed') + 1;
+  const first = e.range.getColumn(), last = first + e.range.getNumColumns() - 1;
+  if (confirmedCol < first || confirmedCol > last) return;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(60000);
+  try {
+    const sh = leaveSheet_();
+    let changed = false;
+    for (let r = e.range.getRow(); r < e.range.getRow() + e.range.getNumRows(); r++) {
+      const v = sh.getRange(r, 1, 1, LEAVE_COLS.length).getValues()[0];
+      const req = {};
+      LEAVE_COLS.forEach((c, i) => { req[c] = v[i]; });
+      if (req['Confirmed'] !== true || String(req['Status']).indexOf('Done') === 0) continue;
+      const status = carryOutLeave_(req);
+      sh.getRange(r, LEAVE_COLS.indexOf('Status') + 1, 1, 2).setValues([[status, new Date()]]);
+      changed = true;
+    }
+    if (changed) rebuildPublic_();
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** Deletes the member (and/or marks them removed on the old list). Returns a status text. */
+function carryOutLeave_(req) {
+  const email = String(req['Email'] || '').trim().toLowerCase();
+  const m = readMembers_();
+  const member = (req['Member ID'] && m.rows.find(r => r['Member ID'] === req['Member ID'])) ||
+                 m.rows.find(r => r['Email'] === email);
+  const listed = inviteForEmail_(email);
+  if (member) removeMember_(m.sh, member, [email]);
+  if (listed) markInviteState_(listed['Member ref'], 'removed');
+  if (!member && !listed) return 'Done: nothing to delete (no member with this email)';
+  emailLeft_(member ? member['Email'] : email, member ? member['Name'] : listed['Name']);
+  return member ? 'Done: entry deleted' : 'Done: removed from the old member list';
+}
+
 // ===== Admin.gs =====
 /**
  * Admin functions, run by hand from the Apps Script editor.
  */
 
-const AUTOMATION_HANDLERS = ['onSubmitA', 'onSubmitB', 'onSheetEdit', 'maintenanceTick', 'dailyRebuild'];
+const AUTOMATION_HANDLERS = ['onSubmitA', 'onSubmitB', 'onSheetEdit', 'maintenanceTick', 'dailyRebuild', 'onLeaveRequest'];
 
 /** Turns the automation on (safe to run again; it replaces its own triggers). */
 function installTriggers() {
@@ -1446,6 +1604,8 @@ function installTriggers() {
   ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(prop_('PRIVATE_SS_ID')).onEdit().create();
   ScriptApp.newTrigger('maintenanceTick').timeBased().everyMinutes(15).create();
   ScriptApp.newTrigger('dailyRebuild').timeBased().everyDays(1).atHour(3).create();
+  const leaveId = PropertiesService.getScriptProperties().getProperty('LEAVE_FORM_ID');
+  if (leaveId) ScriptApp.newTrigger('onLeaveRequest').forForm(leaveId).onFormSubmit().create();
   membersSheet_();
   rebuildPublic_();
   Logger.log('Automation is on. Triggers: ' + ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction()).join(', '));
@@ -1511,6 +1671,10 @@ function clearTestData() {
       const sh = ss.getSheetByName(props.getProperty(k) || '');
       if (sh && sh.getLastRow() > 1) deleteRowsSafely_(sh, 2, sh.getLastRow() - 1);
     });
+    const leaveId = props.getProperty('LEAVE_FORM_ID');
+    if (leaveId) FormApp.openById(leaveId).deleteAllResponses();
+    const leaveSh = ss.getSheetByName(LEAVE_TAB);
+    if (leaveSh && leaveSh.getLastRow() > 1) deleteRowsSafely_(leaveSh, 2, leaveSh.getLastRow() - 1);
     const members = membersSheet_();
     if (members.getLastRow() > 1) deleteRowsSafely_(members, 2, members.getLastRow() - 1);
 

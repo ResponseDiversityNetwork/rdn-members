@@ -2,7 +2,7 @@
  * Admin functions, run by hand from the Apps Script editor.
  */
 
-const AUTOMATION_HANDLERS = ['onSubmitA', 'onSubmitB', 'onSheetEdit', 'maintenanceTick', 'dailyRebuild'];
+const AUTOMATION_HANDLERS = ['onSubmitA', 'onSubmitB', 'onSheetEdit', 'maintenanceTick', 'dailyRebuild', 'onLeaveRequest'];
 
 /** Turns the automation on (safe to run again; it replaces its own triggers). */
 function installTriggers() {
@@ -14,6 +14,8 @@ function installTriggers() {
   ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(prop_('PRIVATE_SS_ID')).onEdit().create();
   ScriptApp.newTrigger('maintenanceTick').timeBased().everyMinutes(15).create();
   ScriptApp.newTrigger('dailyRebuild').timeBased().everyDays(1).atHour(3).create();
+  const leaveId = PropertiesService.getScriptProperties().getProperty('LEAVE_FORM_ID');
+  if (leaveId) ScriptApp.newTrigger('onLeaveRequest').forForm(leaveId).onFormSubmit().create();
   membersSheet_();
   rebuildPublic_();
   Logger.log('Automation is on. Triggers: ' + ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction()).join(', '));
@@ -79,6 +81,10 @@ function clearTestData() {
       const sh = ss.getSheetByName(props.getProperty(k) || '');
       if (sh && sh.getLastRow() > 1) deleteRowsSafely_(sh, 2, sh.getLastRow() - 1);
     });
+    const leaveId = props.getProperty('LEAVE_FORM_ID');
+    if (leaveId) FormApp.openById(leaveId).deleteAllResponses();
+    const leaveSh = ss.getSheetByName(LEAVE_TAB);
+    if (leaveSh && leaveSh.getLastRow() > 1) deleteRowsSafely_(leaveSh, 2, leaveSh.getLastRow() - 1);
     const members = membersSheet_();
     if (members.getLastRow() > 1) deleteRowsSafely_(members, 2, members.getLastRow() - 1);
 

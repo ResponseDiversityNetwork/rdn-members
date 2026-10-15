@@ -176,15 +176,22 @@ function doLeave_(sh, row, formKey, response, ans) {
   // The response that was just submitted
   deleteResponse_(formKey, response.getId(), emails);
   deleteUploads_([].concat(ans[Q.PHOTO] || []));
-  if (row) {
-    if (row['Response ID'] !== response.getId()) deleteResponse_(row['Form'], row['Response ID'], emails);
-    deleteUploads_(listOf_(row['Photo uploads']));
-    deletePublicPhoto_(row['Member ID']);
-    markInviteState_(row['Member ref'], 'left');
-    if (row['Approved'] === true && isYes_(row['Mailing list'])) listservNotify_('remove', row);
-    deleteMemberRow_(sh, row);
-  }
+  if (row) removeMember_(sh, row, emails, response.getId());
   if (email) emailLeft_(email, ans[Q.NAME]);
+}
+
+/**
+ * Deletes everything about a member: their form response and its sheet row, photos,
+ * Members row; marks their invitation "left"; asks the listserv manager to unsubscribe them.
+ */
+function removeMember_(sh, row, emails, skipResponseId) {
+  emails = (emails || []).concat([row['Email']]);
+  if (row['Response ID'] && row['Response ID'] !== skipResponseId) deleteResponse_(row['Form'], row['Response ID'], emails);
+  deleteUploads_(listOf_(row['Photo uploads']));
+  deletePublicPhoto_(row['Member ID']);
+  markInviteState_(row['Member ref'], 'left');
+  if (row['Approved'] === true && isYes_(row['Mailing list'])) listservNotify_('remove', row);
+  deleteMemberRow_(sh, row);
 }
 
 /** Deletes a response from its form and its row in the form's responses tab. */
@@ -208,6 +215,7 @@ function deleteResponse_(formKey, responseId, emails) {
  */
 function onSheetEdit(e) {
   const sh = e.range.getSheet();
+  if (sh.getName() === LEAVE_TAB && e.range.getRow() >= 2) return onLeaveSheetEdit_(e);
   if (sh.getName() !== 'Members' || e.range.getRow() < 2) return;
   const lock = LockService.getScriptLock();
   lock.waitLock(60000);

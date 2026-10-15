@@ -60,6 +60,13 @@ Apps Script can't create file-upload questions, so this step is manual.
 4. In `index.qmd`, set `DATA_URL` to the first URL and `SUMMARY_URL` to the second, each in quotes. In `join.qmd`, replace `FORM_A_URL` and `FORM_B_URL` with the two public form links from the setup log.
 5. Commit and push. The map at https://responsediversitynetwork.github.io/rdn-members/ is now live but empty until the first member is approved, and the "Demo" banner disappears.
 
+### 5b. The leave form
+
+1. Run `setupLeaveForm`. It creates a short "leave the network" form and its trigger, and logs the form's link.
+2. Put that link in `join.qmd` in place of `LEAVE_FORM_URL`, then push.
+
+Requests from this form appear in a `Leave requests` tab of the private spreadsheet, and the curator gets an email. Nothing is deleted until the curator ticks **Confirmed** in that row. The **Status** column then shows what was done. Leaving through the personal link still takes effect at once.
+
 ## 6. Test everything
 
 Use your own addresses, plus a second address you can read.
@@ -92,6 +99,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 - **Fixing a location:** edit City, State/Province or Country in `Members`, and the row is placed again.
 - **Your own notes:** use the `Curator notes` column. The script overwrites the other columns when a member edits their entry.
 - **Map looks out of date:** run `rebuildPublicNow`.
+- **Leave requests:** the curator gets an email and ticks **Confirmed** in the `Leave requests` tab.
 - **Turning everything off:** run `removeTriggers`.
 
 ## Inviting the existing members

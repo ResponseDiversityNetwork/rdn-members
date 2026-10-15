@@ -157,12 +157,13 @@ function makeEnv() {
   const pub = ctx.SpreadsheetApp.create('pub');
   const fA = new Form(false, Q, O), fB = new Form(true, Q, O);
   formsById[fA.id] = fA; formsById[fB.id] = fB;
+  const fL = new Form(false, Q, O); fL.items = []; formsById[fL.id] = fL;   // the leave form (answers matched by title)
   fA.tab = priv.insertSheet('Responses A (no photo)'); fA.tab.setFrozenRows(1);
   fB.tab = priv.insertSheet('Responses B (photo)'); fB.tab.setFrozenRows(1);
   Object.assign(props, {FORM_A_ID: fA.id, FORM_B_ID: fB.id, PRIVATE_SS_ID: priv.id, PUBLIC_SS_ID: pub.id,
-    RESPONSES_A_TAB: 'Responses A (no photo)', RESPONSES_B_TAB: 'Responses B (photo)', PHOTO_FOLDER_ID: 'photos'});
+    RESPONSES_A_TAB: 'Responses A (no photo)', RESPONSES_B_TAB: 'Responses B (photo)', PHOTO_FOLDER_ID: 'photos', LEAVE_FORM_ID: fL.id});
   const upload = (ready = true) => { const f = {id: id('upl'), name: 'me.jpg', folder: 'uploads', trashed: false, thumbReady: ready}; files[f.id] = f; return f.id; };
 
-  return {ctx, run, mails, log, priv, pub, fA, fB, files, triggers: () => triggers, upload, O, Q};
+  return {ctx, run, mails, log, priv, pub, fA, fB, fL, files, triggers: () => triggers, upload, O, Q};
 }
 module.exports = {makeEnv};
