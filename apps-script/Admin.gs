@@ -96,3 +96,14 @@ function clearTestData() {
     lock.releaseLock();
   }
 }
+
+
+/** Fills in "Photo link" for any member rows that lack it (e.g. rows made before the column existed). */
+function fillPhotoLinks() {
+  const m = readMembers_();
+  let n = 0;
+  m.rows.forEach(r => {
+    if (!r['Photo link'] && r['Member ref']) { r['Photo link'] = photoLink_(r['Member ref']); writeMember_(m.sh, r); n++; }
+  });
+  Logger.log('Photo links filled in for ' + n + ' members.');
+}

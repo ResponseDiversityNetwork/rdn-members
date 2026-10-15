@@ -33,6 +33,7 @@ check(m.length === 1 && m[0].Approved === false, 'Members row created, not appro
 check(m[0].Email === 'alice@example.org', 'email lower-cased');
 check(m[0].Country === 'Switzerland' && m[0]['Country code'] === 'CH' && m[0].Continent === 'Europe', 'geocoded with continent');
 check(m[0]['Member ref'].length === 20 && /^m[0-9a-f]{8}$/.test(m[0]['Member ID']), 'member ref and public id assigned');
+check(m[0]['Photo link'].includes(fB.id + '/prefill') && m[0]['Photo link'].includes(encodeURIComponent(m[0]['Member ref'])), 'Photo link column filled in for the curator');
 let ms = newMails();
 check(ms.length === 2 && ms[0].to === 'alice@example.org' && /membership received/.test(ms[0].subject), 'member gets "received" email');
 check(ms[0].htmlBody.includes(a.getEditResponseUrl()), 'email contains personal edit link');

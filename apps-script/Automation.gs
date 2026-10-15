@@ -123,6 +123,7 @@ function handleSubmit_(formKey, response) {
     }
 
     rec['Notes'] = notes.join(' ');
+    if (kind === 'new' || !rec['Photo link']) rec['Photo link'] = photoLink_(rec['Member ref']);
     writeMember_(m.sh, rec);
 
     // Emails

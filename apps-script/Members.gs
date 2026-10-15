@@ -3,6 +3,8 @@
  * date by the automation. Curators tick "Approved" here. You can also correct
  * City / State/Province / Country here; the row is then geocoded again.
  * "Notes" is written by the script; use "Curator notes" for your own notes.
+ * If a member's emails don't arrive, send them "Edit URL" (their personal link) and "Photo link"
+ * from your own address.
  * Other columns are overwritten when the member next edits their entry.
  */
 
@@ -14,6 +16,7 @@ const MEMBER_COLS = [
   'Show on map', 'Details shown', 'Mailing list',
   'Photo uploads', 'Photo URL', 'Photo pending',
   'Form', 'Response ID', 'Edit URL', 'Member ref', 'Joined', 'Updated', 'Notes', 'Curator notes',
+  'Photo link',   // the member's photo-form link, to send by hand if our emails don't reach them
 ];
 
 /** Form question → Members column, for the plain answers copied across. */
@@ -35,6 +38,9 @@ function membersSheet_() {
     sh.getRange(1, 1, 1, MEMBER_COLS.length).setValues([MEMBER_COLS]).setFontWeight('bold');
     sh.setFrozenRows(1);
     sh.setFrozenColumns(3);
+  } else if (first.some((v, i) => String(v) !== MEMBER_COLS[i])) {
+    // New columns are only ever added at the end, so updating the header row is enough.
+    sh.getRange(1, 1, 1, MEMBER_COLS.length).setValues([MEMBER_COLS]).setFontWeight('bold');
   }
   return sh;
 }

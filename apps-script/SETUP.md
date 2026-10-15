@@ -99,6 +99,7 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 
 ## Day to day
 
+- **Member says our emails don't arrive:** in their `Members` row, copy **Edit URL** (their personal link) and **Photo link**, and send both from your own address.
 - **Photos:** members add, change or remove them with the photo-form link in any of our emails. A photo submitted without a valid member reference is discarded, and you get an email.
 - **New members:** the curator gets an email and ticks **Approved** in the `Members` tab.
 - **Fixing a location:** edit City, State/Province or Country in `Members`, and the row is placed again.
