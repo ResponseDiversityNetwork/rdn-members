@@ -76,7 +76,11 @@ const OPTIONS = {
            'Practitioner/non-academic', 'Other'],
   APPROACH: ['Field observation', 'Experiments (lab/mesocosm)', 'Theory/modelling',
              'Data synthesis/meta-analysis', 'Applied/management'],
-  SYSTEMS: ['Terrestrial', 'Freshwater', 'Marine', 'Agricultural', 'Urban', 'Microbial'],
+  // Ecosystems, from the RDN response diversity survey (Oikos appendix S1, question 8e). "Multiple" is left out:
+  // members can tick several.
+  SYSTEMS: ['Marine', 'Freshwater', 'Terrestrial (tropical)', 'Terrestrial (temperate)', 'Terrestrial (dry)',
+            'Terrestrial (arctic and boreal)', 'Subterranean (e.g. soil)',
+            'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
   // Taxa, from the RDN response diversity survey (Oikos appendix S1, question 8f). "Multiple" is left out:
   // members can tick several.
   ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects', 'Terrestrial mammals', 'Marine mammals', 'Fish',

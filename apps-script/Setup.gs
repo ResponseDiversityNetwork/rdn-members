@@ -217,6 +217,11 @@ function updateFormTexts() {
     const leaveItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.LEAVE);
     if (leaveItem) leaveItem.asCheckboxItem().setHelpText(LEAVE_HELP);
     Logger.log('Form ' + key + ': "' + EXISTING_SECTION_TITLE + '" page text updated.');
+    const systems = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SYSTEMS);
+    if (systems) {
+      systems.asCheckboxItem().setChoiceValues(OPTIONS.SYSTEMS);
+      Logger.log('Form ' + key + ': "' + Q.SYSTEMS + '" options updated.');
+    }
     const organisms = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.ORGANISMS);
     if (organisms) {
       organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS);

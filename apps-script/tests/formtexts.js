@@ -19,6 +19,7 @@ function mkForm(id, withPhoto) {
   add(T.SECTION_HEADER, 'About you'); add(T.TEXT, 'Full name'); add(T.TEXT, 'Email address'); add(T.PARAGRAPH_TEXT, 'Research interests');
   if (withPhoto) add('FILE_UPLOAD', 'Photo');
   add(T.PAGE_BREAK, 'Your research'); add(T.PAGE_BREAK, 'Consent and privacy');
+  add(T.CHECKBOX, 'Systems').setChoiceValues(['Terrestrial', 'Urban']);
   add(T.CHECKBOX, 'Organisms').setChoiceValues(['Plants', 'Vertebrates']);
   add(T.CHECKBOX, 'Details I agree to show on the map').setChoiceValues(['Name', 'Website']);
   add(T.PAGE_BREAK, 'For existing members'); add(T.CHECKBOX, 'Leave the network');
@@ -70,6 +71,8 @@ for (const k of ['A', 'B']) {
 for (const k of ['A', 'B']) {
   const ch = forms[k].items.find(i => i.title === 'Organisms').choices;
   assert(ch.includes('Terrestrial mammals') && ch.includes('Amphibians') && !ch.includes('Vertebrates'), k + ' taxa list updated');
+  const sy = forms[k].items.find(i => i.title === 'Systems').choices;
+  assert(sy.includes('Terrestrial (arctic and boreal)') && sy.includes('Subterranean (e.g. soil)') && !sy.includes('Urban'), k + ' ecosystem list updated');
 }
 for (const k of ['A', 'B']) {
   const it = forms[k].items.find(i => i.title === 'Research interests');
