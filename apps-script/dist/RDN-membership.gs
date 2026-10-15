@@ -481,16 +481,21 @@ function updateFormTexts() {
 
 const COVER_TITLE = 'Before you start: about our emails';
 
-/** The cover page: which emails to expect, how to help them arrive, and the fallback. */
+/** The cover page: why we email, the non-email option, and how to help our emails arrive. Plain text (Forms shows no formatting). */
 function coverText_() {
-  return 'After you submit this form, we email you a personal link for changing your entry later. ' +
-    'It comes from ' + CONFIG.CONTACT_EMAIL + ' (sender name "' + CONFIG.SENDER_NAME + '").\n\n' +
-    'Some organisations\' email systems hold such emails back, sometimes in a quarantine you don\'t normally see. To help them arrive:\n' +
-    '• add ' + CONFIG.CONTACT_EMAIL + ' to your contacts or safe senders, or send it a short email first;\n' +
-    '• if nothing arrives within an hour, check your junk folder and your organisation\'s quarantine ' +
-    '(in Microsoft 365: the quarantine notification email, or security.microsoft.com/quarantine), and release the message.\n\n' +
-    'If our email never arrives: after you submit, the confirmation page shows an "Edit your response" link. ' +
-    'That is your personal link, so bookmark it or save it. For help, write to ' + CONFIG.CONTACT_EMAIL + '.';
+  const c = CONFIG.CONTACT_EMAIL;
+  return 'WHY WE EMAIL YOU. When you submit this form, we email you a personal link. You can use it at any time to update your entry, ' +
+    'add or remove a photo, or leave the network. We also use email to confirm when a curator has approved a new membership.\n\n' +
+    'YOU DON\u2019T NEED THE EMAIL. When you submit this form, the confirmation page shows an \u201cEdit your response\u201d link. ' +
+    'This is the same personal link we email you. Bookmark it, or copy it somewhere safe, before you close the page. ' +
+    'Opening it later lets you change any of your answers, or leave the network by ticking \u201cLeave the network\u201d on the last page. ' +
+    'If you lose the link and our email never arrived, write to ' + c + ' and we\u2019ll help.\n\n' +
+    'WHY YOU MIGHT NOT GET OUR EMAILS (AND WHAT YOU CAN DO TO TRY TO GET THEM). These emails are sent automatically by the system that ' +
+    'runs RDN membership, so they come from the network\u2019s own account (sender name \u201c' + CONFIG.SENDER_NAME + '\u201d) ' +
+    'rather than from a person. Some organisations\u2019 email systems treat automated messages like this with suspicion and may move ' +
+    'them to junk or hold them in quarantine. To help them reach you, add ' + c + ' to your contacts or safe senders before you submit. ' +
+    'If nothing arrives within an hour, check your junk folder and your organisation\u2019s quarantine. ' +
+    'In Microsoft 365, that\u2019s the quarantine notification email or security.microsoft.com/quarantine.';
 }
 
 function confirmationMessage_() {
