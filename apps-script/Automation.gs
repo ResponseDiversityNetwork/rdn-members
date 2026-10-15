@@ -77,6 +77,17 @@ function handleSubmit_(formKey, response) {
       rec['Member ref'] = invite ? ref : newMemberRef_();
       rec['Approved'] = !!invite;
       rec['Joined'] = invite && invite['Date joined'] ? invite['Date joined'] : new Date();
+      if (!invite) {
+        // An old-list member who joined through the join page (e.g. their invitation never arrived).
+        const listed = inviteForEmail_(rec['Email']);
+        if (listed) {
+          if (listed['Date joined']) rec['Joined'] = listed['Date joined'];
+          // Use their invitation's reference, so that a later reply via the invitation link updates this entry.
+          if (listed['Member ref']) rec['Member ref'] = listed['Member ref'];
+          markInviteState_(listed['Member ref'], 'responded');
+          notes.push('This email is on the old member list (' + listed['Name'] + '). Approve to confirm.');
+        }
+      }
       const dup = m.rows.find(r => r['Email'] === rec['Email']);
       if (dup) notes.push('Same email as existing member ' + dup['Name'] + ' (' + dup['Member ID'] + ').');
     }

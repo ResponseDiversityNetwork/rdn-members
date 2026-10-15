@@ -35,13 +35,12 @@ function removeTriggers() {
 function emailMailingListRequests() {
   const rows = readMembers_().rows.filter(r => r['Approved'] === true && isYes_(r['Mailing list']));
   const lines = rows.map(r => String(r['Name']).replace(/[<>]/g, '') + ' <' + r['Email'] + '>');
-  MailApp.sendEmail({
+  MailApp.sendEmail(mailOptions_({
     to: CONFIG.LISTSERV_MANAGER,
     subject: '[RDN list] ' + rows.length + ' members to subscribe',
     body: 'These members asked to join the RDN mailing list. One per line, for bulk subscribe:\n\n' + lines.join('\n') +
           '\n\nFrom now on you will get an email for each new request, change or removal.',
-    name: CONFIG.SENDER_NAME, replyTo: CONFIG.REPLY_TO,
-  });
+  }));
   Logger.log('Sent ' + rows.length + ' addresses to ' + CONFIG.LISTSERV_MANAGER +
              '. Now set LISTSERV_NOTIFY_EACH to true in Config.gs.');
 }

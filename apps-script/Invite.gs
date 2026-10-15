@@ -7,7 +7,7 @@
  * 2. Run prepareInvites(). It adds tracking columns, gives each row a secret member
  *    reference, and flags rows it can't invite (no or invalid email, duplicate email).
  *    The Status and Comments columns are ignored.
- * 3. Run sendTestInvite(). It sends the first row's invitation to CONFIG.REPLY_TO only.
+ * 3. Run sendTestInvite(). It sends the first row's invitation to CONFIG.CURATOR only.
  * 4. Run startInvites(). It sends about 60 invitations a day (keeping email quota for replies), and
  *    sets a daily timer that continues until everyone is invited. The timer also sends one
  *    reminder REMINDER_AFTER_DAYS later to anyone who hasn't responded.
@@ -89,35 +89,30 @@ function inviteAnswers_(r) {
 }
 
 function inviteEmail_(r, isReminder) {
-  const first = String(r['Name'] || '').trim().split(/\s+/)[0] || 'colleague';
+  const first = firstName_(r['Name']);
   const answers = inviteAnswers_(r);
   const linkA = prefillUrl_(formsCache_().a, answers);
   const linkB = prefillUrl_(formsCache_().b, answers);
-  const subject = (isReminder ? 'Reminder: ' : '') + 'Please update your Response Diversity Network membership';
+  const subject = isReminder ? 'Reminder: your Response Diversity Network membership'
+                             : 'Response Diversity Network: your membership in our new system';
   const intro = isReminder
-    ? 'A couple of weeks ago we invited you to move your RDN membership to our new system. If you have a couple of minutes, please do it now.'
-    : 'The Response Diversity Network has a new membership system, with a public map of members. ' +
-      'We have filled in what we already know about you. Please check it, add a few details about your research, and choose what (if anything) is shown on the map.';
-  const html =
-    '<p>Dear ' + esc_(first) + ',</p>' +
-    '<p>' + esc_(intro) + ' It takes about two minutes.</p>' +
-    '<p><a href="' + linkA + '"><b>Update my membership</b></a> (no sign-in needed)</p>' +
-    '<p>Or, if you would like a photo on the map: <a href="' + linkB + '">update my membership and add a photo</a> ' +
-    '(Google requires you to sign in to upload a photo).</p>' +
-    '<p>Nothing about you is shown publicly unless you agree to it in the form. You can change your answers or leave at any time. ' +
-    'See <a href="' + CONFIG.INFO_URL + '">how membership works and our privacy notice</a>, ' +
-    'and the <a href="' + CONFIG.MAP_URL + '">member map</a>.</p>' +
-    '<p>If you no longer want to be part of RDN, just reply to this email and we will remove you from our list.</p>' +
-    '<p>Best wishes,<br>' + esc_(CONFIG.ORG_NAME) + '</p>';
-  const text =
-    'Dear ' + first + ',\n\n' + intro + ' It takes about two minutes.\n\n' +
-    'Update my membership (no sign-in needed):\n' + linkA + '\n\n' +
-    'Update my membership and add a photo (Google sign-in required):\n' + linkB + '\n\n' +
-    'Nothing about you is shown publicly unless you agree to it in the form. You can change your answers or leave at any time.\n' +
-    'How membership works, and our privacy notice: ' + CONFIG.INFO_URL + '\n\n' +
-    'If you no longer want to be part of RDN, just reply to this email and we will remove you from our list.\n\n' +
-    'Best wishes,\n' + CONFIG.ORG_NAME;
-  return {subject, html, text};
+    ? 'A couple of weeks ago we asked you to move your Response Diversity Network membership to our new system. If you have two minutes, please do it now.'
+    : 'The Response Diversity Network has a new membership system, with a map of members. ' +
+      'We have filled in what we already know about you. Please check it, add a few details about your research, ' +
+      'and choose what, if anything, is shown on the map. It takes about two minutes.';
+  const paragraphs = [
+    'Dear ' + esc_(first) + ',',
+    esc_(intro),
+    '<b>' + link_(linkA, 'Open my membership form') + '</b> (Google Forms, no sign-in needed).',
+    'If you would like a photo on the map, use the ' + link_(linkB, 'photo version of the form') +
+      ' instead (Google Forms; it needs a Google sign-in).',
+    'Nothing about you is shown publicly unless you agree to it in the form. You can change your answers or leave at any time. ' +
+      'More about membership and privacy: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
+    'So that our emails reach you, please add ' + esc_(CONFIG.CONTACT_EMAIL) + ' to your contacts. ' +
+      'If you no longer want to be part of the network, just reply to this email.',
+    'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
+  ];
+  return {subject, paragraphs};
 }
 
 let FORMS_CACHE_ = null;
@@ -132,16 +127,21 @@ function esc_(s) {
 
 function sendInvite_(to, r, isReminder) {
   const m = inviteEmail_(r, isReminder);
-  MailApp.sendEmail({to, subject: m.subject, body: m.text, htmlBody: m.html,
-                     name: CONFIG.SENDER_NAME, replyTo: CONFIG.REPLY_TO});
+  const html = m.paragraphs.map(p => '<p>' + p + '</p>').join('\n');
+  const text = m.paragraphs
+    .map(p => p.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, '$2: $1').replace(/<br>/g, '\n').replace(/<[^>]+>/g, ''))
+    .map(p => p.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"))
+    .join('\n\n');
+  // Sent directly (not via mail_) so that a failure is recorded in the Invites tab and retried.
+  MailApp.sendEmail(mailOptions_({to, subject: m.subject, body: text, htmlBody: html}));
 }
 
-/** Step 3. Sends the first ready row's invitation to CONFIG.REPLY_TO only. */
+/** Step 3. Sends the first ready row's invitation to CONFIG.CURATOR only. */
 function sendTestInvite() {
   const r = readInvites_().rows.find(x => x['Invite state'] === 'ready');
   if (!r) throw new Error('No row is "ready". Run prepareInvites() first.');
-  sendInvite_(CONFIG.REPLY_TO, r, false);
-  Logger.log('Test invitation for row ' + r._row + ' (' + r['Name'] + ') sent to ' + CONFIG.REPLY_TO);
+  sendInvite_(CONFIG.CURATOR, r, false);
+  Logger.log('Test invitation for row ' + r._row + ' (' + r['Name'] + ') sent to ' + CONFIG.CURATOR);
 }
 
 /** Step 4. Sends today's batch and sets the daily timer. */
@@ -226,4 +226,31 @@ function stopInvites() {
   const ts = ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'inviteTick');
   ts.forEach(t => ScriptApp.deleteTrigger(t));
   Logger.log(ts.length ? 'Invitation timer switched off.' : 'No invitation timer was running.');
+}
+
+
+/** The old-list row with this email address, or null (also null if there is no Invites tab). */
+function inviteForEmail_(email) {
+  email = String(email || '').trim().toLowerCase();
+  if (!email) return null;
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  if (!ss.getSheetByName(CONFIG.INVITES_TAB)) return null;
+  return readInvites_().rows.find(r => String(r['Email'] || '').trim().toLowerCase() === email) || null;
+}
+
+/**
+ * Writes an "Invite links" tab: one row per old-list member who has not responded yet,
+ * with their personal pre-filled links. Download it as CSV for a mail merge from your own
+ * email account (e.g. Word mail merge to Outlook), which organisations' filters trust more.
+ */
+function exportInviteLinks() {
+  const rows = readInvites_().rows.filter(r => ['ready', 'invited'].indexOf(r['Invite state']) >= 0);
+  const out = rows.map(r => {
+    const a = inviteAnswers_(r);
+    return [String(r['Name'] || '').trim(), firstName_(r['Name']), String(r['Email'] || '').trim(),
+            prefillUrl_(formsCache_().a, a), prefillUrl_(formsCache_().b, a), r['Invite state']];
+  });
+  writeTab_(SpreadsheetApp.openById(prop_('PRIVATE_SS_ID')), 'Invite links',
+            ['Name', 'FirstName', 'Email', 'LinkNoPhoto', 'LinkWithPhoto', 'InviteState'], out);
+  Logger.log('Wrote ' + out.length + ' rows to the "Invite links" tab (members who have not responded yet).');
 }

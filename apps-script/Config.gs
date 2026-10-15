@@ -5,7 +5,11 @@
 const CONFIG = {
   ORG_NAME: 'Response Diversity Network',
   SENDER_NAME: 'Response Diversity Network (membership)',
-  REPLY_TO: 'owen.petchey@uzh.ch',
+  // Replies go to the sending account (rdn.projectbase@gmail.com) unless REPLY_TO is set. A reply-to on a
+  // different domain makes emails look like phishing to some filters, so it is left empty.
+  // Forward the account's mail to an organiser in Gmail settings instead.
+  REPLY_TO: '',
+  CONTACT_EMAIL: 'rdn.projectbase@gmail.com',   // shown to members as the address to write to
   LISTSERV_MANAGER: 'owen.petchey@uzh.ch',
   CURATOR: 'owen.petchey@uzh.ch',
   // Links in member emails point to this repo's GitHub Pages site (rdn-members).

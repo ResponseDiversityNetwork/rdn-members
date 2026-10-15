@@ -64,16 +64,15 @@ function buildForm_(form, withPhoto) {
       .setCollectEmail(false)          // email is a normal question, so Form A needs no sign-in
       .setShowLinkToRespondAgain(false)
       .setProgressBar(true)
-      .setConfirmationMessage(
-        'Thank you. We will email you a personal link for updating your entry later. ' +
-        'New entries appear on the map after a curator has checked them.');
+      .setConfirmationMessage(confirmationMessage_());
   if (typeof form.setPublished === 'function') form.setPublished(true);
 
   const minLen = (n, msg) => FormApp.createTextValidation()
       .requireTextLengthGreaterThanOrEqualTo(n).setHelpText(msg).build();
 
   // Section 1: about you
-  form.addSectionHeaderItem().setTitle('About you');
+  form.addSectionHeaderItem().setTitle(COVER_TITLE).setHelpText(coverText_());
+  form.addPageBreakItem().setTitle('About you');
   form.addTextItem().setTitle(Q.NAME).setRequired(true)
       .setValidation(minLen(2, 'Please enter your name.'));
   form.addTextItem().setTitle(Q.EMAIL).setRequired(true)
@@ -211,6 +210,9 @@ function updateFormTexts() {
     form.setDescription(formDescription_(key, urlA, urlB));
     const consent = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === CONSENT_SECTION_TITLE);
     if (consent) consent.asPageBreakItem().setHelpText(consentHelp_());
+    form.setConfirmationMessage(confirmationMessage_());
+    ensureCoverPage_(form);
+    Logger.log('Form ' + key + ': confirmation message and cover page updated.');
     const fieldsItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SHOW_FIELDS);
     if (fieldsItem) {
       const opts = key === 'B' ? OPTIONS.SHOW_FIELDS.concat([OPTIONS.SHOW_FIELDS_PHOTO]) : OPTIONS.SHOW_FIELDS;
@@ -221,4 +223,46 @@ function updateFormTexts() {
                (consent ? '.' : ' (no "' + CONSENT_SECTION_TITLE + '" section found).'));
   });
   Logger.log('Privacy notice link now: ' + CONFIG.PRIVACY_URL);
+}
+
+
+const COVER_TITLE = 'Before you start: about our emails';
+
+/** The cover page: which emails to expect, how to help them arrive, and the fallback. */
+function coverText_() {
+  return 'After you submit this form, we email you a personal link for changing your entry later. ' +
+    'It comes from ' + CONFIG.CONTACT_EMAIL + ' (sender name "' + CONFIG.SENDER_NAME + '").\n\n' +
+    'Some organisations\' email systems hold such emails back, sometimes in a quarantine you don\'t normally see. To help them arrive:\n' +
+    '• add ' + CONFIG.CONTACT_EMAIL + ' to your contacts or safe senders, or send it a short email first;\n' +
+    '• if nothing arrives within an hour, check your junk folder and your organisation\'s quarantine ' +
+    '(in Microsoft 365: the quarantine notification email, or security.microsoft.com/quarantine), and release the message.\n\n' +
+    'If our email never arrives: after you submit, the confirmation page shows an "Edit your response" link. ' +
+    'That is your personal link, so bookmark it or save it. For help, write to ' + CONFIG.CONTACT_EMAIL + '.';
+}
+
+function confirmationMessage_() {
+  return 'Thank you, your answers are saved.\n\n' +
+    'The "Edit your response" link below is your personal link for changing your entry or leaving the network later. ' +
+    'Please bookmark it or save it now, in case our email does not reach you. ' +
+    'We are also emailing it to you from ' + CONFIG.CONTACT_EMAIL + '.\n\n' +
+    'New members appear on the map after a curator has checked their entry.';
+}
+
+/**
+ * Makes the first page of an existing form the cover page (adds it if missing, otherwise
+ * updates its text). The "About you" section header becomes a page break after it.
+ */
+function ensureCoverPage_(form) {
+  const items = form.getItems();
+  let cover = items.find(i => i.getTitle() === COVER_TITLE);
+  if (cover) {
+    cover.asSectionHeaderItem().setHelpText(coverText_());
+    return;
+  }
+  cover = form.addSectionHeaderItem().setTitle(COVER_TITLE).setHelpText(coverText_());
+  form.moveItem(cover, 0);
+  const oldHeader = form.getItems(FormApp.ItemType.SECTION_HEADER).find(i => i.getTitle() === 'About you');
+  if (oldHeader) form.deleteItem(oldHeader);
+  const page = form.addPageBreakItem().setTitle('About you');
+  form.moveItem(page, 1);
 }

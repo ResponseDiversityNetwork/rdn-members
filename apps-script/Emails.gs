@@ -5,7 +5,6 @@
 
 function mail_(to, subject, paragraphs) {
   if (CONFIG.TEST_PHASE) {
-    subject = '[Test] ' + subject;
     paragraphs = ['<i>This is a test of the new RDN membership system. Test entries will be deleted before launch. ' +
                   'Thank you for helping!</i>'].concat(paragraphs);
   }
@@ -15,7 +14,7 @@ function mail_(to, subject, paragraphs) {
     .map(p => p.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"))
     .join('\n\n');
   try {
-    MailApp.sendEmail({to, subject, body: text, htmlBody: html, name: CONFIG.SENDER_NAME, replyTo: CONFIG.REPLY_TO});
+    MailApp.sendEmail(mailOptions_({to, subject, body: text, htmlBody: html}));
   } catch (e) {
     // e.g. the daily email limit is used up. Don't let a failed email stop the rest of the update.
     console.error('Email to ' + to + ' ("' + subject + '") failed: ' + e.message);
@@ -26,26 +25,32 @@ function mail_(to, subject, paragraphs) {
   }
 }
 
+/** Adds the sender name, and a reply-to only if one is configured. */
+function mailOptions_(o) {
+  o.name = CONFIG.SENDER_NAME;
+  if (CONFIG.REPLY_TO) o.replyTo = CONFIG.REPLY_TO;
+  return o;
+}
+
 function link_(url, label) { return '<a href="' + esc_(url) + '">' + esc_(label) + '</a>'; }
 
 function firstName_(name) { return String(name || '').trim().split(/\s+/)[0] || 'colleague'; }
 
-/** The paragraphs every member email ends with: personal link, switch link, how to leave. */
+/** The paragraphs every member email ends with: personal link, switch link, more information. */
 function memberLinks_(rec, response) {
   const resp = response || formFor_(rec['Form']).getResponse(rec['Response ID']);
   const other = formFor_(otherKey_(rec['Form']));
   const sw = switchLink_(resp, other, rec['Member ref']);
   const swText = rec['Form'] === 'A'
-    ? 'Would you like a photo on the map? ' + link_(sw, 'Switch to the form with a photo') +
-      ' (your answers are filled in; Google requires you to sign in to upload a photo).'
-    : 'To remove your photo, or to stop needing to sign in: ' + link_(sw, 'switch to the form without a photo') +
-      ' (your answers are filled in).';
+    ? 'To add a photo, use the ' + link_(sw, 'photo version of the form') +
+      ' (Google Forms; your answers are already filled in; it needs a Google sign-in).'
+    : 'To remove your photo, use the ' + link_(sw, 'version of the form without a photo') +
+      ' (Google Forms; your answers are already filled in).';
   return [
-    '<b>Your personal link</b> for changing your entry at any time: ' + link_(rec['Edit URL'], 'update my entry') +
-      '. Please keep this email; anyone with the link can change your entry.',
+    'Your personal link for changing your answers, or for leaving the network, is: ' +
+      link_(rec['Edit URL'], 'my membership entry') + ' (Google Forms). Please keep this email: the link is personal to you.',
     swText,
-    'To leave the network, open your personal link, tick "Leave the network" on the last page, and submit.',
-    'How membership works, and our privacy notice: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
+    'More about membership and privacy: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
     'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
   ];
 }
@@ -54,21 +59,19 @@ function emailMember_(rec, response, kind) {
   const hi = 'Dear ' + esc_(firstName_(rec['Name'])) + ',';
   const onMap = isYes_(rec['Show on map']);
   const subjects = {
-    received: 'Thank you for joining the Response Diversity Network',
-    welcome: 'Your Response Diversity Network membership is updated',
-    switchedToPhoto: 'Your RDN membership: now with a photo',
-    switchedToNoPhoto: 'Your RDN membership: photo removed',
-    emailChanged: 'Your RDN membership email address has changed',
+    received: 'Response Diversity Network: membership received',
+    welcome: 'Response Diversity Network: membership details saved',
+    switchedToPhoto: 'Response Diversity Network: your entry now has a photo',
+    switchedToNoPhoto: 'Response Diversity Network: photo removed',
+    emailChanged: 'Response Diversity Network: email address changed',
   };
   const bodies = {
-    received: 'Thank you for joining. A curator will check your entry, usually within a few days. ' +
-      (onMap ? 'After that you will appear on the ' + link_(CONFIG.MAP_URL, 'member map') + '.'
-             : 'You chose not to appear on the public map.'),
-    welcome: 'Thank you for updating your membership. ' +
-      (onMap ? 'You will appear on the ' + link_(CONFIG.MAP_URL, 'member map') + ' within about 10 minutes.'
-             : 'You chose not to appear on the public map.'),
-    switchedToPhoto: 'Your entry has moved to the form with a photo. Your previous personal link no longer works; please use the new one below.',
-    switchedToNoPhoto: 'Your entry has moved to the form without a photo, and we have deleted your photo. ' +
+    received: 'Thank you for joining the Response Diversity Network. A curator will check your entry, usually within a few days. ' +
+      (onMap ? 'After that you will appear on the member map.' : 'You chose not to appear on the public member map.'),
+    welcome: 'Thank you for updating your Response Diversity Network membership. ' +
+      (onMap ? 'You will appear on the member map within about 10 minutes.' : 'You chose not to appear on the public member map.'),
+    switchedToPhoto: 'Your entry now uses the form with a photo. Your previous personal link no longer works; please use the new one below.',
+    switchedToNoPhoto: 'Your entry now uses the form without a photo, and we have deleted your photo. ' +
       'Your previous personal link no longer works; please use the new one below.',
     emailChanged: 'The email address on your membership is now this one. We have also let your previous address know.',
   };
@@ -77,17 +80,16 @@ function emailMember_(rec, response, kind) {
 
 function emailApproved_(rec) {
   const onMap = isYes_(rec['Show on map']);
-  mail_(rec['Email'], 'Welcome to the Response Diversity Network', [
+  mail_(rec['Email'], 'Response Diversity Network: membership confirmed', [
     'Dear ' + esc_(firstName_(rec['Name'])) + ',',
-    'Your membership has been confirmed. ' +
-      (onMap ? 'You will appear on the ' + link_(CONFIG.MAP_URL, 'member map') + ' within about 10 minutes.'
-             : 'You chose not to appear on the public map.'),
+    'Your membership of the Response Diversity Network has been confirmed. ' +
+      (onMap ? 'You will appear on the member map within about 10 minutes.' : 'You chose not to appear on the public member map.'),
   ].concat(memberLinks_(rec)));
 }
 
 function emailOldAddress_(oldEmail, newEmail) {
   if (!oldEmail) return;
-  mail_(oldEmail, 'Your RDN membership email address has changed', [
+  mail_(oldEmail, 'Response Diversity Network: email address changed', [
     'The email address on your Response Diversity Network membership was changed from this address to ' +
       esc_(newEmail) + '.',
     'If you did not make this change, please reply to this email.',
@@ -96,11 +98,11 @@ function emailOldAddress_(oldEmail, newEmail) {
 }
 
 function emailLeft_(email, name) {
-  mail_(email, 'You have left the Response Diversity Network', [
+  mail_(email, 'Response Diversity Network: you have left', [
     'Dear ' + esc_(firstName_(name)) + ',',
     'You have left the Response Diversity Network. We have removed you from the member map and deleted your entry and any photo.' +
       (CONFIG.LISTSERV_NOTIFY_EACH ? ' We have asked the mailing-list manager to unsubscribe you.' : ''),
-    'If this was a mistake, you are welcome to ' + link_(CONFIG.INFO_URL, 'join again') + '.',
+    'If this was a mistake, you are welcome to join again: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
     'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
   ]);
 }

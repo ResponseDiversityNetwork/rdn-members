@@ -33,18 +33,20 @@ check(m[0].Email === 'alice@example.org', 'email lower-cased');
 check(m[0].Country === 'Switzerland' && m[0]['Country code'] === 'CH' && m[0].Continent === 'Europe', 'geocoded with continent');
 check(m[0]['Member ref'].length === 20 && /^m[0-9a-f]{8}$/.test(m[0]['Member ID']), 'member ref and public id assigned');
 let ms = newMails();
-check(ms.length === 2 && ms[0].to === 'alice@example.org' && /Thank you for joining/.test(ms[0].subject), 'member gets "received" email');
+check(ms.length === 2 && ms[0].to === 'alice@example.org' && /membership received/.test(ms[0].subject), 'member gets "received" email');
 check(ms[0].htmlBody.includes(a.getEditResponseUrl()), 'email contains personal edit link');
 check(ms[0].htmlBody.includes(fB.id + '/prefill') && ms[0].htmlBody.includes(encodeURIComponent(m[0]['Member ref'])), 'email contains prefilled switch link with member ref');
 check(ms[1].to === 'owen.petchey@uzh.ch' && /New member to approve/.test(ms[1].subject), 'curator gets approval request');
 check(publicRows().length === 0 && summary().find(r => r.metric === 'members').count === 0, 'not public before approval');
+check(ms.every(x => !('replyTo' in x) && x.name === 'Response Diversity Network (membership)'), 'no reply-to on another domain; sender name set');
+check(ms.every(x => !/\[Test\]/.test(x.subject)) && /test of the new RDN membership system/.test(ms[0].body), 'test phase: note in body, not in subject');
 
 console.log('2. Curator approves');
 const sh = priv.getSheetByName('Members');
 sh.set(2, 1, true);
 E.ctx.onSheetEdit({range: sh.getRange(2, 1), value: 'TRUE', oldValue: 'FALSE'});
 ms = newMails();
-check(ms.length === 1 && /Welcome/.test(ms[0].subject), 'member gets welcome email (listserv off → no manager email)');
+check(ms.length === 1 && /membership confirmed/.test(ms[0].subject), 'member gets welcome email (listserv off → no manager email)');
 let p = publicRows();
 check(p.length === 1 && p[0].name === 'Alice Ashby' && p[0].email === '' && p[0].institution === 'UZH', 'public row shows only chosen fields');
 check(p[0].lat === 47.38 && p[0].lon === 8.54, 'coordinates rounded to 2 decimals');
@@ -73,7 +75,7 @@ check(m.length === 1 && m[0].Form === 'B' && m[0]['Response ID'] === b.getId(), 
 check(fA.getResponses().length === 0 && fA.tab.getLastRow() === 1, 'old Form A response and its sheet row deleted');
 check(m[0]['Photo URL'].startsWith('https://lh3.googleusercontent.com/d/') && m[0]['Photo pending'] === false, 'photo published');
 check(publicRows()[0].photo_url === m[0]['Photo URL'], 'photo URL public when "Photo" ticked');
-check(ms.length === 1 && /now with a photo/.test(ms[0].subject) && ms[0].htmlBody.includes(fA.id + '/prefill'), 'switch email with link back to Form A');
+check(ms.length === 1 && /now has a photo/.test(ms[0].subject) && ms[0].htmlBody.includes(fA.id + '/prefill'), 'switch email with link back to Form A');
 
 console.log('5. Alice switches back to Form A → photo deleted');
 a = fA.submit(base({[Q.EMAIL]: 'alice@new.org', [Q.MEMBER_REF]: ref}));
@@ -99,7 +101,7 @@ const bob = m.find(r => r.Name === 'Bob Brenner');
 check(bob.Approved === true && bob['Member ref'] === bobRef && bob.Joined === '2021-05-01', 'approved, keeps invite ref and join date');
 check(bob.Country === 'United States' && bob.Continent === 'North America', 'state used for geocoding; country normalised');
 check(inv.rowsAsObjects()[0]['Invite state'] === 'responded', 'invite marked responded');
-check(ms.length === 1 && /membership is updated/.test(ms[0].subject), 'welcome email only, no curator email');
+check(ms.length === 1 && /membership details saved/.test(ms[0].subject), 'welcome email only, no curator email');
 check(publicRows().length === 2, 'Bob on the map');
 
 console.log('7. Formula injection and failed geocoding');
@@ -130,7 +132,7 @@ m = members(); ms = newMails();
 check(!m.some(r => r.Name === 'Bob Brenner'), 'Members row deleted');
 check(!fA.getResponses().some(r => r.id === bobR.id) && !fA.tab.data.some(r => r && r.includes('bob@example.org')), 'response and sheet row deleted');
 check(inv.rowsAsObjects()[0]['Invite state'] === 'left', 'invite marked left');
-check(ms.length === 1 && /You have left/.test(ms[0].subject) && ms[0].to === 'bob@example.org', 'leave confirmation');
+check(ms.length === 1 && /you have left/.test(ms[0].subject) && ms[0].to === 'bob@example.org', 'leave confirmation');
 check(!publicRows().some(r => r.name === 'Bob Brenner'), 'removed from map');
 // leave ticked on a brand-new submission
 let x = fA.submit(base({[Q.EMAIL]: 'x@example.org', [Q.LEAVE]: [O.LEAVE]}));
@@ -162,6 +164,32 @@ check(newMails().some(x => /Please unsubscribe/.test(x.subject)), 'manager asked
 run('emailMailingListRequests()');
 ms = newMails();
 check(ms.length === 1 && /members to subscribe/.test(ms[0].subject) && ms[0].body.includes('Carol') === false, 'bulk list email sent');
+
+console.log('10b. Old-list member joins via the join page; invite links export');
+inv.appendRow(['Erin Eklund', 'Uppsala University', 'Sweden', 'Uppsala', '', 'erin@example.org', 'active', '', '2019-02-02']);
+run('prepareInvites()');
+newMails();
+const erinRef = inv.rowsAsObjects().find(r => r.Name === 'Erin Eklund')['Member ref'];
+let erinJ = fA.submit(base({[Q.NAME]: 'Erin Eklund', [Q.EMAIL]: 'Erin@Example.org', [Q.CITY]: 'Zurich', [Q.COUNTRY]: 'Switzerland'}));
+go('A', erinJ);
+let erin = members().find(r => r.Email === 'erin@example.org');
+ms = newMails();
+check(erin.Approved === false && erin.Joined === '2019-02-02' && erin['Member ref'] === erinRef, 'matched by email: keeps join date and invite ref, still needs approval');
+check(ms.some(x => x.to === 'owen.petchey@uzh.ch' && /old member list/.test(x.htmlBody)), 'curator told it matches the old list');
+check(inv.rowsAsObjects().find(r => r.Name === 'Erin Eklund')['Invite state'] === 'responded', 'no reminder will be sent');
+let erinI = fB.submit(base({[Q.NAME]: 'Erin Eklund', [Q.EMAIL]: 'erin@example.org', [Q.CITY]: 'Zurich', [Q.COUNTRY]: 'Switzerland', [Q.MEMBER_REF]: erinRef}));
+go('B', erinI);
+check(members().filter(r => r.Email === 'erin@example.org').length === 1 && !fA.getResponses().some(r => r.id === erinJ.id), 'later reply via the invitation updates the same entry');
+run("CONFIG.TEST_PHASE = false");
+inv.appendRow(['Finn Faro', 'Lisbon Uni', 'Portugal', 'Lisbon', '', 'finn@example.org', 'active', '', '2018-01-01']);
+run('prepareInvites(); exportInviteLinks()');
+const links = priv.getSheetByName('Invite links').rowsAsObjects();
+check(links.length === 1 && links[0].Email === 'finn@example.org' && links[0].FirstName === 'Finn' && links[0].LinkNoPhoto.includes(fA.id + '/prefill'), 'export lists only members who have not responded, with their links');
+newMails();
+run('sendTestInvite()');
+ms = newMails();
+check(ms.length === 1 && ms[0].to === 'owen.petchey@uzh.ch' && !('replyTo' in ms[0]) && /rdn.projectbase@gmail.com to your contacts/.test(ms[0].body), 'test invitation to curator; asks to add sender to contacts');
+newMails();
 
 console.log('11. Clearing test data');
 assert.throws(() => run('clearTestData()'), /Safety catch/); ok++; console.log('  ✓ safety catch blocks clearTestData');
