@@ -503,21 +503,21 @@ function confirmationMessage_() {
 
 /**
  * Makes the first page of an existing form the cover page (adds it if missing, otherwise
- * updates its text). The "About you" section header becomes a page break after it.
+ * updates its text and position). The "About you" section header becomes a page break after it.
+ * Safe to run again, including after a run that stopped half-way.
+ * Note: Form.moveItem() needs plain Items or indexes, so typed items are re-fetched by id.
  */
 function ensureCoverPage_(form) {
-  const items = form.getItems();
-  let cover = items.find(i => i.getTitle() === COVER_TITLE);
-  if (cover) {
-    cover.asSectionHeaderItem().setHelpText(coverText_());
-    return;
-  }
-  cover = form.addSectionHeaderItem().setTitle(COVER_TITLE).setHelpText(coverText_());
-  form.moveItem(cover, 0);
+  let cover = form.getItems().find(i => i.getTitle() === COVER_TITLE);
+  if (!cover) cover = form.getItemById(form.addSectionHeaderItem().setTitle(COVER_TITLE).getId());
+  cover.asSectionHeaderItem().setHelpText(coverText_());
+  if (cover.getIndex() !== 0) form.moveItem(cover.getIndex(), 0);
+
   const oldHeader = form.getItems(FormApp.ItemType.SECTION_HEADER).find(i => i.getTitle() === 'About you');
   if (oldHeader) form.deleteItem(oldHeader);
-  const page = form.addPageBreakItem().setTitle('About you');
-  form.moveItem(page, 1);
+  let page = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === 'About you');
+  if (!page) page = form.getItemById(form.addPageBreakItem().setTitle('About you').getId());
+  if (page.getIndex() !== 1) form.moveItem(page.getIndex(), 1);
 }
 
 // ===== Photos.gs =====
