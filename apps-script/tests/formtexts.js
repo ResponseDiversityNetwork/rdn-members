@@ -69,6 +69,7 @@ assert.deepStrictEqual(B.items.map(i => i.title), ['Photo', 'Remove my photo', '
 assert(find(B, 'Member reference').required && B.responses === 0 && !B.dest && !B.edits, 'ref required; responses cleared; unlinked; no edits');
 assert(/your photo/.test(B.title) && /link in one of our emails/.test(B.desc) && /shown with your entry/.test(find(B, 'Photo').help), 'photo form texts');
 assert.strictEqual(props.RESPONSES_B_TAB, '', 'responses tab B no longer used');
+assert(/from the link in our email/.test(find(B, 'Member reference').help), 'photo form: reference help');
 vm.runInContext('convertPhotoForm()', ctx);   // running it again changes nothing
 assert.deepStrictEqual(B.items.map(i => i.title), ['Photo', 'Remove my photo', 'Member reference'], 'idempotent');
 
@@ -84,6 +85,7 @@ for (const run of [1, 2]) {
   assert(A.conf.length < 200 && /Edit your response/.test(A.conf), 'short confirmation');
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
   assert.strictEqual(find(A, 'For existing members').help, 'If you are joining, leave this page blank and submit.');
+  assert(/Usually empty/.test(find(A, 'Member reference').help), 'membership form: reference help says it is usually empty');
   assert(/Only works if you opened this form with your personal link/.test(find(A, 'Leave the network').help) && /#leave|forms/.test(find(A, 'Leave the network').help), 'leave tick');
   assert(/rdn-members\/join.html#privacy/.test(find(A, 'Consent and privacy').help), 'privacy link');
   assert(find(A, 'Details I agree to show on the map').choices.includes('Website or ORCID link') && !find(A, 'Details I agree to show on the map').choices.includes('Photo'), 'display options');

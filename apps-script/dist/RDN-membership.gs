@@ -527,7 +527,11 @@ function ensureCoverPage_(form) {
 
 
 const EXISTING_SECTION_TITLE = 'For existing members';
-const MEMBER_REF_HELP = 'Filled in automatically. Please don\u2019t change it.';
+// Membership form: empty for new members; filled in only when the form is opened from one of our links.
+const MEMBER_REF_HELP = 'Usually empty. It is only filled in when you open this form from a link in one of our emails; ' +
+                        'if so, please don\u2019t change it.';
+// Photo form: always reached through a link from our emails, so it is always filled in.
+const PHOTO_REF_HELP = 'Filled in automatically from the link in our email. Please don\u2019t change it.';
 
 /** Text of the last page. */
 function existingMembersHelp_() {
@@ -550,7 +554,7 @@ function buildPhotoForm_(form) {
   form.setCollectEmail(false).setAllowResponseEdits(false).setShowLinkToRespondAgain(false);
   if (typeof form.setPublished === 'function') form.setPublished(true);
   form.addCheckboxItem().setTitle(Q.REMOVE_PHOTO).setChoiceValues([OPTIONS.REMOVE_PHOTO]);
-  form.addTextItem().setTitle(Q.MEMBER_REF).setRequired(true).setHelpText(MEMBER_REF_HELP);
+  form.addTextItem().setTitle(Q.MEMBER_REF).setRequired(true).setHelpText(PHOTO_REF_HELP);
   photoFormTexts_(form);
 }
 
@@ -563,7 +567,7 @@ function photoFormTexts_(form) {
   const photo = form.getItems().find(i => i.getTitle() === Q.PHOTO);
   if (photo) photo.setHelpText(OPTIONS.PHOTO_HELP);
   const ref = form.getItems(FormApp.ItemType.TEXT).find(i => i.getTitle() === Q.MEMBER_REF);
-  if (ref) ref.asTextItem().setHelpText(MEMBER_REF_HELP);
+  if (ref) ref.asTextItem().setHelpText(PHOTO_REF_HELP);
 }
 
 /**
