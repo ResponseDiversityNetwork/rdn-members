@@ -68,13 +68,13 @@ check(publicRows()[0].website === 'https://orcid.org/0000-0001' && publicRows()[
 console.log('4. Alice switches to Form B with a photo');
 let up = E.upload(true);
 const ref = m[0]['Member ref'];
-let b = fB.submit(base({[Q.EMAIL]: 'alice@new.org', [Q.MEMBER_REF]: ref, [Q.PHOTO]: [up], [Q.SHOW_FIELDS]: ['Name', 'Photo']}));
+let b = fB.submit(base({[Q.EMAIL]: 'alice@new.org', [Q.MEMBER_REF]: ref, [Q.PHOTO]: [up], [Q.SHOW_FIELDS]: ['Name']}));
 go('B', b);
 m = members(); ms = newMails();
 check(m.length === 1 && m[0].Form === 'B' && m[0]['Response ID'] === b.getId(), 'row moved to Form B response');
 check(fA.getResponses().length === 0 && fA.tab.getLastRow() === 1, 'old Form A response and its sheet row deleted');
 check(m[0]['Photo URL'].startsWith('https://lh3.googleusercontent.com/d/') && m[0]['Photo pending'] === false, 'photo published');
-check(publicRows()[0].photo_url === m[0]['Photo URL'], 'photo URL public when "Photo" ticked');
+check(publicRows()[0].photo_url === m[0]['Photo URL'], 'photo shown once uploaded (no separate tick needed)');
 check(ms.length === 1 && /now has a photo/.test(ms[0].subject) && ms[0].htmlBody.includes(fA.id + '/prefill'), 'switch email with link back to Form A');
 
 console.log('5. Alice switches back to Form A → photo deleted');
@@ -142,7 +142,7 @@ newMails();
 
 console.log('9. Photo not ready at submit → retried');
 const up2 = E.upload(false);
-let d = fB.submit(base({[Q.NAME]: 'Dan Dorval', [Q.EMAIL]: 'dan@example.org', [Q.CITY]: 'Nairobi', [Q.COUNTRY]: 'Kenya', [Q.PHOTO]: [up2], [Q.SHOW_FIELDS]: ['Name', 'Photo']}));
+let d = fB.submit(base({[Q.NAME]: 'Dan Dorval', [Q.EMAIL]: 'dan@example.org', [Q.CITY]: 'Nairobi', [Q.COUNTRY]: 'Kenya', [Q.PHOTO]: [up2], [Q.SHOW_FIELDS]: ['Name']}));
 go('B', d);
 let dan = members().find(r => r.Email === 'dan@example.org');
 check(dan['Photo pending'] === true && dan['Photo URL'] === '', 'photo marked pending');

@@ -27,7 +27,7 @@ After you submit, the confirmation page shows an **Edit your response** link, an
 - to **add a photo**, use the link to the photo version of the form, upload a photo and submit;
 - to **remove your photo** and stop needing to sign in, use the link to the version without a photo and submit.
 
-Your entry moves across and your previous version is deleted. We then email you a new personal link. To keep your photo but hide it from the map, untick "Photo" under the details you agree to show.
+Your entry moves across and your previous version is deleted. We then email you a new personal link. If you add a photo, it is shown in your entry on the map; to stop showing it, switch to the version without a photo, which deletes it.
 
 If you have lost your link, email [rdn.projectbase@gmail.com](mailto:rdn.projectbase@gmail.com).
 
@@ -79,7 +79,7 @@ You can also leave by emailing [rdn.projectbase@gmail.com](mailto:rdn.projectbas
 
 **What is public.** Only if you tick "show me on the public map", and only the details you choose. Your location is shown at city level, never as an address. The full record is never published. The map page also shows overall counts, such as the number of members per country, continent and career stage. These counts include all members but never name anyone, and countries with fewer than three members are not listed.
 
-**Photos.** If you upload a photo and agree to show it, we publish a small copy (about 400 pixels wide). Google re-creates the copy from your upload, which removes hidden data stored in photo files, such as where the photo was taken. The copy is publicly viewable by anyone who has its link. Your original upload stays private.
+**Photos.** If you upload a photo (and appear on the map), we publish a small copy (about 400 pixels wide). Google re-creates the copy from your upload, which removes hidden data stored in photo files, such as where the photo was taken. The copy is publicly viewable by anyone who has its link. Your original upload stays private.
 
 **Where your data is stored.** In Google Forms, Google Sheets and Google Drive in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. If you use the photo version of the form, Google also knows which Google account submitted it. A small number of RDN organisers can access the data. The mailing list is run separately by the list manager.
 

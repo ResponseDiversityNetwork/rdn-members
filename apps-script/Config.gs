@@ -87,7 +87,10 @@ const OPTIONS = {
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
   SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
                     'Your city and country are always shown if you appear on the map.',
-  SHOW_FIELDS_PHOTO: 'Photo',       // extra option, photo form only
+  // Uploading a photo is the consent to show it (no separate "Photo" tick since 2026-10-15).
+  PHOTO_HELP: 'Optional. A head-and-shoulders photo works best. If you add a photo, it is shown in your entry on the ' +
+              'public member map (only if you chose to appear on the map). To stop showing it, remove it: use the link ' +
+              'to the version of the form without a photo, in any of our emails.',
   YES: 'Yes',
   NO: 'No',
   PRIVACY_OK: 'I have read the privacy note',

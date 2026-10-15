@@ -37,7 +37,7 @@ function publicRow_(r) {
     stressors: attrs ? r['Stressors studied'] : '',
     regions: attrs ? r['Regions of fieldwork'] : '',
     continent: r['Continent'],
-    photo_url: show(OPTIONS.SHOW_FIELDS_PHOTO, r['Photo URL']),
+    photo_url: r['Photo URL'] || '',   // uploading a photo is the consent to show it
   };
 }
 

@@ -33,7 +33,7 @@ Apps Script can't create file-upload questions, so this step is manual.
    - Maximum number of files: **1**
    - Maximum file size: **10 MB**
    - Required: **off**
-   - Description (⋮ → Description): *Optional. A head-and-shoulders photo works best. Shown in a small circle on the map only if you tick "Photo" under the details you agree to show.*
+   - Description: leave it empty; `updateFormTexts` fills it in (uploading a photo is the consent to show it on the map).
 5. Back in Apps Script, run `checkPhotoForm`. The log should say "OK".
 
 ## 4. Check the forms
@@ -76,7 +76,7 @@ Use your own addresses, plus a second address you can read.
 | Submit Form A as a new member (show on map: Yes, mailing list: Yes) | You get a "Thank you for joining" email. The curator gets "New member to approve". A new row appears in `Members`. |
 | Tick **Approved** in that row | You get "Welcome". The member appears on the map within about 5–10 minutes. The counts update. |
 | Open the personal link from the email, change your email address, submit | The new and the old address each get an email. |
-| Click "Switch to the form with a photo" in that email, upload a photo, and tick **Photo** under the details to show | A "now with a photo" email arrives. The photo appears in the map popup. The old Form A response is gone. |
+| Click "Switch to the form with a photo" in that email and upload a photo | A "now with a photo" email arrives. The photo appears in the map popup. The old Form A response is gone. |
 | Take a phone photo that has a location, upload it, then download the public copy (the `Photo URL` in `Members`) and check it has no location data | On a Mac: open it in Preview → **Tools → Show Inspector**. There should be no GPS tab. |
 | Click "switch to the form without a photo" and submit | The photo is deleted, both the Drive copy and the public copy. |
 | Submit with the city "Atlantis" | The curator gets a "could not find" note. Correct the city in `Members` and the row is placed again. |

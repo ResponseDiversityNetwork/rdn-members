@@ -60,4 +60,6 @@ for (const run of [1, 2]) {   // running twice must not add a second cover page
   }
 }
 assert(forms.B.items.some(i => i.title === 'Photo'), 'photo question kept');
+assert(/shown in your entry on the public member map/.test(forms.B.items.find(i => i.title === 'Photo').help), 'photo question explains it is shown');
+for (const k of ['A', 'B']) assert(!forms[k].items.find(i => i.title === 'Details I agree to show on the map').choices.includes('Photo'), k + ' no Photo tick');
 console.log('updateFormTexts: all checks passed (run twice).');

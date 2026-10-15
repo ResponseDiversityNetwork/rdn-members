@@ -110,7 +110,7 @@ function buildForm_(form, withPhoto) {
   form.addPageBreakItem().setTitle(CONSENT_SECTION_TITLE).setHelpText(consentHelp_());
   form.addMultipleChoiceItem().setTitle(Q.SHOW_ON_MAP).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO]);
-  const fields = withPhoto ? OPTIONS.SHOW_FIELDS.concat([OPTIONS.SHOW_FIELDS_PHOTO]) : OPTIONS.SHOW_FIELDS;
+  const fields = OPTIONS.SHOW_FIELDS;
   form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(fields).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
   form.addMultipleChoiceItem().setTitle(Q.MAILING_LIST).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO])
@@ -215,10 +215,11 @@ function updateFormTexts() {
     Logger.log('Form ' + key + ': confirmation message and cover page updated.');
     const fieldsItem = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.SHOW_FIELDS);
     if (fieldsItem) {
-      const opts = key === 'B' ? OPTIONS.SHOW_FIELDS.concat([OPTIONS.SHOW_FIELDS_PHOTO]) : OPTIONS.SHOW_FIELDS;
-      fieldsItem.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
+      fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
       Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
     }
+    const photo = form.getItems().find(i => i.getTitle() === Q.PHOTO);
+    if (photo) { photo.setHelpText(OPTIONS.PHOTO_HELP); Logger.log('Form ' + key + ': photo question description updated.'); }
     Logger.log('Form ' + key + ': description ' + (consent ? 'and privacy note ' : '') + 'updated' +
                (consent ? '.' : ' (no "' + CONSENT_SECTION_TITLE + '" section found).'));
   });
