@@ -25,7 +25,7 @@ Do all of this signed in as **rdn.projectbase@gmail.com**.
 
 If you already ran the setup before 9 October, add a short-answer question titled `State/Province` (not required) under **City** in the membership form by hand.
 
-The setup creates the membership form (Form A), the small photo form (Form B), a private spreadsheet (with tabs `Members` and `Responses A`), a public spreadsheet, and a photo folder.
+The setup creates the membership form (Form A), the small photo form (Form B), a private spreadsheet (with tabs `Members` and `Form responses`), a public spreadsheet, and a photo folder.
 
 ## 3. Add the upload question to the photo form (by hand)
 

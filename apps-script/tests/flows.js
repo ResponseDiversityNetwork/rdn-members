@@ -255,4 +255,16 @@ check(fA.tab.getLastRow() === 1, 'response tab keeps only its header');
 check(Object.values(files).every(f => f.trashed), 'all uploads and public photos trashed');
 check(publicRows().length === 0 && summary().find(r => r.metric === 'members').count === 0, 'public sheet empty');
 
+console.log('12. Renaming the response tab');
+run('renameResponsesTab()');
+const propsNow = () => E.ctx.PropertiesService.getScriptProperties().getProperty('RESPONSES_A_TAB');
+check(fA.tab.name === 'Form responses' && propsNow() === 'Form responses', 'tab renamed and the script property follows');
+run('renameResponsesTab()');
+check(propsNow() === 'Form responses', 'running it again is harmless');
+let g = fA.submit(base({[Q.NAME]: 'Gina Gale', [Q.EMAIL]: 'gina@example.org'}));
+go('A', g);
+const rowsBefore = fA.tab.getLastRow();
+run(`deleteResponse_('A', '${g.id}', ['gina@example.org'])`);
+check(rowsBefore > 1 && fA.tab.getLastRow() === rowsBefore - 1, 'deleting a response still removes its row from the renamed tab');
+
 console.log(`\nAll ${ok} checks passed.`);

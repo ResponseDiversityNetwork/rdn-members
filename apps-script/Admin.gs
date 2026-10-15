@@ -107,3 +107,30 @@ function fillPhotoLinks() {
   });
   Logger.log('Photo links filled in for ' + n + ' members.');
 }
+
+/**
+ * Renames the membership form's response tab in the private spreadsheet (default
+ * "Form responses") and updates the script's record of its name, so leaving still
+ * deletes the right rows. Safe to run again.
+ */
+function renameResponsesTab(newName) {
+  newName = (typeof newName === 'string' && newName.trim()) ? newName.trim() : 'Form responses';
+  const props = PropertiesService.getScriptProperties();
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  const oldName = props.getProperty('RESPONSES_A_TAB') || '';
+  const sh = ss.getSheetByName(oldName);
+  if (!sh) {
+    if (ss.getSheetByName(newName)) {
+      props.setProperty('RESPONSES_A_TAB', newName);
+      Logger.log('The tab is already called "' + newName + '". The script now uses that name.');
+      return;
+    }
+    throw new Error('No tab called "' + oldName + '" in the private spreadsheet. If you renamed it by hand, ' +
+                    'run renameResponsesTab again after changing the name back.');
+  }
+  if (oldName === newName) { Logger.log('Already called "' + newName + '". Nothing to do.'); return; }
+  if (ss.getSheetByName(newName)) throw new Error('There is already a tab called "' + newName + '". Delete or rename it first.');
+  sh.setName(newName);
+  props.setProperty('RESPONSES_A_TAB', newName);
+  Logger.log('Renamed "' + oldName + '" to "' + newName + '", and the script now uses the new name.');
+}

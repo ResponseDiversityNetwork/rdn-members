@@ -22,7 +22,7 @@ function setupMembership() {
   const formA = FormApp.create('Response Diversity Network: membership');
   const formB = FormApp.create(PHOTO_FORM_TITLE);
   buildForm_(formA);
-  const tabA = linkToSheet_(formA, priv, 'Responses A');
+  const tabA = linkToSheet_(formA, priv, 'Form responses');
   const members = priv.getSheets().find(s => s.getName() === 'Sheet1') || priv.insertSheet();
   members.setName('Members');
   priv.setActiveSheet(members);

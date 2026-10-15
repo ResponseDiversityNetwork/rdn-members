@@ -118,7 +118,7 @@ function makeEnv() {
   const props = {};
   const ctx = {
     console, Logger: {log: x => log.push(String(x))},
-    PropertiesService: {getScriptProperties: () => ({getProperty: k => props[k] ?? null, setProperties: o => Object.assign(props, o)})},
+    PropertiesService: {getScriptProperties: () => ({getProperty: k => props[k] ?? null, setProperties: o => Object.assign(props, o), setProperty: (k, v) => { props[k] = v; }})},
     SpreadsheetApp: {
       create: n => { const s = new SS(n); sheetsById[s.id] = s; return s; },
       openById: i => { if (!sheetsById[i]) throw new Error('no ss ' + i); return sheetsById[i]; },
