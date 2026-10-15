@@ -49,6 +49,8 @@ Apps Script can't create file-upload questions, so this step is manual.
 
 1. Make sure every script file has its latest contents (see section 1).
 2. Run `installTriggers`. Approve the new permissions it asks for.
+   - Replies to the system's emails now go to rdn.projectbase@gmail.com, because a reply-to on another domain makes emails look like phishing. To receive them yourself, in that Gmail account go to **Settings → See all settings → Forwarding and POP/IMAP → Add a forwarding address**, add your own address, and confirm it.
+   - Run `updateFormTexts` once, to add the cover page and the new confirmation message to forms created before 15 October.
    - From now on, submissions are handled automatically: geocoding, emails, curator approval and the public sheet.
    - The two test responses from section 4 were submitted before this, so they aren't in the `Members` tab. That's expected; section 7 clears them.
 3. Open the **public** spreadsheet (link in the setup log) and choose **File → Share → Publish to web**:
@@ -93,6 +95,15 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 - **Turning everything off:** run `removeTriggers`.
 
 ## Inviting the existing members
+
+**Plan.** Some organisations quarantine emails from a new Gmail sender, so the invitations use three routes, and you only send one email yourself:
+
+1. **Announcement from you, a few days before.** One email from your own address to all members (in BCC). Tell them that an invitation is coming from rdn.projectbase@gmail.com, to add it to their contacts or send it a short email, and to check their quarantine. Also tell them that if nothing arrives, they can simply join at the join page with the same email address.
+2. **Invitations from the system**, as below. Each one has the member's details pre-filled.
+3. **Fallbacks**, needing no extra work:
+   - a member who joins through the join page with an email address on the old list is recognised: the curator email says so, and they keep their original joining date and get no reminder;
+   - after about two weeks, `exportInviteLinks` writes an `Invite links` tab of everyone who hasn't responded, with their personal pre-filled links. Download it as CSV and send those few emails as one mail merge from your own account (for example Word → Mailings → Start Mail Merge → Email Messages, using Outlook), using the fields FirstName, LinkNoPhoto and LinkWithPhoto.
+
 
 Do this after section 7, step 1. The invitation emails link to the rdn-members site's map and join pages.
 
