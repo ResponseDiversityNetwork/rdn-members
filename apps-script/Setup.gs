@@ -91,11 +91,7 @@ function buildForm_(form, withPhoto) {
       .setHelpText('Full link starting with https://, e.g. https://orcid.org/0000-0000-0000-0000')
       .setValidation(FormApp.createTextValidation().requireTextIsUrl()
         .setHelpText('Please enter a full link starting with https://').build());
-  form.addParagraphTextItem().setTitle(Q.INTERESTS).setRequired(true)
-      .setHelpText('One or two sentences. Searchable on the map.')
-      .setValidation(FormApp.createParagraphTextValidation()
-        .requireTextLengthGreaterThanOrEqualTo(30)
-        .setHelpText('Please write at least 30 characters.').build());
+  form.addParagraphTextItem().setTitle(Q.INTERESTS).setRequired(true).setHelpText(OPTIONS.INTERESTS_HELP);
   // Form B: the "Photo" File upload question goes here, added by hand (SETUP.md, step 3).
 
   // Section 2: research
@@ -217,6 +213,11 @@ function updateFormTexts() {
     if (fieldsItem) {
       fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
       Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
+    }
+    const interests = form.getItems(FormApp.ItemType.PARAGRAPH_TEXT).find(i => i.getTitle() === Q.INTERESTS);
+    if (interests) {
+      interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation();
+      Logger.log('Form ' + key + ': research interests help text updated, length limit removed.');
     }
     const photo = form.getItems().find(i => i.getTitle() === Q.PHOTO);
     if (photo) { photo.setHelpText(OPTIONS.PHOTO_HELP); Logger.log('Form ' + key + ': photo question description updated.'); }

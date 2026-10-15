@@ -85,6 +85,8 @@ const OPTIONS = {
   REGIONS: ['Europe', 'North America', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
+  INTERESTS_HELP: 'A short phrase or a few keywords, e.g. \u2018Response diversity of plankton communities to heatwaves\u2019. ' +
+                  'Shown on the map and searchable.',
   SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
                     'Your city and country are always shown if you appear on the map.',
   // Uploading a photo is the consent to show it (no separate "Photo" tick since 2026-10-15).

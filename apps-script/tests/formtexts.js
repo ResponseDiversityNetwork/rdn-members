@@ -1,13 +1,14 @@
 // Checks updateFormTexts(): cover page, confirmation message, privacy note and display options,
 // on mock forms laid out as setupMembership() created them (before the cover page existed).
 const fs = require('fs'), vm = require('vm'), path = require('path'), assert = require('assert');
-const T = {TEXT: 'TEXT', CHECKBOX: 'CHECKBOX', SECTION_HEADER: 'SECTION_HEADER', PAGE_BREAK: 'PAGE_BREAK', MULTIPLE_CHOICE: 'MULTIPLE_CHOICE'};
+const T = {PARAGRAPH_TEXT: 'PARAGRAPH_TEXT', TEXT: 'TEXT', CHECKBOX: 'CHECKBOX', SECTION_HEADER: 'SECTION_HEADER', PAGE_BREAK: 'PAGE_BREAK', MULTIPLE_CHOICE: 'MULTIPLE_CHOICE'};
 let nextId = 1;
 function mkItem(type, title) {
   const it = {type, title, help: '', choices: [], id: nextId++, getId: () => it.id,
     getTitle: () => it.title, getType: () => it.type, setTitle(t) { it.title = t; return it; }, setHelpText(h) { it.help = h; return it; },
     setChoiceValues(c) { it.choices = c; return it; }};
-  it.asSectionHeaderItem = it.asPageBreakItem = it.asCheckboxItem = () => it;
+  it.asSectionHeaderItem = it.asPageBreakItem = it.asCheckboxItem = it.asParagraphTextItem = () => it;
+  it.validation = 'min 30'; it.clearValidation = () => { it.validation = null; return it; };
   it.getIndex = () => it.form.items.indexOf(it);
   return it;
 }
@@ -15,7 +16,7 @@ function typed(it) { return {getId: it.getId, setTitle(t) { it.setTitle(t); retu
 function mkForm(id, withPhoto) {
   const f = {id, items: [], desc: '', conf: ''};
   const add = (type, title) => { const it = mkItem(type, title); it.form = f; f.items.push(it); return it; };
-  add(T.SECTION_HEADER, 'About you'); add(T.TEXT, 'Full name'); add(T.TEXT, 'Email address');
+  add(T.SECTION_HEADER, 'About you'); add(T.TEXT, 'Full name'); add(T.TEXT, 'Email address'); add(T.PARAGRAPH_TEXT, 'Research interests');
   if (withPhoto) add('FILE_UPLOAD', 'Photo');
   add(T.PAGE_BREAK, 'Your research'); add(T.PAGE_BREAK, 'Consent and privacy');
   add(T.CHECKBOX, 'Details I agree to show on the map').setChoiceValues(['Name', 'Website']);
@@ -60,6 +61,10 @@ for (const run of [1, 2]) {   // running twice must not add a second cover page
   }
 }
 assert(forms.B.items.some(i => i.title === 'Photo'), 'photo question kept');
+for (const k of ['A', 'B']) {
+  const it = forms[k].items.find(i => i.title === 'Research interests');
+  assert(/short phrase or a few keywords/.test(it.help) && it.validation === null, k + ' interests: new help text, no length limit');
+}
 assert(/shown in your entry on the public member map/.test(forms.B.items.find(i => i.title === 'Photo').help), 'photo question explains it is shown');
 for (const k of ['A', 'B']) assert(!forms[k].items.find(i => i.title === 'Details I agree to show on the map').choices.includes('Photo'), k + ' no Photo tick');
 console.log('updateFormTexts: all checks passed (run twice).');
