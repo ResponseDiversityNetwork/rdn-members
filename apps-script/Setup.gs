@@ -214,6 +214,11 @@ function updateFormTexts() {
       fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
       Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
     }
+    const organisms = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.ORGANISMS);
+    if (organisms) {
+      organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS);
+      Logger.log('Form ' + key + ': "' + Q.ORGANISMS + '" options updated.');
+    }
     const interests = form.getItems(FormApp.ItemType.PARAGRAPH_TEXT).find(i => i.getTitle() === Q.INTERESTS);
     if (interests) {
       interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation();

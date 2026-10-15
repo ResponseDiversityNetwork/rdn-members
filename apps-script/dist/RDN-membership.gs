@@ -80,8 +80,10 @@ const OPTIONS = {
   APPROACH: ['Field observation', 'Experiments (lab/mesocosm)', 'Theory/modelling',
              'Data synthesis/meta-analysis', 'Applied/management'],
   SYSTEMS: ['Terrestrial', 'Freshwater', 'Marine', 'Agricultural', 'Urban', 'Microbial'],
-  ORGANISMS: ['Plants', 'Invertebrates', 'Vertebrates', 'Microbes', 'Algae/phytoplankton', 'Fungi',
-              'Whole communities'],
+  // Taxa, from the RDN response diversity survey (Oikos appendix S1, question 8f). "Multiple" is left out:
+  // members can tick several.
+  ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects', 'Terrestrial mammals', 'Marine mammals', 'Fish',
+              'Reptiles', 'Amphibians', 'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
   LEVELS: ['Individuals/traits', 'Populations', 'Communities', 'Ecosystems', 'Social-ecological systems'],
   STRESSORS: ['Warming', 'Climate extremes/drought', 'Land-use change', 'Pollution', 'Invasive species',
               'Harvesting', 'Multiple stressors'],
@@ -480,6 +482,11 @@ function updateFormTexts() {
     if (fieldsItem) {
       fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
       Logger.log('Form ' + key + ': "' + Q.SHOW_FIELDS + '" options and note updated.');
+    }
+    const organisms = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.ORGANISMS);
+    if (organisms) {
+      organisms.asCheckboxItem().setChoiceValues(OPTIONS.ORGANISMS);
+      Logger.log('Form ' + key + ': "' + Q.ORGANISMS + '" options updated.');
     }
     const interests = form.getItems(FormApp.ItemType.PARAGRAPH_TEXT).find(i => i.getTitle() === Q.INTERESTS);
     if (interests) {
