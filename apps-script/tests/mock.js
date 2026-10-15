@@ -84,6 +84,7 @@ function makeEnv() {
       this.tab = null; this.Q = Q;
     }
     getId() { return this.id; } getItems() { return this.items; }
+    getTitle() { return 'membership'; } getPublishedUrl() { return 'https://forms/' + this.id; }
     getResponses() { return this.responses.slice(); }
     getResponse(rid) { const r = this.responses.find(x => x.id === rid); if (!r) throw new Error('no response ' + rid); return r; }
     deleteResponse(rid) { const n = this.responses.length; this.responses = this.responses.filter(r => r.id !== rid); if (n === this.responses.length) throw new Error('no such response'); }
@@ -119,6 +120,7 @@ function makeEnv() {
   const props = {};
   const ctx = {
     console, Logger: {log: x => log.push(String(x))},
+    Session: {getEffectiveUser: () => ({getEmail: () => 'rdn.projectbase@gmail.com'})},
     PropertiesService: {getScriptProperties: () => ({getProperty: k => props[k] ?? null, setProperties: o => Object.assign(props, o), setProperty: (k, v) => { props[k] = v; }})},
     SpreadsheetApp: {
       create: n => { const s = new SS(n); sheetsById[s.id] = s; return s; },

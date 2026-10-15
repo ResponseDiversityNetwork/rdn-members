@@ -121,6 +121,39 @@ function processMissedResponses() {
   }
 }
 
+/** Logs what the automation knows: triggers, the latest form responses, Members rows, failed emails. */
+function diagnose() {
+  const L = s => Logger.log(s);
+  L('Running as: ' + Session.getEffectiveUser().getEmail());
+  L('Triggers: ' + (ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction()).join(', ') || 'none'));
+  L('Emails left today: ' + MailApp.getRemainingDailyQuota());
+  const formA = formFor_('A');
+  L('Membership form: ' + formA.getTitle() + ' | ' + formA.getPublishedUrl());
+  const m = readMembers_();
+  const byResp = {};
+  m.rows.forEach(r => { byResp[r['Response ID']] = r; });
+  const resps = formA.getResponses();
+  L('Membership form responses: ' + resps.length + ' (latest 5 below)');
+  resps.slice(-5).forEach(resp => {
+    const a = answersOf_(resp);
+    const row = byResp[resp.getId()];
+    L('  ' + resp.getTimestamp() + ' | ' + a[Q.EMAIL] + ' | ref ' + (a[Q.MEMBER_REF] || '-') + ' | ' +
+      (row ? 'in Members (updated ' + row['Updated'] + ', approved ' + row['Approved'] + ')' : 'NOT in Members'));
+  });
+  L('Members rows: ' + m.rows.length + ' (latest 5 below)');
+  m.rows.slice(-5).forEach(r => L('  ' + r['Email'] + ' | form ' + r['Form'] + ' | approved ' + r['Approved'] +
+                                    ' | updated ' + r['Updated'] + ' | notes: ' + (r['Notes'] || '-')));
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  const failed = ss.getSheetByName('Failed emails');
+  if (failed && failed.getLastRow() > 1) {
+    L('Failed emails (latest 5):');
+    failed.getRange(Math.max(2, failed.getLastRow() - 4), 1, Math.min(5, failed.getLastRow() - 1), 4).getValues()
+      .forEach(v => L('  ' + v.join(' | ')));
+  } else L('Failed emails: none');
+  const inv = ss.getSheetByName(CONFIG.INVITES_TAB);
+  L('Invites tab: ' + (inv ? (inv.getLastRow() - 1) + ' rows' : 'none'));
+}
+
 /** Fills in "Photo link" for any member rows that lack it (e.g. rows made before the column existed). */
 function fillPhotoLinks() {
   const m = readMembers_();

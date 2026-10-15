@@ -280,4 +280,9 @@ fA.edit(h, {[Q.INSTITUTION]: 'ETH'});   // a missed edit
 run('processMissedResponses()');
 check(members().find(r => r.Email === 'hugo@example.org').Institution === 'ETH', 'missed edit handled');
 
+console.log('14. Diagnose');
+E.log.length = 0;
+run('diagnose()');
+check(E.log.some(l => /hugo@example.org \| ref .* \| in Members/.test(l)) && E.log.some(l => /^Triggers: .*onSubmitA/.test(l)), 'diagnose lists responses and triggers');
+
 console.log(`\nAll ${ok} checks passed.`);
