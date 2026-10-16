@@ -483,8 +483,9 @@ function updateFormTexts() {
   });
   const interests = byTitle(FormApp.ItemType.PARAGRAPH_TEXT, Q.INTERESTS);
   if (interests) { interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation(); log('research interests'); }
-  const existing = byTitle(FormApp.ItemType.PAGE_BREAK, EXISTING_SECTION_TITLE);
-  if (existing) existing.asPageBreakItem().setHelpText(existingMembersHelp_());
+  const existing = byTitle(FormApp.ItemType.PAGE_BREAK, EXISTING_SECTION_TITLE) ||
+                   byTitle(FormApp.ItemType.PAGE_BREAK, OLD_EXISTING_SECTION_TITLE);
+  if (existing) existing.asPageBreakItem().setTitle(EXISTING_SECTION_TITLE).setHelpText(existingMembersHelp_());
   const ref = byTitle(FormApp.ItemType.TEXT, Q.MEMBER_REF);
   if (ref) ref.asTextItem().setHelpText(MEMBER_REF_HELP);
   const leaveItem = byTitle(FormApp.ItemType.CHECKBOX, Q.LEAVE);
@@ -505,7 +506,7 @@ function coverText_() {
     '\u2022 The same link is shown on the page after you submit (\u201cEdit your response\u201d). Please bookmark it.\n' +
     '\u2022 No email and no link? Write to ' + c + '. If our emails don\u2019t arrive: ' + CONFIG.INFO_URL + '#emails\n' +
     '\u2022 Want to leave? If you opened this form with your personal link, all required questions will be prefilled ' +
-    'and you can skip direct to the last page, tick \u201cLeave the network\u201d, and press Submit. ' +
+    'so you can click Next through to the last page, tick \u201cLeave the network\u201d, and press Submit. ' +
     'You can also leave with the Leave form: ' + leaveFormUrl_();
 }
 
@@ -539,16 +540,18 @@ function ensureCoverPage_(form) {
 }
 
 
-const EXISTING_SECTION_TITLE = 'For existing members';
+const EXISTING_SECTION_TITLE = 'Before you submit';
+const OLD_EXISTING_SECTION_TITLE = 'For existing members';   // renamed by updateFormTexts
 // Membership form: empty for new members; filled in only when the form is opened from one of our links.
-const MEMBER_REF_HELP = 'Usually empty. It is only filled in when you open this form from a link in one of our emails; ' +
-                        'if so, please don\u2019t change it.';
+const MEMBER_REF_HELP = 'Please ignore this question and anything filled in here. It is only for internal administration.';
 // Photo form: always reached through a link from our emails, so it is always filled in.
 const PHOTO_REF_HELP = 'Filled in automatically from the link in our email. Please don\u2019t change it.';
 
 /** Text of the last page. */
 function existingMembersHelp_() {
-  return 'If you are joining, leave this page blank and submit.';
+  return '\u2022 Joining: nothing to do here, just press Submit.\n' +
+    '\u2022 Updating with your personal link: nothing to do here, just press Submit.\n' +
+    '\u2022 Leaving with your personal link: tick \u201cLeave the network\u201d below, and press Submit.';
 }
 
 /** Help text of the "Leave the network" tick. */

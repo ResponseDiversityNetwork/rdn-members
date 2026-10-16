@@ -85,8 +85,9 @@ for (const run of [1, 2]) {
   assert(cover.length < 800, 'cover is short (' + cover.length + ' chars)');
   assert(A.conf.length < 200 && /Edit your response/.test(A.conf), 'short confirmation');
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
-  assert.strictEqual(find(A, 'For existing members').help, 'If you are joining, leave this page blank and submit.');
-  assert(/Usually empty/.test(find(A, 'Member reference').help), 'membership form: reference help says it is usually empty');
+  assert(!find(A, 'For existing members'), 'old last-page title renamed');
+  assert(/Joining: nothing to do/.test(find(A, 'Before you submit').help) && /Leaving with your personal link/.test(find(A, 'Before you submit').help), 'last page: what to do');
+  assert(/Please ignore this question/.test(find(A, 'Member reference').help), 'membership form: reference help says to ignore it');
   assert(/Only works if you opened this form with your personal link/.test(find(A, 'Leave the network').help) && /#leave|forms/.test(find(A, 'Leave the network').help), 'leave tick');
   assert(/rdn-members\/join.html#privacy/.test(find(A, 'Consent and privacy').help), 'privacy link');
   assert(find(A, 'Details I agree to show on the map').choices.includes('Website or ORCID link') && !find(A, 'Details I agree to show on the map').choices.includes('Photo'), 'display options');
