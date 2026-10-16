@@ -218,7 +218,14 @@ function coverText_() {
   return '\u2022 After you submit, we email you a personal link for changing your entry or leaving later. ' +
     'It comes from ' + c + ': please add that address to your contacts.\n' +
     '\u2022 The same link is shown on the page after you submit (\u201cEdit your response\u201d). Please bookmark it.\n' +
-    '\u2022 No email and no link? Write to ' + c + '. If our emails don\u2019t arrive: ' + CONFIG.INFO_URL + '#emails';
+    '\u2022 No email and no link? Write to ' + c + '. If our emails don\u2019t arrive: ' + CONFIG.INFO_URL + '#emails\n' +
+    '\u2022 Want to leave? With your personal link, go to the last page and tick \u2018Leave the network\u2019. ' +
+    'Without it, use the leave form: ' + leaveFormUrl_();
+}
+
+/** The leave form's public link, or the join page's Leave section if the leave form isn't set up. */
+function leaveFormUrl_() {
+  return PropertiesService.getScriptProperties().getProperty('LEAVE_FORM_URL') || (CONFIG.INFO_URL + '#leave');
 }
 
 function confirmationMessage_() {
@@ -260,8 +267,7 @@ function existingMembersHelp_() {
 
 /** Help text of the "Leave the network" tick. */
 function leaveHelp_() {
-  const leaveUrl = PropertiesService.getScriptProperties().getProperty('LEAVE_FORM_URL') || (CONFIG.INFO_URL + '#leave');
-  return 'Only works if you opened this form with your personal link. No link? Use the leave form: ' + leaveUrl;
+  return 'Only works if you opened this form with your personal link. No link? Use the leave form: ' + leaveFormUrl_();
 }
 
 

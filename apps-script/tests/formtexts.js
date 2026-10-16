@@ -81,8 +81,8 @@ for (const run of [1, 2]) {
   assert.strictEqual(t[0], 'SECTION_HEADER:Before you start: about our emails'); assert.strictEqual(t[1], 'PAGE_BREAK:About you');
   assert.strictEqual(t.filter(x => x.includes('about our emails')).length, 1, 'one cover');
   const cover = A.items[0].help;
-  assert(cover.split('\n').length === 3 && /contacts/.test(cover) && /Edit your response/.test(cover) && /#emails/.test(cover), 'cover: three short lines');
-  assert(cover.length < 450, 'cover is short (' + cover.length + ' chars)');
+  assert(cover.split('\n').length === 4 && /Want to leave/.test(cover) && /contacts/.test(cover) && /Edit your response/.test(cover) && /#emails/.test(cover), 'cover: four short lines');
+  assert(cover.length < 700, 'cover is short (' + cover.length + ' chars)');
   assert(A.conf.length < 200 && /Edit your response/.test(A.conf), 'short confirmation');
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
   assert.strictEqual(find(A, 'For existing members').help, 'If you are joining, leave this page blank and submit.');
