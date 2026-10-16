@@ -62,6 +62,7 @@ function buildForm_(form) {
 
   // Section 1: about you
   form.addSectionHeaderItem().setTitle(COVER_TITLE).setHelpText(coverText_());
+  form.addSectionHeaderItem().setTitle(LEAVE_HEADER_TITLE).setHelpText(leaveCoverText_());
   form.addPageBreakItem().setTitle('About you');
   form.addTextItem().setTitle(Q.NAME).setRequired(true)
       .setValidation(minLen(2, 'Please enter your name.'));
@@ -211,16 +212,27 @@ function updateFormTexts() {
 }
 
 
-const COVER_TITLE = 'Before you start: about our emails';
+const COVER_TITLE = 'Keeping track of your membership';
+const OLD_COVER_TITLES = ['Before you start: about our emails'];   // renamed by updateFormTexts
+const LEAVE_HEADER_TITLE = 'Want to leave?';
 
 /** The cover page, kept short; the details are on the join page (#emails). Plain text (Forms shows no formatting). */
 function coverText_() {
   const c = CONFIG.CONTACT_EMAIL;
-  return '\u2022 After you submit, we email you a personal link for changing your entry or leaving later. ' +
-    'It comes from ' + c + ': please add that address to your contacts.\n' +
-    '\u2022 The same link is shown on the page after you submit (\u201cEdit your response\u201d). Please bookmark it.\n' +
-    '\u2022 No email and no link? Write to ' + c + '. If our emails don\u2019t arrive: ' + CONFIG.INFO_URL + '#emails\n' +
-    '\u2022 Want to leave? If you opened this form with your personal link, all required questions will be prefilled ' +
+  return '\u2022 After you submit this form, your personal link is shown on the confirmation page, as ' +
+    '\u201cEdit your response\u201d. You need it to update your membership details easily. ' +
+    'You can also use it to leave the network (though you can also leave without it).\n' +
+    '\u2022 Bookmark your personal link, and copy it somewhere safe.\n' +
+    '\u2022 We also send your personal link to you by email. The email comes from ' + c +
+    ': please add that address to your contacts.\n' +
+    '\u2022 No email and no link? Write to ' + c + '.\n' +
+    '\u2022 You don\u2019t need to receive the emails, but if they don\u2019t arrive and you want them, look here: ' +
+    CONFIG.INFO_URL + '#emails';
+}
+
+/** The "Want to leave?" box on the cover page. */
+function leaveCoverText_() {
+  return 'If you opened this form with your personal link, all required questions are already filled in, ' +
     'so you can click Next through to the last page, tick \u201cLeave the network\u201d, and press Submit. ' +
     'You can also leave with the Leave form: ' + leaveFormUrl_();
 }
@@ -242,16 +254,23 @@ function confirmationMessage_() {
  * Note: Form.moveItem() needs plain Items or indexes, so typed items are re-fetched by id.
  */
 function ensureCoverPage_(form) {
-  let cover = form.getItems().find(i => i.getTitle() === COVER_TITLE);
-  if (!cover) cover = form.getItemById(form.addSectionHeaderItem().setTitle(COVER_TITLE).getId());
-  cover.asSectionHeaderItem().setHelpText(coverText_());
+  const headers = () => form.getItems(FormApp.ItemType.SECTION_HEADER);
+  let cover = headers().find(i => i.getTitle() === COVER_TITLE) ||
+              headers().find(i => OLD_COVER_TITLES.indexOf(i.getTitle()) >= 0);
+  if (!cover) cover = form.getItemById(form.addSectionHeaderItem().getId());
+  cover.asSectionHeaderItem().setTitle(COVER_TITLE).setHelpText(coverText_());
   if (cover.getIndex() !== 0) form.moveItem(cover.getIndex(), 0);
+
+  let leave = headers().find(i => i.getTitle() === LEAVE_HEADER_TITLE);
+  if (!leave) leave = form.getItemById(form.addSectionHeaderItem().setTitle(LEAVE_HEADER_TITLE).getId());
+  leave.asSectionHeaderItem().setHelpText(leaveCoverText_());
+  if (leave.getIndex() !== 1) form.moveItem(leave.getIndex(), 1);
 
   const oldHeader = form.getItems(FormApp.ItemType.SECTION_HEADER).find(i => i.getTitle() === 'About you');
   if (oldHeader) form.deleteItem(oldHeader);
   let page = form.getItems(FormApp.ItemType.PAGE_BREAK).find(i => i.getTitle() === 'About you');
   if (!page) page = form.getItemById(form.addPageBreakItem().setTitle('About you').getId());
-  if (page.getIndex() !== 1) form.moveItem(page.getIndex(), 1);
+  if (page.getIndex() !== 2) form.moveItem(page.getIndex(), 2);
 }
 
 

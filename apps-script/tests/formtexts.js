@@ -78,11 +78,13 @@ assert.deepStrictEqual(B.items.map(i => i.title), ['Photo', 'Remove my photo', '
 for (const run of [1, 2]) {
   vm.runInContext('updateFormTexts()', ctx);
   const A = forms.A, t = A.items.map(i => i.type + ':' + i.title);
-  assert.strictEqual(t[0], 'SECTION_HEADER:Before you start: about our emails'); assert.strictEqual(t[1], 'PAGE_BREAK:About you');
-  assert.strictEqual(t.filter(x => x.includes('about our emails')).length, 1, 'one cover');
+  assert.strictEqual(t[0], 'SECTION_HEADER:Keeping track of your membership');
+  assert.strictEqual(t[1], 'SECTION_HEADER:Want to leave?'); assert.strictEqual(t[2], 'PAGE_BREAK:About you');
+  assert(!t.some(x => x.includes('about our emails')), 'old cover renamed, not duplicated');
+  assert.strictEqual(t.filter(x => x.includes('Want to leave?')).length, 1, 'one leave box');
   const cover = A.items[0].help;
-  assert(cover.split('\n').length === 4 && /Want to leave/.test(cover) && /contacts/.test(cover) && /Edit your response/.test(cover) && /#emails/.test(cover), 'cover: four short lines');
-  assert(cover.length < 800, 'cover is short (' + cover.length + ' chars)');
+  assert(cover.split('\n').length === 5 && /contacts/.test(cover) && /Edit your response/.test(cover) && /#emails/.test(cover), 'cover: five lines');
+  assert(/Next through to the last page/.test(A.items[1].help) && /forms|#leave/.test(A.items[1].help) && !/^Want to leave/.test(A.items[1].help), 'leave box text');
   assert(A.conf.length < 200 && /Edit your response/.test(A.conf), 'short confirmation');
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
   assert(!find(A, 'For existing members'), 'old last-page title renamed');
