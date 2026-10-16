@@ -486,7 +486,8 @@ function updateFormTexts() {
   if (interests) { interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation(); log('research interests'); }
   const existing = byTitle(FormApp.ItemType.PAGE_BREAK, EXISTING_SECTION_TITLE) ||
                    byTitle(FormApp.ItemType.PAGE_BREAK, OLD_EXISTING_SECTION_TITLE);
-  if (existing) existing.asPageBreakItem().setTitle(EXISTING_SECTION_TITLE).setHelpText(existingMembersHelp_());
+  if (existing && existing.getTitle() !== EXISTING_SECTION_TITLE) existing.setTitle(EXISTING_SECTION_TITLE);
+  if (existing) existing.asPageBreakItem().setHelpText(existingMembersHelp_());
   const ref = byTitle(FormApp.ItemType.TEXT, Q.MEMBER_REF);
   if (ref) ref.asTextItem().setHelpText(MEMBER_REF_HELP);
   const leaveItem = byTitle(FormApp.ItemType.CHECKBOX, Q.LEAVE);
@@ -543,7 +544,9 @@ function ensureCoverPage_(form) {
   let cover = headers().find(i => i.getTitle() === COVER_TITLE) ||
               headers().find(i => OLD_COVER_TITLES.indexOf(i.getTitle()) >= 0);
   if (!cover) cover = form.getItemById(form.addSectionHeaderItem().getId());
-  cover.asSectionHeaderItem().setTitle(COVER_TITLE).setHelpText(coverText_());
+  // Only set the title when it differs: setTitle() clears formatting (e.g. bold) added in the Form editor.
+  if (cover.getTitle() !== COVER_TITLE) cover.setTitle(COVER_TITLE);
+  cover.asSectionHeaderItem().setHelpText(coverText_());
   if (cover.getIndex() !== 0) form.moveItem(cover.getIndex(), 0);
 
   let leave = headers().find(i => i.getTitle() === LEAVE_HEADER_TITLE);
