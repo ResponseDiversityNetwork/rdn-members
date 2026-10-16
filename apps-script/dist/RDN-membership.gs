@@ -504,8 +504,9 @@ function coverText_() {
     'It comes from ' + c + ': please add that address to your contacts.\n' +
     '\u2022 The same link is shown on the page after you submit (\u201cEdit your response\u201d). Please bookmark it.\n' +
     '\u2022 No email and no link? Write to ' + c + '. If our emails don\u2019t arrive: ' + CONFIG.INFO_URL + '#emails\n' +
-    '\u2022 Want to leave? With your personal link, go to the last page and tick \u2018Leave the network\u2019. ' +
-    'Without it, use the leave form: ' + leaveFormUrl_();
+    '\u2022 Want to leave? If you opened this form with your personal link, all required questions will be prefilled ' +
+    'and you can skip direct to the last page, tick \u201cLeave the network\u201d, and press Submit. ' +
+    'You can also leave with the Leave form: ' + leaveFormUrl_();
 }
 
 /** The leave form's public link, or the join page's Leave section if the leave form isn't set up. */
