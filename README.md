@@ -192,3 +192,32 @@ Editing the code directly in the Apps Script editor works too, but the change is
 | Failures of automatic runs | Google emails "Summary of failures for Google Apps Script" to rdn.projectbase@gmail.com; details under **Executions** |
 | Turn everything off | `removeTriggers` (and `stopInvites` during invitations) |
 
+
+### If access to the Google account is lost
+
+Everything (the script, the forms, both spreadsheets, the photo folder and the emails) belongs to rdn.projectbase@gmail.com. If nobody can sign in to it, for example because the system administrator leaves without handing over or the password and second factor are lost, the system keeps running on its own for a while, but nobody can approve members, change anything or fix problems. Preventing this is much easier than recovering from it.
+
+**Prevention (do this now, and check it once a year)**
+
+1. **At least two people can sign in.** The password, and the 2-step verification backup codes, are kept somewhere at least two organisers can reach, such as a shared password manager. Not only in one person's head or phone.
+2. **Recovery details point to the organisation, not to one person.** The account's recovery email and phone (myaccount.google.com → Security) should be ones the organisers still control if one of them leaves; ideally more than one person receives them. Update them whenever an organiser changes.
+3. **A second Google account has edit access to the key files.** Share the Apps Script project, the membership form, the photo form, the leave form, the private spreadsheet and the public spreadsheet with a second organiser's Google account as **Editor**. If the main account is lost, that person can still open, copy and run everything.
+4. **Inactive Account Manager.** In the account, set up Google's Inactive Account Manager (myaccount.google.com → Data & privacy → "Make a plan for your digital legacy") to notify trusted organisers, and share data with them, if the account is unused for some months.
+5. **The GitHub organisation has at least two owners,** so the site can still be changed.
+6. **Handover.** When the system administrator changes, the new one signs in, changes the password, generates new backup codes and checks steps 1–5.
+
+The code itself is safe: it is in this repo, and `dist/RDN-membership.gs` can be pasted into a new script project at any time.
+
+**If access is lost**
+
+1. **Try Google's account recovery first:** accounts.google.com/signin/recovery, from a device and location that have signed in to the account before. This works more often than expected, but can take days.
+2. **If a second account has edit access (prevention step 3),** that person can take over:
+   - open the script project and run `installTriggers` under their own account. The automation then runs as them, and emails are sent from their address. Run `removeTriggers` too, to stop the old account's triggers from also running if they still work;
+   - change `CONTACT_EMAIL` (and `CURATOR`, `LISTSERV_MANAGER` if needed) in `Config.gs`, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
+   - change the contact address on the join page (`join.qmd`).
+   Members' personal links keep working, because the forms themselves haven't changed. Later, move ownership of all files to a new shared account and run `installTriggers` there.
+3. **If nobody has access at all,** the system has to be rebuilt in a new account:
+   - create a new account (and do the prevention steps from the start), then follow `apps-script/SETUP.md` to set up new forms and spreadsheets;
+   - publish the new public tabs and change `DATA_URL` and `SUMMARY_URL` in `index.qmd`, and the form links in `join.qmd`;
+   - re-invite members. The old personal links stop working, so everyone must respond again. Use the latest available member list as the `Invites` tab: the public CSV gives names, institutions and places of members who chose to show them, and any list an organiser kept. The invitation system then pre-fills each member's details for them.
+   - The old account's forms, data and photos stay where they are. Ask Google to close the account if it can't be recovered, so that the personal data in it isn't kept indefinitely.
