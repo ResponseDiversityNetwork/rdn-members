@@ -212,12 +212,12 @@ The code itself is safe: it is in this repo, and `dist/RDN-membership.gs` can be
 
 1. **Try Google's account recovery first:** accounts.google.com/signin/recovery, from a device and location that have signed in to the account before. This works more often than expected, but can take days.
 2. **If a second account has edit access (prevention step 3),** that person can take over:
-   - open the script project and run `installTriggers` under their own account. The automation then runs as them, and emails are sent from their address. Run `removeTriggers` too, to stop the old account's triggers from also running if they still work;
+   - open the script project and run `installTriggers` under their own account. The automation then runs as them, and emails are sent from their address. (Triggers belong to the account that made them, so the old account's triggers can't be removed from here and may keep running too. That's harmless: the second run of each submission finds it already handled.);
    - change `CONTACT_EMAIL` (and `CURATOR`, `LISTSERV_MANAGER` if needed) in `Config.gs`, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
    - change the contact address on the join page (`join.qmd`).
    Members' personal links keep working, because the forms themselves haven't changed. Later, move ownership of all files to a new shared account and run `installTriggers` there.
 3. **If nobody has access at all,** the system has to be rebuilt in a new account:
    - create a new account (and do the prevention steps from the start), then follow `apps-script/SETUP.md` to set up new forms and spreadsheets;
    - publish the new public tabs and change `DATA_URL` and `SUMMARY_URL` in `index.qmd`, and the form links in `join.qmd`;
-   - re-invite members. The old personal links stop working, so everyone must respond again. Use the latest available member list as the `Invites` tab: the public CSV gives names, institutions and places of members who chose to show them, and any list an organiser kept. The invitation system then pre-fills each member's details for them.
-   - The old account's forms, data and photos stay where they are. Ask Google to close the account if it can't be recovered, so that the personal data in it isn't kept indefinitely.
+   - re-invite members. The old personal links stop working, so everyone must respond again. Build the `Invites` tab from the best list available: the old member list, the mailing list, and the public CSV (names, institutions, places, and emails of members who chose to show them). The invitation system then pre-fills each member's details for them.
+   - The old account's forms, data and photos stay where they are. Keep trying to recover the account, so that the personal data in it can be deleted; tell members in the re-invitation what happened.
