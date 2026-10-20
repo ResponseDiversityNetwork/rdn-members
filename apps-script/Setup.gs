@@ -76,7 +76,7 @@ function buildForm_(form) {
       .setValidation(minLen(2, 'Please enter a city.'));
   form.addTextItem().setTitle(Q.STATE)
       .setHelpText('Optional. Helps place you correctly, e.g. Cambridge, Massachusetts vs Cambridge, UK.');
-  form.addTextItem().setTitle(Q.COUNTRY).setRequired(true)
+  form.addTextItem().setTitle(Q.COUNTRY).setRequired(true).setHelpText(COUNTRY_HELP)
       .setValidation(minLen(2, 'Please enter a country.'));
   form.addTextItem().setTitle(Q.WEBSITE)
       .setHelpText('Full link starting with https://, e.g. https://orcid.org/0000-0000-0000-0000')
@@ -199,6 +199,8 @@ function updateFormTexts() {
   });
   const interests = byTitle(FormApp.ItemType.PARAGRAPH_TEXT, Q.INTERESTS);
   if (interests) { interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation(); log('research interests'); }
+  const country = byTitle(FormApp.ItemType.TEXT, Q.COUNTRY);
+  if (country) { country.asTextItem().setHelpText(COUNTRY_HELP); log('country'); }
   const existing = byTitle(FormApp.ItemType.PAGE_BREAK, EXISTING_SECTION_TITLE) ||
                    byTitle(FormApp.ItemType.PAGE_BREAK, OLD_EXISTING_SECTION_TITLE);
   if (existing && existing.getTitle() !== EXISTING_SECTION_TITLE) existing.setTitle(EXISTING_SECTION_TITLE);
@@ -212,6 +214,8 @@ function updateFormTexts() {
   Logger.log('Photo form: texts updated.');
 }
 
+
+const COUNTRY_HELP = 'Type your country\u2019s name in whatever form you like; we do the hard work of finding it on the map :)';
 
 const COVER_TITLE = 'Keeping track of your membership';
 const OLD_COVER_TITLES = ['Before you start: about our emails'];   // renamed by updateFormTexts

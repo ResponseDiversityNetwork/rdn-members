@@ -89,6 +89,7 @@ for (const run of [1, 2]) {
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
   assert(!find(A, 'For existing members'), 'old last-page title renamed');
   assert(/Joining: nothing to do/.test(find(A, 'Before you submit').help) && /Leaving with your personal link/.test(find(A, 'Before you submit').help), 'last page: what to do');
+  assert(/whatever form you like/.test(find(A, 'Country').help), 'country help');
   assert(/Please ignore this question/.test(find(A, 'Member reference').help), 'membership form: reference help says to ignore it');
   assert(/Only works if you opened this form with your personal link/.test(find(A, 'Leave the network').help) && /#leave|forms/.test(find(A, 'Leave the network').help), 'leave tick');
   assert(/rdn-members\/join.html#privacy/.test(find(A, 'Consent and privacy').help), 'privacy link');
