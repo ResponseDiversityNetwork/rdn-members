@@ -60,11 +60,11 @@ The curator needs **edit access to the private spreadsheet** ("RDN members (PRIV
 | When | What to do | Where |
 |---|---|---|
 | Email "[RDN] New member to approve" | Check the entry looks genuine (a real person with a plausible research connection), then tick **Approved**. The member is emailed and appears on the map within about 10 minutes. | `Members` tab |
-| Email with a note, e.g. "Could not find … on the map" | Correct **City**, **State/Province** or **Country**. The row is placed on the map again automatically. | `Members` tab |
+| Email "[RDN] Check entry", or a note such as "Could not find … on the map" | Correct **City**, **State/Province** or **Country**. The row is placed on the map again automatically. | `Members` tab |
 | Note "This email is on the old member list" | An existing member joined through the join page instead of their invitation. Approve if it's them. | `Members` tab |
 | Note "Same email as existing member" | Someone joined twice. Keep the newer row; ask the system administrator to remove the older one, or ask the member to leave with the older personal link. | `Members` tab |
-| Email "[RDN] Leave request" | Check the request is plausible (e.g. it came from the member's own address, or the member confirmed by email), then tick **Confirmed**. The member is removed and emailed. Leave it unticked if in doubt. | `Leave requests` tab |
-| Email "Photo with an unknown member reference" | Nothing to do; the photo was discarded. If the member writes, send them their **Photo link** (below). | – |
+| Email "[RDN] Request to leave" | Check the request is plausible (e.g. it came from the member's own address, or the member confirmed by email), then tick **Confirmed**. The member is removed and emailed. Leave it unticked if in doubt. | `Leave requests` tab |
+| Email "[RDN] Photo discarded: unknown member reference" | Nothing to do; the photo was discarded. If the member writes, send them their **Photo link** (below). | – |
 
 **Helping members**
 
