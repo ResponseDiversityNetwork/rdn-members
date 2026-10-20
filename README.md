@@ -200,16 +200,18 @@ Everything (the script, the forms, both spreadsheets, the photo folder and the e
 **Prevention (do this now, and check it once a year)**
 
 1. **Others already have edit access to the key files.** The private spreadsheet is shared with two other leadership team members. If the main account is lost, either of them can copy the private spreadsheet and set up a new Google account to manage the membership.
-2. **Inactive Account Manager.** Three members of the RDN Leadership Team are set up in Google's Inactive Account Manager (myaccount.google.com → Data & privacy → "Make a plan for your digital legacy"). If the account is unused for the period set in the plan, they are notified automatically and can download the data the plan shares with them.
-3. **The GitHub organisation has at least two owners,** so the site can still be changed.
-4. **Handover.** When the system administrator changes, the new one signs in, changes the password, generates new backup codes and checks steps 1–3.
+2. **Someone else can take over the running system.** The Apps Script project, the membership form, the photo form and the leave form are also shared with at least one of those leadership team members, as **Editor**. If the main account is lost, they can then keep the system running under their own account (see "If access is lost", point 2), and members' personal links keep working.
+3. **The account is used regularly.** The system administrator signs in to rdn.projectbase@gmail.com at least every two months and does something in it (reads an email, opens the private spreadsheet). Scripts running on their own probably don't count as activity for Google, and the curator works in their own account, so without this the account could look unused and set off the Inactive Account Manager plan (step 4), or, after two years, Google's deletion of inactive accounts. A recurring calendar reminder helps.
+4. **Inactive Account Manager.** Three members of the RDN Leadership Team are set up in Google's Inactive Account Manager (myaccount.google.com → Data & privacy → "Make a plan for your digital legacy"). If the account is unused for the period set in the plan, they are notified automatically and can download the data the plan shares with them.
+5. **The GitHub organisation has at least two owners,** so the site can still be changed.
+6. **Handover.** When the system administrator changes, the new one signs in, changes the password, generates new backup codes and checks steps 1–5.
 
 The code itself is safe: it is in this repo, and `dist/RDN-membership.gs` can be pasted into a new script project at any time.
 
 **If access is lost**
 
 1. **Try Google's account recovery first:** accounts.google.com/signin/recovery, from a device and location that have signed in to the account before. This works more often than expected, but can take days.
-2. **If a second account has edit access to the script project and the forms** (at present only the private spreadsheet is shared), that person can take over:
+2. **If a second account has edit access to the script project and the forms** (prevention step 2), that person can take over:
    - open the script project and run `installTriggers` under their own account. The automation then runs as them, and emails are sent from their address. (Triggers belong to the account that made them, so the old account's triggers can't be removed from here and may keep running too. That's harmless: the second run of each submission finds it already handled.);
    - change `CONTACT_EMAIL` (and `CURATOR`, `LISTSERV_MANAGER` if needed) in `Config.gs`, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
    - change the contact address on the join page (`join.qmd`).
