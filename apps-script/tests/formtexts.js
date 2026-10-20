@@ -40,7 +40,7 @@ function mkForm(id, layout) {
 // The old full membership form, as both forms looked before 16 Oct (Form B also had the upload question).
 const oldLayout = withPhoto => add => {
   add(T.SECTION_HEADER, 'Before you start: about our emails'); add(T.PAGE_BREAK, 'About you');
-  add(T.TEXT, 'Full name'); add(T.TEXT, 'Email address'); add(T.PARAGRAPH_TEXT, 'Research interests');
+  add(T.TEXT, 'Full name'); add(T.TEXT, 'Email address'); add(T.TEXT, 'Country'); add(T.PARAGRAPH_TEXT, 'Research interests');
   if (withPhoto) add(T.FILE_UPLOAD, 'Photo');
   add(T.PAGE_BREAK, 'Your research');
   add(T.MULTIPLE_CHOICE, 'Career stage').setChoiceValues(['PhD student', 'Postdoc', 'Mid/senior researcher']);
