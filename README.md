@@ -1,17 +1,25 @@
 # rdn-members
 
-The public member map for the Response Diversity Network.
-Site: https://responsediversitynetwork.github.io/rdn-members/
+The repository of the membership system for the Response Diversity Network.
 
-- `index.qmd` is the map page, built with Quarto, Observable JS and Leaflet. The visitor's browser does all the work, so there is no server.
-- `join.qmd` explains how to join, update and leave, and holds the privacy notice.
-- `apps-script/` holds the Google Apps Script code (a copy for version control; it runs in the rdn.projectbase account).
-- `data/demo-members.csv` holds fictional members, used while `DATA_URL` in `index.qmd` is `null`.
-- `.github/workflows/publish.yml` renders the site and deploys it to GitHub Pages on every push to `main`.
+**Purpose.** To keep an up-to-date list of the network's members that members manage themselves, to show the network to the world on a public map, and to do this with as little manual work, and as little exposure of personal data, as possible.
 
-## Where the real data comes from
+**What it does**
 
-The page never sees the private membership sheet. RDN's Apps Script (in the rdn.projectbase@gmail.com account) writes a **public subset** to a separate Google Sheet:
+- **Joining:** anyone can join with a Google Form, without signing in. A curator checks each new member before they appear publicly.
+- **Updating:** each member gets a personal link, shown after submitting and sent by email, to change their entry at any time.
+- **Photos:** members can add, change or remove a photo with a small separate form.
+- **Leaving:** members can leave at once with their personal link, or ask with a leave form, which a curator confirms.
+- **Public map:** a searchable, filterable map of members who agreed to be shown, with only the details they chose, plus overall counts by country, continent and career stage. Site: https://responsediversitynetwork.github.io/rdn-members/
+- **Join page:** how to join, update and leave, and the privacy notice.
+- **Inviting existing members:** members of the old list receive personal invitations with their details already filled in, sent and followed up automatically.
+- **Mailing list:** records who wants to be on the RDN mailing list, for the list manager.
+
+**How it is built.** Google Forms, Google Sheets and Google Apps Script in the network's own Google account (rdn.projectbase@gmail.com) do the data handling and send the emails. The map and join pages are a Quarto website in this repository, published with GitHub Pages; the map reads a public subset of the data, published from Google Sheets. There is no server to maintain and no cost.
+
+## Privacy
+
+Persons use a google form to enter their information. This information goes into a private membership sheet. RDN's Apps Script (in the rdn.projectbase@gmail.com account) writes a **public subset** to a separate Google Sheet:
 
 - only members who consented to the map;
 - only the fields each member agreed to show;
@@ -36,15 +44,10 @@ A second tab, `summary`, published as its own CSV (`SUMMARY_URL`), holds counts 
 
 Filter options are built from the data, so a new answer option in the form shows up as a filter automatically.
 
-## Preview locally
-
-```
-quarto preview
-```
 
 ## Roles
 
-The work is split into two roles, which can be held by different people:
+The ongoing work is split into two roles, which can be held by different people:
 
 - **System administrator:** keeps the system running and changes it. Works in the Apps Script project, the forms' settings, the Google account and this repo.
 - **Curator:** looks after the members. Works only in two tabs of the private spreadsheet and answers members' questions.
