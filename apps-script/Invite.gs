@@ -7,7 +7,7 @@
  * 2. Run prepareInvites(). It adds tracking columns, gives each row a secret member
  *    reference, and flags rows it can't invite (no or invalid email, duplicate email).
  *    The Status and Comments columns are ignored.
- * 3. Run sendTestInvite(). It sends the first row's invitation to CONFIG.CURATOR only.
+ * 3. Run sendTestInvite(). It sends the first row's invitation to CONFIG.ADMIN only.
  * 4. Run startInvites(). It sends about 60 invitations a day (keeping email quota for replies), and
  *    sets a daily timer that continues until everyone is invited. The timer also sends one
  *    reminder REMINDER_AFTER_DAYS later to anyone who hasn't responded.
@@ -134,11 +134,11 @@ function sendInvite_(to, r, isReminder) {
   MailApp.sendEmail(mailOptions_({to, subject: m.subject, body: text, htmlBody: html}));
 }
 
-/** Step 3. Sends the first ready row's invitation to CONFIG.CURATOR only. */
+/** Step 3. Sends the first ready row's invitation to CONFIG.ADMIN only. */
 function sendTestInvite() {
   const r = readInvites_().rows.find(x => x['Invite state'] === 'ready');
   if (!r) throw new Error('No row is "ready". Run prepareInvites() first.');
-  sendInvite_(CONFIG.CURATOR, r, false);
+  sendInvite_(CONFIG.ADMIN, r, false);
   Logger.log('Test invitation for row ' + r._row + ' (' + r['Name'] + ') sent to ' + CONFIG.CURATOR);
 }
 

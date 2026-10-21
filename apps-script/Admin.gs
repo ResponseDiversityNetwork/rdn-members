@@ -127,6 +127,7 @@ function diagnose() {
   L('Running as: ' + Session.getEffectiveUser().getEmail());
   L('Triggers: ' + (ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction()).join(', ') || 'none'));
   L('Emails left today: ' + MailApp.getRemainingDailyQuota());
+  L('Curator emails go to: ' + CONFIG.CURATOR + '; system administrator: ' + CONFIG.ADMIN);
   const formA = formFor_('A');
   L('Membership form: ' + formA.getTitle() + ' | ' + formA.getPublishedUrl());
   const m = readMembers_();

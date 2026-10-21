@@ -11,7 +11,12 @@ const CONFIG = {
   REPLY_TO: '',
   CONTACT_EMAIL: 'rdn.projectbase@gmail.com',   // shown to members as the address to write to
   LISTSERV_MANAGER: 'owen.petchey@uzh.ch',
-  CURATOR: 'owen.petchey@uzh.ch',
+  ADMIN: 'owen.petchey@uzh.ch',                 // system administrator: gets test invitations
+  // The curator's address is kept out of this (public) code: set it as the script property
+  // CURATOR_EMAIL (Project Settings > Script properties). Until it is set, curator emails go to ADMIN.
+  get CURATOR() {
+    return PropertiesService.getScriptProperties().getProperty('CURATOR_EMAIL') || this.ADMIN;
+  },
   // Links in member emails point to this repo's GitHub Pages site (rdn-members).
   MAP_URL: 'https://responsediversitynetwork.github.io/rdn-members/',
   INFO_URL: 'https://responsediversitynetwork.github.io/rdn-members/join.html',

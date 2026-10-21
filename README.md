@@ -54,9 +54,14 @@ The ongoing work is split into two roles, which can be held by different people:
 
 The curator is not responsible for anything in the System administration section.
 
+**Current roles**
+
+- System administrator: Owen Petchey
+- Curator: Takehiro Sasaki
+
 ## Curator roles and responsibilities
 
-The curator needs **edit access to the private spreadsheet** ("RDN members (PRIVATE, do not share)"), shared from rdn.projectbase@gmail.com, and receives the curator emails (the `CURATOR` address in `Config.gs`). Nothing else is needed: no access to the script, the forms or this repo.
+The curator needs **edit access to the private spreadsheet** ("RDN members (PRIVATE, do not share)"), shared from rdn.projectbase@gmail.com, and receives the curator emails. The curator's address is set by the system administrator as the script property `CURATOR_EMAIL` (Apps Script → Project Settings → Script properties), so it isn't published in this repo. Nothing else is needed: no access to the script, the forms or this repo.
 
 **Regular tasks**
 
@@ -166,7 +171,8 @@ Editing the code directly in the Apps Script editor works too, but the change is
 | Wording of an email | `Emails.gs` (invitations: `Invite.gs`) |
 | Form descriptions, cover page, help texts | `Setup.gs` (the text functions and constants), then `updateFormTexts` |
 | Answer options (career stage, systems, organisms …) | `OPTIONS` in `Config.gs`, then `updateFormTexts`. New options appear in the map's filters automatically. |
-| Curator or mailing-list address, sender name | `CONFIG` in `Config.gs` |
+| Curator's address | Script property `CURATOR_EMAIL` (Project Settings → Script properties); no code change. Check with `diagnose`. |
+| System administrator's or mailing-list address, sender name | `ADMIN`, `LISTSERV_MANAGER`, `SENDER_NAME` in `Config.gs` |
 | End of the test phase | `TEST_PHASE: false` in `Config.gs`; empty `_test-banner.qmd` |
 | Mailing list ready | Run `emailMailingListRequests`, then set `LISTSERV_NOTIFY_EACH: true` |
 | Map page, join page, privacy notice | `index.qmd`, `join.qmd`; push to publish |
@@ -212,7 +218,7 @@ The code itself is safe: it is in this repo, and `dist/RDN-membership.gs` can be
 1. **Try Google's account recovery first:** accounts.google.com/signin/recovery, from a device and location that have signed in to the account before. This works more often than expected, but can take days.
 2. **If a second account has edit access to the script project and the forms** (prevention step 1), that person can take over:
    - open the script project and run `installTriggers` under their own account. The automation then runs as them, and emails are sent from their address. (Triggers belong to the account that made them, so the old account's triggers can't be removed from here and may keep running too. That's harmless: the second run of each submission finds it already handled.);
-   - change `CONTACT_EMAIL` (and `CURATOR`, `LISTSERV_MANAGER` if needed) in `Config.gs`, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
+   - change `CONTACT_EMAIL` (and `ADMIN`, `LISTSERV_MANAGER` if needed) in `Config.gs`, and the `CURATOR_EMAIL` script property if needed, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
    - change the contact address on the join page (`join.qmd`).
    Members' personal links keep working, because the forms themselves haven't changed. Later, move ownership of all files to a new shared account and run `installTriggers` there.
 3. **If nobody has access at all,** the system has to be rebuilt in a new account:

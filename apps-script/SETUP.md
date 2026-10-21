@@ -124,7 +124,7 @@ Do this after section 7, step 1. The invitation emails link to the rdn-members s
 
 1. In the **private** spreadsheet, choose **File → Import → Upload**, pick the old member list, and select **Insert new sheet(s)**. Rename the new tab to `Invites`. The headings must stay as they are: Name, Organisation, Country, City, State/Province, Email, Status, Comments, Date joined.
 2. Run `prepareInvites`. It adds tracking columns and marks each row `ready` or `not invitable`. The reason for each `not invitable` row is in **Invite note**, for example a missing or duplicate email. The Status and Comments columns are ignored. Fix those rows if you can, then run it again.
-3. Run `sendTestInvite`. It sends the first row’s invitation to you (the curator address) only. Open the link and check that the answers are filled in.
+3. Run `sendTestInvite`. It sends the first row’s invitation to you (the `ADMIN` address) only. Open the link and check that the answers are filled in.
 4. Run `startInvites`. It sends about 60 invitations a day, so 164 take three days. A Gmail account can send about 100 emails a day, and the rest are kept for replies to the invitations. A daily timer then sends one reminder, 14 days after the invitation, to anyone who hasn't responded, and switches itself off when everything is sent.
 5. Check progress at any time in the `Invites` tab, or run `inviteProgress`.
 
@@ -139,7 +139,7 @@ Do this before importing the real list, with test rows only, so no real member c
    - you again, with a second address you can read, a city and state (e.g. Cambridge, Massachusetts, USA), and a date such as 2021-05-01;
    - a row with no email, to check that it gets flagged.
 2. Run `prepareInvites`. Two rows should be `ready` and one `not invitable` ("no email").
-3. Run `sendTestInvite`. One invitation arrives at the curator address. Open its link: name, email, organisation, city, state and country should be filled in, with a member reference on the last page.
+3. Run `sendTestInvite`. One invitation arrives at the `ADMIN` address. Open its link: name, email, organisation, city, state and country should be filled in, with a member reference on the last page.
 4. Run `startInvites`. Both test addresses get an invitation, and a daily `inviteTick` timer appears under **Triggers**.
 5. Reply to the first invitation through its link. Fill in the rest and submit. Check that:
    - you get a "Your Response Diversity Network membership is updated" email, and no curator email;

@@ -167,7 +167,7 @@ function makeEnv() {
   const fL = new Form(false, Q, O); fL.items = []; formsById[fL.id] = fL;   // the leave form (answers matched by title)
   fA.tab = priv.insertSheet('Responses A (no photo)'); fA.tab.setFrozenRows(1);
   Object.assign(props, {FORM_A_ID: fA.id, FORM_B_ID: fB.id, PRIVATE_SS_ID: priv.id, PUBLIC_SS_ID: pub.id,
-    RESPONSES_A_TAB: 'Responses A (no photo)', RESPONSES_B_TAB: '', PHOTO_FOLDER_ID: 'photos', LEAVE_FORM_ID: fL.id});
+    RESPONSES_A_TAB: 'Responses A (no photo)', RESPONSES_B_TAB: '', PHOTO_FOLDER_ID: 'photos', LEAVE_FORM_ID: fL.id, CURATOR_EMAIL: 'curator@example.org'});
   const upload = (ready = true) => { const f = {id: id('upl'), name: 'me.jpg', folder: 'uploads', trashed: false, thumbReady: ready}; files[f.id] = f; return f.id; };
 
   return {ctx, run, mails, log, priv, pub, fA, fB, fL, files, triggers: () => triggers, upload, O, Q};
