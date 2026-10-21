@@ -100,9 +100,8 @@ function buildForm_(form) {
   form.addMultipleChoiceItem().setTitle(Q.SHOW_ON_MAP).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO]);
   form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
-  form.addMultipleChoiceItem().setTitle(Q.MAILING_LIST).setRequired(true)
-      .setChoiceValues([OPTIONS.YES, OPTIONS.NO])
-      .setHelpText('If you choose Yes, we ask the mailing-list manager to add you.');
+  form.addCheckboxItem().setTitle(Q.MAILING_OPT_OUT).setChoiceValues([OPTIONS.MAILING_OPT_OUT])
+      .setHelpText(OPTIONS.MAILING_HELP);
   form.addCheckboxItem().setTitle(Q.PRIVACY_OK).setRequired(true).setChoiceValues([OPTIONS.PRIVACY_OK]);
 
   // Section 4: only used through a personal link
@@ -166,6 +165,31 @@ function formDescription_() {
     'About membership and privacy: ' + CONFIG.INFO_URL;
 }
 
+/**
+ * Replaces the old opt-in mailing-list question (Yes/No) with the opt-out tick box, in the same place.
+ * Members who chose No before keep "No" in the Members tab until they next submit through their
+ * personal link; they are listed in the log so they can be told to tick the new box.
+ */
+function ensureMailingOptOut_(form) {
+  const old = form.getItems(FormApp.ItemType.MULTIPLE_CHOICE).find(i => i.getTitle() === Q.MAILING_LIST);
+  let item = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.MAILING_OPT_OUT);
+  if (!item) {
+    item = form.getItemById(form.addCheckboxItem().setTitle(Q.MAILING_OPT_OUT).getId());
+    if (old) form.moveItem(item.getIndex(), old.getIndex());
+  }
+  item.asCheckboxItem().setChoiceValues([OPTIONS.MAILING_OPT_OUT]).setHelpText(OPTIONS.MAILING_HELP);
+  if (old) {
+    form.deleteItem(old);
+    let said = [];
+    try { said = readMembers_().rows.filter(r => r['Mailing list'] === OPTIONS.NO).map(r => r['Name'] + ' <' + r['Email'] + '>'); }
+    catch (e) { /* no Members tab yet */ }
+    Logger.log('Mailing-list question is now opt-out. ' + (said.length
+      ? 'These members had chosen No; ask them to tick "' + OPTIONS.MAILING_OPT_OUT + '" next time they use their personal link, ' +
+        'otherwise they will be added: ' + said.join(', ')
+      : 'No member had chosen No.'));
+  }
+}
+
 /** The short privacy note at the top of the consent section. */
 function consentHelp_() {
   return 'We store your answers in RDN\'s Google account (Google Forms, Sheets and Drive), which may be ' +
@@ -193,6 +217,9 @@ function updateFormTexts() {
   if (fieldsItem) { fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP); log('"' + Q.SHOW_FIELDS + '"'); }
   const career = byTitle(FormApp.ItemType.MULTIPLE_CHOICE, Q.CAREER);
   if (career) { career.asMultipleChoiceItem().setChoiceValues(OPTIONS.CAREER); log('"' + Q.CAREER + '" options'); }
+  const regions = byTitle(FormApp.ItemType.CHECKBOX, Q.REGIONS);
+  if (regions) { regions.asCheckboxItem().setChoiceValues(OPTIONS.REGIONS); log('"' + Q.REGIONS + '" options'); }
+  ensureMailingOptOut_(form); log('mailing-list question');
   [[Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS]].forEach(([title, opts]) => {
     const it = byTitle(FormApp.ItemType.CHECKBOX, title);
     if (it) { it.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.OTHER_HELP); log('"' + title + '" options'); }

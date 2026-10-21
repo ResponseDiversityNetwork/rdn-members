@@ -9,7 +9,7 @@ toc: true
 
 ## Join
 
-**[Open the membership form](https://forms.gle/yhXSwWUDRqEu8BFNA)**. It takes about five minutes and needs no sign-in. You choose whether you appear on the public map, which details are shown, and whether you join the mailing list.
+**[Open the membership form](https://forms.gle/yhXSwWUDRqEu8BFNA)**. It takes about five minutes and needs no sign-in. You choose whether you appear on the public map and which details are shown. You're added to the RDN mailing list, a moderated list where members share information, unless you opt out in the form.
 
 New entries appear on the map once a curator has checked them, usually within a few days.
 
@@ -58,7 +58,7 @@ You don't need the email to manage your entry: the "Edit your response" link on 
 - an optional photo (added with the photo form);
 - your consent choices.
 
-**Why.** To run the network: to keep a member list, to show a public map of members (only if you agree), and to add you to the mailing list (only if you ask). The legal basis is your consent (Swiss revFADP; EU GDPR Art. 6(1)(a)).
+**Why.** To run the network: to keep a member list, to show a public map of members (only if you agree), and to add you to the mailing list (unless you opt out). The legal basis is your consent (Swiss revFADP; EU GDPR Art. 6(1)(a)).
 
 **What is public.** Only if you tick "show me on the public map", and only the details you choose. Your location is shown at city level, never as an address. The full record is never published. The map page also shows overall counts, such as the number of members per country, continent and career stage. These counts include all members but never name anyone, and countries with fewer than three members are not listed.
 

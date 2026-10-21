@@ -62,7 +62,8 @@ const Q = {
   REGIONS: 'Regions of fieldwork',
   SHOW_ON_MAP: 'Show me on the public member map',
   SHOW_FIELDS: 'Details I agree to show on the map',
-  MAILING_LIST: 'Add me to the RDN mailing list',
+  MAILING_LIST: 'Add me to the RDN mailing list',   // old opt-in question; updateFormTexts replaces it
+  MAILING_OPT_OUT: 'RDN mailing list',               // opt-out checkbox
   PRIVACY_OK: 'Privacy',
   MEMBER_REF: 'Member reference',
   LEAVE: 'Leave the network',
@@ -92,13 +93,20 @@ const OPTIONS = {
             'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
   // Taxa, from the RDN response diversity survey (Oikos appendix S1, question 8f). "Multiple" is left out:
   // members can tick several.
-  ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects', 'Terrestrial mammals', 'Marine mammals', 'Fish',
+  ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects',
+              'Other invertebrates (e.g. crustaceans, molluscs, worms)', 'Terrestrial mammals', 'Marine mammals', 'Fish',
               'Reptiles', 'Amphibians', 'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
   LEVELS: ['Individuals/traits', 'Populations', 'Communities', 'Ecosystems', 'Social-ecological systems'],
   STRESSORS: ['Warming', 'Climate extremes/drought', 'Land-use change', 'Pollution', 'Invasive species',
               'Harvesting', 'Multiple stressors'],
-  REGIONS: ['Europe', 'North America', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
+  REGIONS: ['Europe', 'North America', 'Central America and the Caribbean', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
+  MAILING_OPT_OUT: 'Please don\u2019t add me to the RDN mailing list',
+  MAILING_HELP: 'Members are added to the RDN mailing list unless they tick the box below. The list is a place ' +
+                'for members to share information with each other: meetings and workshops, calls for collaboration, ' +
+                'opportunities and news from the network. It is moderated. Tick the box if you would rather just be ' +
+                'on the member map. You can change this at any time with your personal link. Emails about your ' +
+                'membership itself, such as your personal link, are sent either way.',
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
   OTHER_HELP: 'If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d ' +
               '(a short phrase or a few keywords) on the \u201cAbout you\u201d page.',

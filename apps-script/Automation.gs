@@ -76,6 +76,7 @@ function handleSubmit_(formKey, response) {
     const old = row ? Object.assign({}, row) : null;
     const rec = row || {};
     ANSWER_TO_COL.forEach(([q, c]) => { rec[c] = joinList_(ans[q]); });
+    rec['Mailing list'] = mailingListAnswer_(ans);
     rec['Email'] = String(rec['Email']).trim().toLowerCase();
     rec['Form'] = formKey;
     rec['Response ID'] = response.getId();

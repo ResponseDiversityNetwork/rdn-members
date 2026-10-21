@@ -48,6 +48,8 @@ const oldLayout = withPhoto => add => {
   add(T.CHECKBOX, 'Organisms').setChoiceValues(['Plants', 'Vertebrates']);
   add(T.PAGE_BREAK, 'Consent and privacy');
   add(T.CHECKBOX, 'Details I agree to show on the map').setChoiceValues(['Name', 'Website', 'Photo']);
+  add(T.MULTIPLE_CHOICE, 'Add me to the RDN mailing list').setChoiceValues(['Yes', 'No']);
+  add(T.CHECKBOX, 'Regions of fieldwork').setChoiceValues(['Europe', 'North America', 'South America']);
   add(T.PAGE_BREAK, 'For existing members'); add(T.TEXT, 'Member reference'); add(T.CHECKBOX, 'Leave the network');
 };
 const forms = {A: mkForm('A', oldLayout(false)), B: mkForm('B', oldLayout(true))};
@@ -89,6 +91,12 @@ for (const run of [1, 2]) {
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
   assert(!find(A, 'For existing members'), 'old last-page title renamed');
   assert(/Joining: nothing to do/.test(find(A, 'Before you submit').help) && /Leaving with your personal link/.test(find(A, 'Before you submit').help), 'last page: what to do');
+  assert(!find(A, 'Add me to the RDN mailing list'), 'old mailing-list question removed');
+  const ml = find(A, 'RDN mailing list');
+  assert(ml && ml.type === 'CHECKBOX' && A.items.indexOf(ml) === A.items.indexOf(find(A, 'Details I agree to show on the map')) + 1, 'opt-out box in the old place');
+  assert(/moderated/.test(ml.help) && /share information/.test(ml.help) && ml.choices.length === 1, 'mailing-list help');
+  assert(find(A, 'Regions of fieldwork').choices[2] === 'Central America and the Caribbean', 'Central America after North America');
+  assert(find(A, 'Organisms').choices.indexOf('Other invertebrates (e.g. crustaceans, molluscs, worms)') === find(A, 'Organisms').choices.indexOf('Insects') + 1, 'other invertebrates after insects');
   assert(/whatever form you like/.test(find(A, 'Country').help), 'country help');
   assert(/Please ignore this question/.test(find(A, 'Member reference').help), 'membership form: reference help says to ignore it');
   assert(/Only works if you opened this form with your personal link/.test(find(A, 'Leave the network').help) && /#leave|forms/.test(find(A, 'Leave the network').help), 'leave tick');

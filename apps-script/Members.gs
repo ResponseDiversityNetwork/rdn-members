@@ -26,8 +26,14 @@ const ANSWER_TO_COL = [
   [Q.INTERESTS, 'Research interests'], [Q.CAREER, 'Career stage'], [Q.APPROACH, 'Research approach'],
   [Q.SYSTEMS, 'Systems'], [Q.ORGANISMS, 'Organisms'], [Q.LEVELS, 'Level of organisation'],
   [Q.STRESSORS, 'Stressors studied'], [Q.REGIONS, 'Regions of fieldwork'],
-  [Q.SHOW_ON_MAP, 'Show on map'], [Q.SHOW_FIELDS, 'Details shown'], [Q.MAILING_LIST, 'Mailing list'],
-];
+  [Q.SHOW_ON_MAP, 'Show on map'], [Q.SHOW_FIELDS, 'Details shown'],
+];   // 'Mailing list' comes from mailingListAnswer_()
+
+/** "Yes" or "No" for the Mailing list column: opt-out box, or the old opt-in question on older responses. */
+function mailingListAnswer_(ans) {
+  if (ans[Q.MAILING_LIST] !== undefined) return joinList_(ans[Q.MAILING_LIST]);
+  return [].concat(ans[Q.MAILING_OPT_OUT] || []).length ? OPTIONS.NO : OPTIONS.YES;
+}
 
 function membersSheet_() {
   const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));

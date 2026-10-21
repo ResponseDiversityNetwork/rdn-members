@@ -15,7 +15,7 @@ const base = (o = {}) => Object.assign({
   [Q.WEBSITE]: 'orcid.org/0000-0001', [Q.INTERESTS]: 'Response diversity of plankton under heatwaves.',
   [Q.CAREER]: 'Postdoc', [Q.APPROACH]: ['Theory/modelling'], [Q.SYSTEMS]: ['Freshwater', 'Marine'],
   [Q.SHOW_ON_MAP]: O.YES, [Q.SHOW_FIELDS]: ['Name', 'Institution', 'Research attributes'],
-  [Q.MAILING_LIST]: O.YES, [Q.PRIVACY_OK]: [O.PRIVACY_OK],
+  [Q.PRIVACY_OK]: [O.PRIVACY_OK],
 }, o);
 const submit = (key, r) => run(`handleSubmit_('${key}', __r)`.replace('__r', '__resp')) ;
 E.ctx.__go = (key, resp) => E.ctx.handleSubmit_(key, resp);
@@ -60,7 +60,7 @@ check(s.find(r => r.metric === 'members').count === 1 && s.find(r => r.metric ==
 check(!s.some(r => r.metric === 'country'), 'country with <3 members not listed in summary');
 
 console.log('3. Alice edits: new email, leaves mailing list, shows website');
-fA.edit(a, {[Q.EMAIL]: 'alice@new.org', [Q.MAILING_LIST]: O.NO, [Q.SHOW_FIELDS]: ['Name', 'Website or ORCID link', 'Research attributes']});
+fA.edit(a, {[Q.EMAIL]: 'alice@new.org', [Q.MAILING_OPT_OUT]: [O.MAILING_OPT_OUT], [Q.SHOW_FIELDS]: ['Name', 'Website or ORCID link', 'Research attributes']});
 go('A', a);
 m = members(); ms = newMails();
 check(m.length === 1 && m[0].Email === 'alice@new.org' && m[0].Approved === true, 'same row updated, still approved');
@@ -170,11 +170,14 @@ sh.set(danRow, 1, true);
 E.ctx.onSheetEdit({range: sh.getRange(danRow, 1), value: 'TRUE', oldValue: 'FALSE'});
 ms = newMails();
 check(ms.some(x => /Please subscribe/.test(x.subject) && x.to === 'owen.petchey@uzh.ch'), 'manager asked to subscribe on approval');
-fA.edit(d, {[Q.MAILING_LIST]: O.NO}); go('A', d);
+fA.edit(d, {[Q.MAILING_OPT_OUT]: [O.MAILING_OPT_OUT]}); go('A', d);
+check(members().find(r => r.Email === 'dan@example.org')['Mailing list'] === 'No', 'opt-out box gives No');
 check(newMails().some(x => /Please unsubscribe/.test(x.subject)), 'manager asked to unsubscribe on opt-out');
 run('emailMailingListRequests()');
 ms = newMails();
 check(ms.length === 1 && /members to subscribe/.test(ms[0].subject) && ms[0].body.includes('Carol') === false, 'bulk list email sent');
+
+check(run(`mailingListAnswer_({'${Q.MAILING_LIST}': 'No'})`) === 'No' && run('mailingListAnswer_({})') === 'Yes', 'old opt-in answers still read; no tick = on the list');
 
 console.log('10b. Old-list member joins via the join page; invite links export');
 inv.appendRow(['Erin Eklund', 'Uppsala University', 'Sweden', 'Uppsala', '', 'erin@example.org', 'active', '', '2019-02-02']);

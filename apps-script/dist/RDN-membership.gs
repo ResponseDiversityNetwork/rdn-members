@@ -65,7 +65,8 @@ const Q = {
   REGIONS: 'Regions of fieldwork',
   SHOW_ON_MAP: 'Show me on the public member map',
   SHOW_FIELDS: 'Details I agree to show on the map',
-  MAILING_LIST: 'Add me to the RDN mailing list',
+  MAILING_LIST: 'Add me to the RDN mailing list',   // old opt-in question; updateFormTexts replaces it
+  MAILING_OPT_OUT: 'RDN mailing list',               // opt-out checkbox
   PRIVACY_OK: 'Privacy',
   MEMBER_REF: 'Member reference',
   LEAVE: 'Leave the network',
@@ -95,13 +96,20 @@ const OPTIONS = {
             'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
   // Taxa, from the RDN response diversity survey (Oikos appendix S1, question 8f). "Multiple" is left out:
   // members can tick several.
-  ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects', 'Terrestrial mammals', 'Marine mammals', 'Fish',
+  ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects',
+              'Other invertebrates (e.g. crustaceans, molluscs, worms)', 'Terrestrial mammals', 'Marine mammals', 'Fish',
               'Reptiles', 'Amphibians', 'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
   LEVELS: ['Individuals/traits', 'Populations', 'Communities', 'Ecosystems', 'Social-ecological systems'],
   STRESSORS: ['Warming', 'Climate extremes/drought', 'Land-use change', 'Pollution', 'Invasive species',
               'Harvesting', 'Multiple stressors'],
-  REGIONS: ['Europe', 'North America', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
+  REGIONS: ['Europe', 'North America', 'Central America and the Caribbean', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
+  MAILING_OPT_OUT: 'Please don\u2019t add me to the RDN mailing list',
+  MAILING_HELP: 'Members are added to the RDN mailing list unless they tick the box below. The list is a place ' +
+                'for members to share information with each other: meetings and workshops, calls for collaboration, ' +
+                'opportunities and news from the network. It is moderated. Tick the box if you would rather just be ' +
+                'on the member map. You can change this at any time with your personal link. Emails about your ' +
+                'membership itself, such as your personal link, are sent either way.',
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
   OTHER_HELP: 'If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d ' +
               '(a short phrase or a few keywords) on the \u201cAbout you\u201d page.',
@@ -206,8 +214,14 @@ const ANSWER_TO_COL = [
   [Q.INTERESTS, 'Research interests'], [Q.CAREER, 'Career stage'], [Q.APPROACH, 'Research approach'],
   [Q.SYSTEMS, 'Systems'], [Q.ORGANISMS, 'Organisms'], [Q.LEVELS, 'Level of organisation'],
   [Q.STRESSORS, 'Stressors studied'], [Q.REGIONS, 'Regions of fieldwork'],
-  [Q.SHOW_ON_MAP, 'Show on map'], [Q.SHOW_FIELDS, 'Details shown'], [Q.MAILING_LIST, 'Mailing list'],
-];
+  [Q.SHOW_ON_MAP, 'Show on map'], [Q.SHOW_FIELDS, 'Details shown'],
+];   // 'Mailing list' comes from mailingListAnswer_()
+
+/** "Yes" or "No" for the Mailing list column: opt-out box, or the old opt-in question on older responses. */
+function mailingListAnswer_(ans) {
+  if (ans[Q.MAILING_LIST] !== undefined) return joinList_(ans[Q.MAILING_LIST]);
+  return [].concat(ans[Q.MAILING_OPT_OUT] || []).length ? OPTIONS.NO : OPTIONS.YES;
+}
 
 function membersSheet_() {
   const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
@@ -390,9 +404,8 @@ function buildForm_(form) {
   form.addMultipleChoiceItem().setTitle(Q.SHOW_ON_MAP).setRequired(true)
       .setChoiceValues([OPTIONS.YES, OPTIONS.NO]);
   form.addCheckboxItem().setTitle(Q.SHOW_FIELDS).setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP);
-  form.addMultipleChoiceItem().setTitle(Q.MAILING_LIST).setRequired(true)
-      .setChoiceValues([OPTIONS.YES, OPTIONS.NO])
-      .setHelpText('If you choose Yes, we ask the mailing-list manager to add you.');
+  form.addCheckboxItem().setTitle(Q.MAILING_OPT_OUT).setChoiceValues([OPTIONS.MAILING_OPT_OUT])
+      .setHelpText(OPTIONS.MAILING_HELP);
   form.addCheckboxItem().setTitle(Q.PRIVACY_OK).setRequired(true).setChoiceValues([OPTIONS.PRIVACY_OK]);
 
   // Section 4: only used through a personal link
@@ -456,6 +469,31 @@ function formDescription_() {
     'About membership and privacy: ' + CONFIG.INFO_URL;
 }
 
+/**
+ * Replaces the old opt-in mailing-list question (Yes/No) with the opt-out tick box, in the same place.
+ * Members who chose No before keep "No" in the Members tab until they next submit through their
+ * personal link; they are listed in the log so they can be told to tick the new box.
+ */
+function ensureMailingOptOut_(form) {
+  const old = form.getItems(FormApp.ItemType.MULTIPLE_CHOICE).find(i => i.getTitle() === Q.MAILING_LIST);
+  let item = form.getItems(FormApp.ItemType.CHECKBOX).find(i => i.getTitle() === Q.MAILING_OPT_OUT);
+  if (!item) {
+    item = form.getItemById(form.addCheckboxItem().setTitle(Q.MAILING_OPT_OUT).getId());
+    if (old) form.moveItem(item.getIndex(), old.getIndex());
+  }
+  item.asCheckboxItem().setChoiceValues([OPTIONS.MAILING_OPT_OUT]).setHelpText(OPTIONS.MAILING_HELP);
+  if (old) {
+    form.deleteItem(old);
+    let said = [];
+    try { said = readMembers_().rows.filter(r => r['Mailing list'] === OPTIONS.NO).map(r => r['Name'] + ' <' + r['Email'] + '>'); }
+    catch (e) { /* no Members tab yet */ }
+    Logger.log('Mailing-list question is now opt-out. ' + (said.length
+      ? 'These members had chosen No; ask them to tick "' + OPTIONS.MAILING_OPT_OUT + '" next time they use their personal link, ' +
+        'otherwise they will be added: ' + said.join(', ')
+      : 'No member had chosen No.'));
+  }
+}
+
 /** The short privacy note at the top of the consent section. */
 function consentHelp_() {
   return 'We store your answers in RDN\'s Google account (Google Forms, Sheets and Drive), which may be ' +
@@ -483,6 +521,9 @@ function updateFormTexts() {
   if (fieldsItem) { fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP); log('"' + Q.SHOW_FIELDS + '"'); }
   const career = byTitle(FormApp.ItemType.MULTIPLE_CHOICE, Q.CAREER);
   if (career) { career.asMultipleChoiceItem().setChoiceValues(OPTIONS.CAREER); log('"' + Q.CAREER + '" options'); }
+  const regions = byTitle(FormApp.ItemType.CHECKBOX, Q.REGIONS);
+  if (regions) { regions.asCheckboxItem().setChoiceValues(OPTIONS.REGIONS); log('"' + Q.REGIONS + '" options'); }
+  ensureMailingOptOut_(form); log('mailing-list question');
   [[Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS]].forEach(([title, opts]) => {
     const it = byTitle(FormApp.ItemType.CHECKBOX, title);
     if (it) { it.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.OTHER_HELP); log('"' + title + '" options'); }
@@ -1107,6 +1148,7 @@ function handleSubmit_(formKey, response) {
     const old = row ? Object.assign({}, row) : null;
     const rec = row || {};
     ANSWER_TO_COL.forEach(([q, c]) => { rec[c] = joinList_(ans[q]); });
+    rec['Mailing list'] = mailingListAnswer_(ans);
     rec['Email'] = String(rec['Email']).trim().toLowerCase();
     rec['Form'] = formKey;
     rec['Response ID'] = response.getId();
