@@ -50,6 +50,7 @@ const oldLayout = withPhoto => add => {
   add(T.CHECKBOX, 'Details I agree to show on the map').setChoiceValues(['Name', 'Website', 'Photo']);
   add(T.MULTIPLE_CHOICE, 'Add me to the RDN mailing list').setChoiceValues(['Yes', 'No']);
   add(T.CHECKBOX, 'Regions of fieldwork').setChoiceValues(['Europe', 'North America', 'South America']);
+  add(T.CHECKBOX, 'Research approach'); add(T.CHECKBOX, 'Level of organisation'); add(T.CHECKBOX, 'Stressors studied');
   add(T.PAGE_BREAK, 'For existing members'); add(T.TEXT, 'Member reference'); add(T.CHECKBOX, 'Leave the network');
 };
 const forms = {A: mkForm('A', oldLayout(false)), B: mkForm('B', oldLayout(true))};
@@ -91,6 +92,12 @@ for (const run of [1, 2]) {
   assert(!/photo/i.test(A.desc) && /five minutes/.test(A.desc), 'description: no photo-form talk');
   assert(!find(A, 'For existing members'), 'old last-page title renamed');
   assert(/Joining: nothing to do/.test(find(A, 'Before you submit').help) && /Leaving with your personal link/.test(find(A, 'Before you submit').help), 'last page: what to do');
+  for (const q of ['Research approach', 'Level of organisation', 'Stressors studied', 'Regions of fieldwork', 'Systems', 'Organisms', 'Career stage']) {
+    const it = find(A, q);
+    assert(it.choices.includes('Other') && /If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d \(a short phrase or a few keywords\) on the \u201cAbout you\u201d page\./.test(it.help), q + ': Other + note');
+  }
+  assert(/multiple stressors, please tick all that apply/.test(find(A, 'Stressors studied').help), 'stressors note');
+  assert(!find(A, 'Systems').choices.some(c => /Not applicable/.test(c)), 'Systems: no "Not applicable"');
   assert(!find(A, 'Add me to the RDN mailing list'), 'old mailing-list question removed');
   const ml = find(A, 'RDN mailing list');
   assert(ml && ml.type === 'CHECKBOX' && A.items.indexOf(ml) === A.items.indexOf(find(A, 'Details I agree to show on the map')) + 1, 'opt-out box in the old place');

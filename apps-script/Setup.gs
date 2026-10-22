@@ -87,13 +87,12 @@ function buildForm_(form) {
   // Section 2: research
   form.addPageBreakItem().setTitle('Your research')
       .setHelpText('These answers become the filters on the member map. Tick all that apply.');
-  form.addMultipleChoiceItem().setTitle(Q.CAREER).setRequired(true).setChoiceValues(OPTIONS.CAREER);
-  [[Q.APPROACH, OPTIONS.APPROACH], [Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS],
-   [Q.LEVELS, OPTIONS.LEVELS], [Q.STRESSORS, OPTIONS.STRESSORS], [Q.REGIONS, OPTIONS.REGIONS]]
-    .forEach(([title, opts]) => {
-      const item = form.addCheckboxItem().setTitle(title).setChoiceValues(opts);
-      if (opts.indexOf('Other') >= 0) item.setHelpText(OPTIONS.OTHER_HELP);
-    });
+  form.addMultipleChoiceItem().setTitle(Q.CAREER).setRequired(true).setChoiceValues(OPTIONS.CAREER)
+      .setHelpText(choiceHelp_(Q.CAREER, OPTIONS.CAREER));
+  researchQuestions_().forEach(([title, opts]) => {
+    const item = form.addCheckboxItem().setTitle(title).setChoiceValues(opts);
+    if (choiceHelp_(title, opts)) item.setHelpText(choiceHelp_(title, opts));
+  });
 
   // Section 3: consent
   form.addPageBreakItem().setTitle(CONSENT_SECTION_TITLE).setHelpText(consentHelp_());
@@ -190,6 +189,20 @@ function ensureMailingOptOut_(form) {
   }
 }
 
+/** The tick-box questions on the "Your research" page, with their options. */
+function researchQuestions_() {
+  return [[Q.APPROACH, OPTIONS.APPROACH], [Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS],
+          [Q.LEVELS, OPTIONS.LEVELS], [Q.STRESSORS, OPTIONS.STRESSORS], [Q.REGIONS, OPTIONS.REGIONS]];
+}
+
+/** Help text for a question with options: the "Other" note whenever "Other" is an option, plus extras. */
+function choiceHelp_(title, opts) {
+  const parts = [];
+  if (title === Q.STRESSORS) parts.push(OPTIONS.STRESSORS_HELP);
+  if (opts.indexOf('Other') >= 0) parts.push(OPTIONS.OTHER_HELP);
+  return parts.join(' ');
+}
+
 /** The short privacy note at the top of the consent section. */
 function consentHelp_() {
   return 'We store your answers in RDN\'s Google account (Google Forms, Sheets and Drive), which may be ' +
@@ -216,13 +229,14 @@ function updateFormTexts() {
   const fieldsItem = byTitle(FormApp.ItemType.CHECKBOX, Q.SHOW_FIELDS);
   if (fieldsItem) { fieldsItem.asCheckboxItem().setChoiceValues(OPTIONS.SHOW_FIELDS).setHelpText(OPTIONS.SHOW_FIELDS_HELP); log('"' + Q.SHOW_FIELDS + '"'); }
   const career = byTitle(FormApp.ItemType.MULTIPLE_CHOICE, Q.CAREER);
-  if (career) { career.asMultipleChoiceItem().setChoiceValues(OPTIONS.CAREER); log('"' + Q.CAREER + '" options'); }
-  const regions = byTitle(FormApp.ItemType.CHECKBOX, Q.REGIONS);
-  if (regions) { regions.asCheckboxItem().setChoiceValues(OPTIONS.REGIONS); log('"' + Q.REGIONS + '" options'); }
+  if (career) {
+    career.asMultipleChoiceItem().setChoiceValues(OPTIONS.CAREER).setHelpText(choiceHelp_(Q.CAREER, OPTIONS.CAREER));
+    log('"' + Q.CAREER + '" options');
+  }
   ensureMailingOptOut_(form); log('mailing-list question');
-  [[Q.SYSTEMS, OPTIONS.SYSTEMS], [Q.ORGANISMS, OPTIONS.ORGANISMS]].forEach(([title, opts]) => {
+  researchQuestions_().forEach(([title, opts]) => {
     const it = byTitle(FormApp.ItemType.CHECKBOX, title);
-    if (it) { it.asCheckboxItem().setChoiceValues(opts).setHelpText(OPTIONS.OTHER_HELP); log('"' + title + '" options'); }
+    if (it) { it.asCheckboxItem().setChoiceValues(opts).setHelpText(choiceHelp_(title, opts)); log('"' + title + '" options'); }
   });
   const interests = byTitle(FormApp.ItemType.PARAGRAPH_TEXT, Q.INTERESTS);
   if (interests) { interests.asParagraphTextItem().setHelpText(OPTIONS.INTERESTS_HELP).clearValidation(); log('research interests'); }

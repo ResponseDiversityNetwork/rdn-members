@@ -85,22 +85,21 @@ const OPTIONS = {
            'Working outside academia (e.g. government agency, NGO, consultancy, industry)',
            'Retired or emeritus', 'Other'],
   APPROACH: ['Field observation', 'Experiments (lab/mesocosm)', 'Theory/modelling',
-             'Data synthesis/meta-analysis', 'Applied/management'],
+             'Data synthesis/meta-analysis', 'Applied/management', 'Other'],
   // Ecosystems, from the RDN response diversity survey (Oikos appendix S1, question 8e). "Multiple" is left out:
   // members can tick several.
   SYSTEMS: ['Marine', 'Freshwater', 'Terrestrial (tropical)', 'Terrestrial (temperate)', 'Terrestrial (dry)',
-            'Terrestrial (arctic and boreal)', 'Subterranean (e.g. soil)',
-            'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
+            'Terrestrial (arctic and boreal)', 'Subterranean (e.g. soil)', 'Other'],
   // Taxa, from the RDN response diversity survey (Oikos appendix S1, question 8f). "Multiple" is left out:
   // members can tick several.
   ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects',
               'Other invertebrates (e.g. crustaceans, molluscs, worms)', 'Terrestrial mammals', 'Marine mammals', 'Fish',
               'Reptiles', 'Amphibians', 'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
-  LEVELS: ['Individuals/traits', 'Populations', 'Communities', 'Ecosystems', 'Social-ecological systems'],
+  LEVELS: ['Individuals/traits', 'Populations', 'Communities', 'Ecosystems', 'Social-ecological systems', 'Other'],
   STRESSORS: ['Warming', 'Climate extremes/drought', 'Land-use change', 'Pollution', 'Invasive species',
-              'Harvesting', 'Multiple stressors'],
+              'Harvesting', 'Multiple stressors', 'Other'],
   REGIONS: ['Europe', 'North America', 'Central America and the Caribbean', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
-            'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'],
+            'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean', 'Other'],
   MAILING_OPT_OUT: 'Please don\u2019t add me to the RDN mailing list',
   MAILING_HELP: 'Members are added to the RDN mailing list unless they tick the box below. The list is a place ' +
                 'for members to share information with each other: meetings and workshops, calls for collaboration, ' +
@@ -110,6 +109,8 @@ const OPTIONS = {
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
   OTHER_HELP: 'If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d ' +
               '(a short phrase or a few keywords) on the \u201cAbout you\u201d page.',
+  STRESSORS_HELP: 'If you study multiple stressors, please tick all that apply, and/or list them in your answer to ' +
+                  '\u201cResearch interests\u201d.',
   INTERESTS_HELP: 'A short phrase or a few keywords, e.g. \u2018Response diversity of plankton communities to heatwaves\u2019. ' +
                   'Shown on the map and searchable.',
   SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +
