@@ -96,7 +96,10 @@ for (const run of [1, 2]) {
     const it = find(A, q);
     assert(it.choices.includes('Other') && /If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d \(a short phrase or a few keywords\) on the \u201cAbout you\u201d page\./.test(it.help), q + ': Other + note');
   }
-  assert(/multiple stressors, please tick all that apply/.test(find(A, 'Stressors studied').help), 'stressors note');
+  for (const q of ['Research approach', 'Systems', 'Organisms', 'Level of organisation', 'Stressors studied', 'Regions of fieldwork'])
+    assert(/^If more than one option applies, please tick all that apply/.test(find(A, q).help), q + ': tick all that apply');
+  assert(!/tick all that apply/.test(find(A, 'Career stage').help), 'career stage (one answer): no tick-all note');
+  assert(!find(A, 'Organisms').choices.some(c => /Not applicable/.test(c)), 'Organisms: no "Not applicable"');
   assert(!find(A, 'Systems').choices.some(c => /Not applicable/.test(c)), 'Systems: no "Not applicable"');
   assert(!find(A, 'Add me to the RDN mailing list'), 'old mailing-list question removed');
   const ml = find(A, 'RDN mailing list');

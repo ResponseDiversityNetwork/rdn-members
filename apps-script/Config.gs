@@ -94,7 +94,7 @@ const OPTIONS = {
   // members can tick several.
   ORGANISMS: ['Plants', 'Microorganisms', 'Birds', 'Insects',
               'Other invertebrates (e.g. crustaceans, molluscs, worms)', 'Terrestrial mammals', 'Marine mammals', 'Fish',
-              'Reptiles', 'Amphibians', 'Not applicable (e.g. theory, socio-ecological analysis)', 'Other'],
+              'Reptiles', 'Amphibians', 'Other'],
   LEVELS: ['Individuals/traits', 'Populations', 'Communities', 'Ecosystems', 'Social-ecological systems', 'Other'],
   STRESSORS: ['Warming', 'Climate extremes/drought', 'Land-use change', 'Pollution', 'Invasive species',
               'Harvesting', 'Multiple stressors', 'Other'],
@@ -109,8 +109,8 @@ const OPTIONS = {
   SHOW_FIELDS: ['Name', 'Institution', 'Email', 'Website or ORCID link', 'Research interests', 'Research attributes'],
   OTHER_HELP: 'If you tick \u201cOther\u201d, you can say more in your answer to \u201cResearch interests\u201d ' +
               '(a short phrase or a few keywords) on the \u201cAbout you\u201d page.',
-  STRESSORS_HELP: 'If you study multiple stressors, please tick all that apply, and/or list them in your answer to ' +
-                  '\u201cResearch interests\u201d.',
+  MULTIPLE_HELP: 'If more than one option applies, please tick all that apply, and/or list them in your answer to ' +
+                 '\u201cResearch interests\u201d.',
   INTERESTS_HELP: 'A short phrase or a few keywords, e.g. \u2018Response diversity of plankton communities to heatwaves\u2019. ' +
                   'Shown on the map and searchable.',
   SHOW_FIELDS_HELP: 'Each option refers to your answer to that question earlier in the form; anything you leave unticked stays private. ' +

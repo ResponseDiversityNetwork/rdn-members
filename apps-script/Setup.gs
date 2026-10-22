@@ -195,10 +195,10 @@ function researchQuestions_() {
           [Q.LEVELS, OPTIONS.LEVELS], [Q.STRESSORS, OPTIONS.STRESSORS], [Q.REGIONS, OPTIONS.REGIONS]];
 }
 
-/** Help text for a question with options: the "Other" note whenever "Other" is an option, plus extras. */
+/** Help text for a question with options: "tick all that apply" for tick-box questions, and the "Other" note. */
 function choiceHelp_(title, opts) {
   const parts = [];
-  if (title === Q.STRESSORS) parts.push(OPTIONS.STRESSORS_HELP);
+  if (researchQuestions_().some(([t]) => t === title)) parts.push(OPTIONS.MULTIPLE_HELP);
   if (opts.indexOf('Other') >= 0) parts.push(OPTIONS.OTHER_HELP);
   return parts.join(' ');
 }
