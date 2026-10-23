@@ -36,7 +36,7 @@ const CONFIG = {
   LIST_NAME: 'respdivnet',
   LIST_ADDRESS: 'respdivnet@ieu.lists.uzh.ch',
   SYMPA_ADDRESS: 'sympa@ieu.lists.uzh.ch',
-  SYMPA_QUIET: true,             // true: Sympa sends no welcome message of its own (our emails mention the list)
+  SYMPA_QUIET: false,            // false: Sympa sends its own welcome (and removal) messages; true: it sends none
   LISTSERV_NOTIFY_EACH: false,
 
   // Inviting the existing members (Invite.gs)

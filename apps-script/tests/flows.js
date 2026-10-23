@@ -169,15 +169,15 @@ const danRow = members().findIndex(r => r.Email === 'dan@example.org') + 2;
 sh.set(danRow, 1, true);
 E.ctx.onSheetEdit({range: sh.getRange(danRow, 1), value: 'TRUE', oldValue: 'FALSE'});
 ms = newMails();
-check(ms.some(x => x.to === 'sympa@ieu.lists.uzh.ch' && x.body === 'QUIET ADD respdivnet dan@example.org Dan Dorval\n' && !x.htmlBody), 'Sympa ADD on approval (plain text)');
+check(ms.some(x => x.to === 'sympa@ieu.lists.uzh.ch' && x.body === 'ADD respdivnet dan@example.org Dan Dorval\n' && !x.htmlBody), 'Sympa ADD on approval (plain text)');
 check(ms.some(x => x.to === 'dan@example.org' && /respdivnet@ieu.lists.uzh.ch/.test(x.body)), 'welcome email mentions the list');
 fA.edit(d, {[Q.MAILING_OPT_OUT]: [O.MAILING_OPT_OUT]}); go('A', d);
 check(members().find(r => r.Email === 'dan@example.org')['Mailing list'] === 'No', 'opt-out box gives No');
-check(newMails().some(x => x.to === 'sympa@ieu.lists.uzh.ch' && x.body === 'QUIET DEL respdivnet dan@example.org\n'), 'Sympa DEL on opt-out');
-check(run(`sympaAdd_('evil@example.org', 'Eve\\nADD respdivnet x@y.org')`) === 'QUIET ADD respdivnet evil@example.org Eve ADD respdivnet x@y.org' && run(`sympaAdd_('a b@c.org', 'X')`) === null, 'no command injection via names or addresses');
+check(newMails().some(x => x.to === 'sympa@ieu.lists.uzh.ch' && x.body === 'DEL respdivnet dan@example.org\n'), 'Sympa DEL on opt-out');
+check(run(`sympaAdd_('evil@example.org', 'Eve\\nADD respdivnet x@y.org')`) === 'ADD respdivnet evil@example.org Eve ADD respdivnet x@y.org' && run(`sympaAdd_('a b@c.org', 'X')`) === null, 'no command injection via names or addresses');
 run('emailMailingListRequests()');
 ms = newMails();
-check(ms.length === 1 && ms[0].to === 'sympa@ieu.lists.uzh.ch' && /^QUIET ADD respdivnet /.test(ms[0].body) && !ms[0].body.includes('dan@example.org'), 'bulk subscribe to Sympa (opted-out member left out)');
+check(ms.length === 1 && ms[0].to === 'sympa@ieu.lists.uzh.ch' && /^ADD respdivnet /.test(ms[0].body) && !ms[0].body.includes('dan@example.org'), 'bulk subscribe to Sympa (opted-out member left out)');
 
 check(run(`mailingListAnswer_({'${Q.MAILING_LIST}': 'No'})`) === 'No' && run('mailingListAnswer_({})') === 'Yes', 'old opt-in answers still read; no tick = on the list');
 
