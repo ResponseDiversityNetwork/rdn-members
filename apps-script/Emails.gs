@@ -16,13 +16,17 @@ function mail_(to, subject, paragraphs) {
   try {
     MailApp.sendEmail(mailOptions_({to, subject, body: text, htmlBody: html}));
   } catch (e) {
-    // e.g. the daily email limit is used up. Don't let a failed email stop the rest of the update.
-    console.error('Email to ' + to + ' ("' + subject + '") failed: ' + e.message);
-    const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
-    const sh = ss.getSheetByName('Failed emails') || ss.insertSheet('Failed emails');
-    if (sh.getLastRow() === 0) sh.appendRow(['When', 'To', 'Subject', 'Error']);
-    sh.appendRow([new Date(), to, subject, e.message]);
+    recordFailedEmail_(to, subject, e);
   }
+}
+
+/** Lists an email that couldn't be sent (e.g. daily limit used up) in the "Failed emails" tab. */
+function recordFailedEmail_(to, subject, e) {
+  console.error('Email to ' + to + ' ("' + subject + '") failed: ' + e.message);
+  const ss = SpreadsheetApp.openById(prop_('PRIVATE_SS_ID'));
+  const sh = ss.getSheetByName('Failed emails') || ss.insertSheet('Failed emails');
+  if (sh.getLastRow() === 0) sh.appendRow(['When', 'To', 'Subject', 'Error']);
+  sh.appendRow([new Date(), to, subject, e.message]);
 }
 
 /** Adds the sender name, and a reply-to only if one is configured. */
@@ -65,7 +69,15 @@ function emailMember_(rec, response, kind) {
     linkChanged: 'Thank you, your membership details are saved. Your personal link has changed: please use the one below.',
     emailChanged: 'The email address on your membership is now this one. We have also let your previous address know.',
   };
-  mail_(rec['Email'], subjects[kind], [hi, bodies[kind]].concat(memberLinks_(rec)));
+  const list = kind === 'welcome' ? listLine_(rec) : [];
+  mail_(rec['Email'], subjects[kind], [hi, bodies[kind]].concat(list, memberLinks_(rec)));
+}
+
+/** For members on the mailing list (once it is switched on): one line about the list. */
+function listLine_(rec) {
+  if (!CONFIG.LISTSERV_NOTIFY_EACH || !isYes_(rec['Mailing list'])) return [];
+  return ['You are on the RDN mailing list, ' + esc_(CONFIG.LIST_ADDRESS) + '. To leave it, open your personal link ' +
+          'and tick \u201c' + esc_(OPTIONS.MAILING_OPT_OUT) + '\u201d.'];
 }
 
 function emailApproved_(rec) {
@@ -74,7 +86,7 @@ function emailApproved_(rec) {
     'Dear ' + esc_(firstName_(rec['Name'])) + ',',
     'Your membership of the Response Diversity Network has been confirmed. ' +
       (onMap ? 'You will appear on the member map within about 10 minutes.' : 'You chose not to appear on the public member map.'),
-  ].concat(memberLinks_(rec)));
+  ].concat(listLine_(rec), memberLinks_(rec)));
 }
 
 function emailOldAddress_(oldEmail, newEmail) {
@@ -91,7 +103,7 @@ function emailLeft_(email, name) {
   mail_(email, 'Response Diversity Network: you have left', [
     'Dear ' + esc_(firstName_(name)) + ',',
     'You have left the Response Diversity Network. We have removed you from the member map and deleted your entry and any photo.' +
-      (CONFIG.LISTSERV_NOTIFY_EACH ? ' We have asked the mailing-list manager to unsubscribe you.' : ''),
+      (CONFIG.LISTSERV_NOTIFY_EACH ? ' We have also removed you from the RDN mailing list.' : ''),
     'If this was a mistake, you are welcome to join again: ' + link_(CONFIG.INFO_URL, CONFIG.INFO_URL),
     'Best wishes,<br>' + esc_(CONFIG.ORG_NAME),
   ]);
@@ -112,22 +124,46 @@ function emailCurator_(rec, notes, isUpdate) {
 }
 
 /**
- * Asks the listserv manager to add, remove or change a subscription.
- * Does nothing while CONFIG.LISTSERV_NOTIFY_EACH is false (mailing list not set up yet).
+ * Subscribes, unsubscribes or changes a member's address on the Sympa list, by emailing commands to Sympa.
+ * Does nothing while CONFIG.LISTSERV_NOTIFY_EACH is false.
  */
 function listservNotify_(action, rec, oldEmail) {
   if (!CONFIG.LISTSERV_NOTIFY_EACH) return;
-  const who = rec['Name'] + ' <' + rec['Email'] + '>';
-  const subject = {add: '[RDN list] Please subscribe ', remove: '[RDN list] Please unsubscribe ',
-                   change: '[RDN list] Please change address for '}[action] + rec['Name'];
-  const body = {
-    add: 'Please subscribe: ' + esc_(who),
-    remove: 'Please unsubscribe: ' + esc_(who),
-    change: 'Please unsubscribe ' + esc_(oldEmail) + ' and subscribe ' + esc_(who),
-  }[action];
-  mail_(CONFIG.LISTSERV_MANAGER, subject, [body, 'Sent automatically by the RDN membership system.']);
+  const cmds = {
+    add: [sympaAdd_(rec['Email'], rec['Name'])],
+    remove: [sympaDel_(rec['Email'])],
+    change: [sympaDel_(oldEmail), sympaAdd_(rec['Email'], rec['Name'])],
+  }[action].filter(Boolean);
+  sendSympa_(cmds);
 }
 
+/** A Sympa command line. Addresses and names are cleaned so a form answer can't add commands of its own. */
+function sympaAdd_(email, name) {
+  const e = sympaEmail_(email);
+  if (!e) return null;
+  const n = String(name || '').replace(/[\x00-\x1f\x7f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
+  return (CONFIG.SYMPA_QUIET ? 'QUIET ' : '') + 'ADD ' + CONFIG.LIST_NAME + ' ' + e + (n ? ' ' + n : '');
+}
+function sympaDel_(email) {
+  const e = sympaEmail_(email);
+  return e ? (CONFIG.SYMPA_QUIET ? 'QUIET ' : '') + 'DEL ' + CONFIG.LIST_NAME + ' ' + e : null;
+}
+function sympaEmail_(email) {
+  const e = String(email || '').trim().toLowerCase();
+  return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(e) ? e : null;
+}
+
+/** Sends command lines to Sympa as plain text (no test note, no HTML), in batches. Sympa replies to rdn.projectbase. */
+function sendSympa_(cmds) {
+  for (let i = 0; i < cmds.length; i += 200) {
+    const subject = 'RDN membership';
+    try {
+      MailApp.sendEmail({to: CONFIG.SYMPA_ADDRESS, subject, body: cmds.slice(i, i + 200).join('\n') + '\n'});
+    } catch (e) {
+      recordFailedEmail_(CONFIG.SYMPA_ADDRESS, subject + ': ' + cmds.slice(i, i + 200).join(' | '), e);
+    }
+  }
+}
 
 function emailLeaveReceived_(email, name) {
   mail_(email, 'Response Diversity Network: request to leave received', [

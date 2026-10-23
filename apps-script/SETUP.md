@@ -77,7 +77,7 @@ Use your own addresses, plus a second address you can read.
 
 | Test | What should happen |
 |---|---|
-| Submit Form A as a new member (show on map: Yes, mailing list: Yes) | You get a "Thank you for joining" email. The curator gets "New member to approve". A new row appears in `Members`. |
+| Submit Form A as a new member (show on map: Yes, mailing-list opt-out not ticked) | You get a "Thank you for joining" email. The curator gets "New member to approve". A new row appears in `Members`. |
 | Tick **Approved** in that row | You get "Welcome". The member appears on the map within about 5–10 minutes. The counts update. |
 | Open the personal link from the email, change your email address, submit | The new and the old address each get an email. |
 | Click the photo-form link in that email and upload a photo | The photo appears in the map popup within about 15 minutes. Your personal link stays the same. |
@@ -93,9 +93,9 @@ Problems show in Apps Script under **Executions**. Emails that couldn't be sent,
 0. End the test phase: set `TEST_PHASE: false` in `Config.gs` (emails stop saying "[Test]"), rebuild and paste the script, and empty `_test-banner.qmd` (or delete its two `include` lines in `index.qmd` and `join.qmd`), then push.
 1. In `Admin.gs`, change `ALLOW_CLEAR = false` to `true` and save. Run `clearTestData`, then change it back to `false` and save. This deletes **all** responses, photos and member rows.
 2. Invite the existing members (next section).
-3. When the mailing list exists:
-   1. Run `emailMailingListRequests`. It emails the list manager everyone who opted in, one per line, ready for a bulk subscribe.
-   2. Set `LISTSERV_NOTIFY_EACH: true` in `Config.gs`. From then on the manager gets one email per subscribe, unsubscribe or address change.
+3. Switch on the mailing list (rdn.projectbase@gmail.com must be an owner of respdivnet in Sympa):
+   1. Run `syncMailingList`. It sends Sympa one `ADD` command for every approved member who hasn't opted out. Sympa's report arrives in rdn.projectbase@gmail.com's inbox.
+   2. Set `LISTSERV_NOTIFY_EACH: true` in `Config.gs`, rebuild and paste. From then on each approval, opt-out, address change and leave updates the list automatically.
 
 ## Day to day
 

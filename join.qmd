@@ -32,6 +32,12 @@ Every email we send you has a link to the **photo form**, where you can add, cha
 
 We then remove you from the map and the mailing list, delete your entry and any photo, and email you to confirm.
 
+## Mailing list {#mailing-list}
+
+Members are on the RDN mailing list, **respdivnet@ieu.lists.uzh.ch**, unless they opt out in the membership form. It's a moderated list where members share information with each other: meetings and workshops, calls for collaboration, opportunities and news from the network. To post, write to respdivnet@ieu.lists.uzh.ch from the address you're subscribed with.
+
+To leave the list but stay a member, open your personal link and tick "Please don't add me to the RDN mailing list" on the consent page. Leaving the network removes you from the list too. Each list email also has an unsubscribe link at the bottom, but please use your personal link, so that our records stay in step with the list.
+
 ## If our emails don't arrive {#emails}
 
 Our emails are sent automatically by the system that runs RDN membership, so they come from the network's own account, **rdn.projectbase@gmail.com** (sender name "Response Diversity Network (membership)"), rather than from a person. Some organisations' email systems treat automated messages like this with suspicion and may move them to junk or hold them in quarantine.
@@ -64,7 +70,7 @@ You don't need the email to manage your entry: the "Edit your response" link on 
 
 **Photos.** If you upload a photo (and appear on the map), we publish a small copy (about 400 pixels wide). Google re-creates the copy from your upload, which removes hidden data stored in photo files, such as where the photo was taken. The copy is publicly viewable by anyone who has its link. Your original upload stays private.
 
-**Where your data is stored.** In Google Forms, Google Sheets and Google Drive in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. If you use the photo form, Google also knows which Google account submitted it. A small number of RDN organisers can access the data. The mailing list is run separately by the list manager.
+**Where your data is stored.** In Google Forms, Google Sheets and Google Drive in RDN's Google account. This means it is stored on Google's servers, which may be outside Switzerland or the EU. If you use the photo form, Google also knows which Google account submitted it. A small number of RDN organisers can access the data. The mailing list runs on the University of Zurich's mailing-list server (Sympa, ieu.lists.uzh.ch): unless you opt out, we pass it your name and email address, and remove them again when you opt out or leave.
 
 **How long we keep it.** Until you leave. When you leave, we delete your entry, your stored form response and your photos.
 

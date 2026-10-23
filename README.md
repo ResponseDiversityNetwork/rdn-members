@@ -13,7 +13,7 @@ The repository of the membership system for the Response Diversity Network.
 - **Public map:** a searchable, filterable map of members who agreed to be shown, with only the details they chose, plus overall counts by country, continent and career stage. Site: https://responsediversitynetwork.github.io/rdn-members/
 - **Join page:** how to join, update and leave, and the privacy notice.
 - **Inviting existing members:** members of the old list receive personal invitations with their details already filled in, sent and followed up automatically.
-- **Mailing list:** records who wants to be on the RDN mailing list, for the list manager.
+- **Mailing list:** members are subscribed to the RDN mailing list (respdivnet@ieu.lists.uzh.ch) automatically unless they opt out, and unsubscribed when they opt out or leave.
 
 **How it is built.** Google Forms, Google Sheets and Google Apps Script in the network's own Google account (rdn.projectbase@gmail.com) do the data handling and send the emails. The map and join pages are a Quarto website in this repository, published with GitHub Pages; the map reads a public subset of the data, published from Google Sheets. There is no server to maintain and no cost.
 
@@ -116,6 +116,7 @@ Photo form ───────► onPhotoSubmit ──► photo folder (public
 Leave form ───────► onLeaveRequest ──► Leave requests tab ──► curator ticks Confirmed ──► member removed
 Curator edits ────► onSheetEdit (approve, re-geocode, confirm leave)
 Timers: maintenanceTick (15 min), dailyRebuild (03:00), inviteTick (daily, during invitations)
+Mailing-list changes ──► command emails to Sympa (sympa@ieu.lists.uzh.ch) ──► respdivnet list
 ```
 
 **Joining and updating.** Each submission of the membership form runs `onSubmitA`, which:
@@ -133,6 +134,8 @@ New members appear on the map only after the curator approves them. Invited exis
 **Public data.** After every change, `rebuildPublic_()` rewrites the public spreadsheet: only approved members who agreed to be on the map, only the fields they chose, locations rounded to city level, plus summary counts. The map page reads the published CSVs; the site never needs rebuilding for data changes.
 
 **Invitations.** The old list sits in the `Invites` tab. `prepareInvites()` checks it and gives each row a member reference; `startInvites()` sends about 60 invitations a day and one reminder after 14 days; `exportInviteLinks()` lists people who haven't replied, for a mail merge from a personal address.
+
+**Mailing list.** The list respdivnet@ieu.lists.uzh.ch runs on UZH's Sympa server. rdn.projectbase@gmail.com is one of its owners, so the script can manage subscriptions by emailing Sympa commands (`QUIET ADD respdivnet <email> <name>`, `QUIET DEL respdivnet <email>`) to sympa@ieu.lists.uzh.ch. It sends `ADD` when a member who hasn't opted out is approved (or unticks the opt-out box later), `DEL` when they opt out or leave, and both when they change their email address. Sympa carries the commands out at once and emails a report to rdn.projectbase@gmail.com. Names and addresses are cleaned first, so a form answer can't add commands of its own. All this only happens while `LISTSERV_NOTIFY_EACH` is `true`; `syncMailingList` subscribes everyone at once when switching it on. If someone unsubscribes with Sympa's own link, the `Members` tab still says "Yes", but they aren't re-added unless they untick and re-tick the box.
 
 **Emails.** Sent with `MailApp` from rdn.projectbase@gmail.com (about 100 a day for a Gmail account). Failed sends are listed in the `Failed emails` tab. Script-sent emails don't appear in the account's Sent folder. Some institutions quarantine them; the form's cover page and the join page explain the alternatives.
 
@@ -172,9 +175,10 @@ Editing the code directly in the Apps Script editor works too, but the change is
 | Form descriptions, cover page, help texts | `Setup.gs` (the text functions and constants), then `updateFormTexts` |
 | Answer options (career stage, systems, organisms …) | `OPTIONS` in `Config.gs`, then `updateFormTexts`. New options appear in the map's filters automatically. |
 | Curator's address | Script property `CURATOR_EMAIL` (Project Settings → Script properties); no code change. Check with `diagnose`. |
-| System administrator's or mailing-list address, sender name | `ADMIN`, `LISTSERV_MANAGER`, `SENDER_NAME` in `Config.gs` |
+| System administrator's address, sender name | `ADMIN`, `SENDER_NAME` in `Config.gs` |
+| Mailing list (list, Sympa address, Sympa welcome message on or off) | `LIST_NAME`, `LIST_ADDRESS`, `SYMPA_ADDRESS`, `SYMPA_QUIET` in `Config.gs`. rdn.projectbase@gmail.com must stay an owner of the list. |
 | End of the test phase | `TEST_PHASE: false` in `Config.gs`; empty `_test-banner.qmd` |
-| Mailing list ready | Run `emailMailingListRequests`, then set `LISTSERV_NOTIFY_EACH: true` |
+| Switching the mailing list on | Run `syncMailingList`, then set `LISTSERV_NOTIFY_EACH: true` |
 | Map page, join page, privacy notice | `index.qmd`, `join.qmd`; push to publish |
 
 **Changes that need more care**
@@ -196,6 +200,7 @@ Editing the code directly in the Apps Script editor works too, but the change is
 | Map out of date | `rebuildPublicNow` |
 | Emails not arriving | The `Failed emails` tab; the recipient's junk folder or quarantine; see join.html#emails |
 | Failures of automatic runs | Google emails "Summary of failures for Google Apps Script" to rdn.projectbase@gmail.com; details under **Executions** |
+| Mailing-list changes not happening | `LISTSERV_NOTIFY_EACH` is `true`; Sympa's reports in rdn.projectbase@gmail.com's inbox; rdn.projectbase is still an owner of respdivnet; the `Failed emails` tab |
 | Turn everything off | `removeTriggers` (and `stopInvites` during invitations) |
 
 
@@ -218,7 +223,7 @@ The code itself is safe: it is in this repo, and `dist/RDN-membership.gs` can be
 1. **Try Google's account recovery first:** accounts.google.com/signin/recovery, from a device and location that have signed in to the account before. This works more often than expected, but can take days.
 2. **If a second account has edit access to the script project and the forms** (prevention step 1), that person can take over:
    - open the script project and run `installTriggers` under their own account. The automation then runs as them, and emails are sent from their address. (Triggers belong to the account that made them, so the old account's triggers can't be removed from here and may keep running too. That's harmless: the second run of each submission finds it already handled.);
-   - change `CONTACT_EMAIL` (and `ADMIN`, `LISTSERV_MANAGER` if needed) in `Config.gs`, and the `CURATOR_EMAIL` script property if needed, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
+   - make their account an owner of the Sympa list (an existing owner can delegate this in Sympa), and change `CONTACT_EMAIL` (and `ADMIN` if needed) in `Config.gs`, and the `CURATOR_EMAIL` script property if needed, rebuild and paste, and run `updateFormTexts` so the forms show the new contact address;
    - change the contact address on the join page (`join.qmd`).
    Members' personal links keep working, because the forms themselves haven't changed. Later, move ownership of all files to a new shared account and run `installTriggers` there.
 3. **If nobody has access at all,** the system has to be rebuilt in a new account:

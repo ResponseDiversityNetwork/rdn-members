@@ -10,7 +10,6 @@ const CONFIG = {
   // Forward the account's mail to an organiser in Gmail settings instead.
   REPLY_TO: '',
   CONTACT_EMAIL: 'rdn.projectbase@gmail.com',   // shown to members as the address to write to
-  LISTSERV_MANAGER: 'owen.petchey@uzh.ch',
   ADMIN: 'owen.petchey@uzh.ch',                 // system administrator: gets test invitations
   // The curator's address is kept out of this (public) code: set it as the script property
   // CURATOR_EMAIL (Project Settings > Script properties). Until it is set, curator emails go to ADMIN.
@@ -27,9 +26,14 @@ const CONFIG = {
   // entries will be deleted before launch. Set to false at launch.
   TEST_PHASE: true,
 
-  // Mailing list. Until the list exists, requests are only recorded in the
-  // Members tab; run emailMailingListRequests() once the list is ready, then set this to true
-  // so each later request emails the manager straight away.
+  // Mailing list, run on UZH's Sympa server. rdn.projectbase@gmail.com is an owner of the list, so the
+  // script subscribes and unsubscribes members by emailing commands to SYMPA_ADDRESS.
+  // While LISTSERV_NOTIFY_EACH is false, choices are only recorded in the Members tab. To switch on:
+  // run syncMailingList() once (subscribes everyone approved who hasn't opted out), then set it to true.
+  LIST_NAME: 'respdivnet',
+  LIST_ADDRESS: 'respdivnet@ieu.lists.uzh.ch',
+  SYMPA_ADDRESS: 'sympa@ieu.lists.uzh.ch',
+  SYMPA_QUIET: true,             // true: Sympa sends no welcome message of its own (our emails mention the list)
   LISTSERV_NOTIFY_EACH: false,
 
   // Inviting the existing members (Invite.gs)
@@ -101,7 +105,7 @@ const OPTIONS = {
   REGIONS: ['Europe', 'North America', 'Central America and the Caribbean', 'South America', 'Africa', 'Asia', 'Oceania', 'Antarctica',
             'Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean', 'Other'],
   MAILING_OPT_OUT: 'Please don\u2019t add me to the RDN mailing list',
-  MAILING_HELP: 'Members are added to the RDN mailing list unless they tick the box below. The list is a place ' +
+  MAILING_HELP: 'Members are added to the RDN mailing list (respdivnet@ieu.lists.uzh.ch) unless they tick the box below. The list is a place ' +
                 'for members to share information with each other: meetings and workshops, calls for collaboration, ' +
                 'opportunities and news from the network. It is moderated. Tick the box if you would rather just be ' +
                 'on the member map. You can change this at any time with your personal link. Emails about your ' +

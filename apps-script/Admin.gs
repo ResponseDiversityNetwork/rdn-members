@@ -30,22 +30,19 @@ function removeTriggers() {
 }
 
 /**
- * Once the mailing list exists: emails the listserv manager everyone (approved) who
- * asked to join, one per line as "Name <email>", ready for a bulk subscribe.
- * Then set CONFIG.LISTSERV_NOTIFY_EACH to true so later changes are sent one by one.
+ * Subscribes every approved member who hasn't opted out to the Sympa list, in one go.
+ * Run it once when switching the list on (then set CONFIG.LISTSERV_NOTIFY_EACH to true).
+ * Safe to run again: Sympa ignores people who are already subscribed.
  */
-function emailMailingListRequests() {
+function syncMailingList() {
   const rows = readMembers_().rows.filter(r => r['Approved'] === true && isYes_(r['Mailing list']));
-  const lines = rows.map(r => String(r['Name']).replace(/[<>]/g, '') + ' <' + r['Email'] + '>');
-  MailApp.sendEmail(mailOptions_({
-    to: CONFIG.LISTSERV_MANAGER,
-    subject: '[RDN list] ' + rows.length + ' members to subscribe',
-    body: 'These members asked to join the RDN mailing list. One per line, for bulk subscribe:\n\n' + lines.join('\n') +
-          '\n\nFrom now on you will get an email for each new request, change or removal.',
-  }));
-  Logger.log('Sent ' + rows.length + ' addresses to ' + CONFIG.LISTSERV_MANAGER +
-             '. Now set LISTSERV_NOTIFY_EACH to true in Config.gs.');
+  const cmds = rows.map(r => sympaAdd_(r['Email'], r['Name'])).filter(Boolean);
+  sendSympa_(cmds);
+  Logger.log('Sent ' + cmds.length + ' subscribe commands to ' + CONFIG.SYMPA_ADDRESS +
+             '. Sympa reports the result by email to rdn.projectbase@gmail.com.' +
+             (CONFIG.LISTSERV_NOTIFY_EACH ? '' : ' Now set LISTSERV_NOTIFY_EACH to true in Config.gs.'));
 }
+function emailMailingListRequests() { syncMailingList(); }   // old name
 
 /**
  * Deletes ALL member data: every response in both forms, all uploaded photos,
